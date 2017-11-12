@@ -1,0 +1,5 @@
+package-lock.json
+node_modules/
+cwe/test/report.xml
+#idea
+.idea/

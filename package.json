@@ -1,0 +1,28 @@
+{
+  "name": "al-cwe-collector",
+  "version": "0.0.1",
+  "description": "Alert Logic CloudWatch Events Collector",
+  "repository": {},
+  "private": true,
+  "scripts": {
+    "lint": "jshint --exclude \"./node_modules/*\" **/*.js",
+    "test": "JUNIT_REPORT_PATH=./test/report.xml mocha --colors --reporter mocha-jenkins-reporter"
+  },
+  "devDependencies": {
+    "aws-sdk": "*",
+    "aws-sdk-mock": "*",
+    "jshint": "^2.9.5",
+    "mocha": "^3.5.3",
+    "mocha-jenkins-reporter": "^0.3.10",
+    "rewire": "^2.5.2",
+    "sinon": "^3.3.0",
+    "clone": "*"
+  },
+  "dependencies": {
+    "async": "*",
+    "cfn-response": "*",
+    "request-promise-native": "*",
+    "request": "*"
+  },
+  "author": "Alert Logic Inc."
+}

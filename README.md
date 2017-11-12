@@ -11,7 +11,7 @@ backend services.
 
 # Installation
 
-Refer to CF template readme for installation instructions. (**TODO**: add link)
+Refer to [CF template readme](./cfn/README.md) for installation instructions.
 
 # How It Works
 
@@ -45,6 +45,7 @@ occurs every 15 minutes.
 1. `cd cwe-collector`
 1. Run `make compile test package` in order to perform code analysis, unit tests and package the 
 lambda function into a zip file.
+1. Run `make cfn` to check CLoudFromation templates.
 
 Please use the following [code style](https://github.com/airbnb/javascript) as much as possible.
 

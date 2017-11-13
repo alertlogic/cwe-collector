@@ -806,8 +806,7 @@
                         "kinesis:PutRecords",
                         "kinesis:GetRecords",
                         "kinesis:GetShardIterator",
-                        "kinesis:DescribeStream",
-                        "kinesis:ListStreams"
+                        "kinesis:DescribeStream"
                      ],
                      "Resource":[
                         {

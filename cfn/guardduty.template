@@ -25,16 +25,6 @@
           "Type":"String",
           "Default" : "default",
           "AllowedValues" : ["default"]
-      },
-      "S3Bucket":{
-          "Description":"Name of the S3 Bucket containing the lambda function",
-          "Type":"String",
-          "Default" : "rcs-test-us-east-1"
-      },
-      "S3Zipfile":{
-          "Description":"Name of the Zipfile containing the lambda function within the S3 Bucket",
-          "Type":"String",
-          "Default" : "packages/lambda/al-cwe-collector.zip"
       }
    },
    "Resources":{
@@ -576,12 +566,11 @@
                ]
             },
             "Code":{
-               "S3Bucket":{
-                   "Ref":"S3Bucket"
-               },
-               "S3Key":{
-                   "Ref":"S3Zipfile"
-               }
+               "S3Bucket":{"Fn::Join" : ["", [
+                    "alertlogic-collectors-",
+                    { "Ref" : "AWS::Region" }
+               ]]},
+               "S3Key": "packages/lambda/al-cwe-collector.zip"
             },
             "Handler":"index.handler",
             "Runtime":"nodejs6.10",
@@ -595,12 +584,11 @@
                   "aims_secret_key":{
                       "Fn::GetAtt": ["EncryptSecretKeyCustomResource", "EncryptedText"]
                   },
-                  "aws_lambda_s3_bucket":{
-                     "Ref":"S3Bucket"
-                  },
-                  "aws_lambda_zipfile_name":{
-                     "Ref":"S3Zipfile"
-                  },
+                  "aws_lambda_s3_bucket":{"Fn::Join" : ["", [
+                      "alertlogic-collectors-",
+                      { "Ref" : "AWS::Region" }
+                  ]]},
+                  "aws_lambda_zipfile_name": "packages/lambda/al-cwe-collector.zip",
                   "al_api":{
                       "Ref":"AlApiEndpoint"
                   },
@@ -748,7 +736,10 @@
                               [
                                  "arn:aws:s3:::",
                                  {
-                                    "Ref":"S3Bucket"
+                                    "Fn::Join" : ["", [
+                                        "alertlogic-collectors-",
+                                        { "Ref" : "AWS::Region" }
+                                    ]]
                                  },
                                  "/*"
                               ]

@@ -786,7 +786,8 @@
       "KinesisPolicy":{
          "Type":"AWS::IAM::Policy",
          "DependsOn":[
-            "KinesisStream"
+            "KinesisStream",
+            "KinesisRole"
          ],
          "Properties":{
             "Roles":[
@@ -820,6 +821,13 @@
                   {
                      "Effect":"Allow",
                      "Action":[
+                        "kinesis:ListStreams"
+                     ],
+                     "Resource": "*"
+                  },
+                  {
+                     "Effect":"Allow",
+                     "Action":[
                          "lambda:*"
                      ],
                      "Resource":[
@@ -841,8 +849,7 @@
             "CollectLambdaPolicy",
             "KinesisStream",
             "KinesisRole",
-            "KinesisPolicy",
-            "RoleForEventsToInvokeKinesis"
+            "KinesisPolicy"
          ],
          "Properties":{
             "Description":"CloudWatch events rule for Guard Duty events",
@@ -863,7 +870,7 @@
                      ]
                   },
                   "RoleArn" : {
-                     "Fn::GetAtt" : ["RoleForEventsToInvokeKinesis", "Arn"] 
+                     "Fn::GetAtt" : ["KinesisRole", "Arn"] 
                   }
                }
             ]
@@ -914,35 +921,6 @@
             }
           }
       },
-      "RoleForEventsToInvokeKinesis":{
-         "Type": "AWS::IAM::Role",
-         "Properties": {
-            "AssumeRolePolicyDocument": {
-               "Version" : "2012-10-17",
-               "Statement": [ {
-                  "Effect": "Allow",
-                  "Principal": {
-                     "Service": [ "events.amazonaws.com" ]
-                  },
-                  "Action": [ "sts:AssumeRole" ]
-               } ]
-            },
-            "Path": "/",
-            "Policies": [ {
-               "PolicyName": "root",
-               "PolicyDocument": {
-                  "Version" : "2012-10-17",
-                  "Statement": [ {
-                     "Effect": "Allow",
-                     "Action": "kinesis:*",
-                     "Resource": [
-                        { "Fn::GetAtt" : ["KinesisStream", "Arn"] }
-                     ]
-                  } ]
-               }
-            } ]
-         }
-      },
       "CollectLambdaEventSourceMapping":{
          "Type":"AWS::Lambda::EventSourceMapping",
          "DependsOn":[
@@ -951,8 +929,7 @@
             "CollectLambdaPolicy",
             "KinesisStream",
             "KinesisRole",
-            "KinesisPolicy",
-            "RoleForEventsToInvokeKinesis"
+            "KinesisPolicy"
          ],
          "Properties":{
             "EventSourceArn" : { "Fn::GetAtt" : ["KinesisStream", "Arn"] },

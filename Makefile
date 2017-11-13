@@ -33,3 +33,4 @@ clean:
 	rm -f $(AWS_LAMBDA_CWE_PACKAGE_NAME)
 	rm -f package-lock.json
 	rm -f test/report.xml
+	rm -rf ./coverage/

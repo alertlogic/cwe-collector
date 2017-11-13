@@ -40,6 +40,9 @@
    "Resources":{
       "KinesisStream":{
          "Type":"AWS::Kinesis::Stream",
+         "DependsOn" : [
+            "EndpointAPIs"
+         ],
          "Properties":{
             "ShardCount" : 1,
             "Tags": [
@@ -50,6 +53,12 @@
                 {
                     "Key": "AlertLogic",
                     "Value": "Collect"
+                },
+                {
+                    "Key": "AlertLogic-AccountID",
+                    "Value": {
+                        "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                    }
                 }
             ]
          }
@@ -80,7 +89,8 @@
             "Type": "AWS::KMS::Key",
             "DependsOn":[
                 "CollectLambdaRole",
-                "EncryptLambdaRole"
+                "EncryptLambdaRole",
+                "EndpointAPIs"
             ],
             "Properties": {
                "Description": "kms key used to encrypt credentials for lambda",
@@ -142,7 +152,23 @@
                           "Resource": "*"
                        }
                     ]
-                }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AlertLogic CWE collector"
+                    },
+                    {
+                        "Key": "AlertLogic",
+                        "Value": "Collect"
+                    },
+                    {
+                        "Key": "AlertLogic-AccountID",
+                        "Value": {
+                            "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                        }
+                    }
+                ]
             }
         },
         "EncryptLambdaRole":{
@@ -245,7 +271,8 @@
         "EncryptLambdaFunction":{
             "Type":"AWS::Lambda::Function",
             "DependsOn":[
-                "EncryptLambdaRole"
+                "EncryptLambdaRole",
+                "EndpointAPIs"
             ],
             "Properties":{
                 "Description":"Alert Logic Lambda Encrypt function",
@@ -298,7 +325,23 @@
                 "Handler":"index.handler",
                 "Runtime":"nodejs6.10",
                 "MemorySize":128,
-                "Timeout": 5
+                "Timeout": 5,
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AlertLogic CWE collector"
+                    },
+                    {
+                        "Key": "AlertLogic",
+                        "Value": "Collect"
+                    },
+                    {
+                        "Key": "AlertLogic-AccountID",
+                        "Value": {
+                            "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                        }
+                    }
+                ]
             }
         },
         "EncryptSecretKeyCustomResource": {
@@ -423,7 +466,7 @@
                                "                function(ingestEndpoint) {\n",
                                "                    return callback({\n",
                                "                        AzcollectApi: azcollectEndpoint.azcollect,\n",
-                               "                        IngestApi: ingestEndpoint.ingest\n",
+                               "                        IngestApi: ingestEndpoint.ingest, ALAccID: accId\n",
                                "                    });\n",
                                "                  }, errFunc);\n",
                                "        }, errFunc);\n",
@@ -470,7 +513,17 @@
                    }
                },
                "Runtime": "nodejs4.3",
-               "Timeout": "60"
+               "Timeout": "60",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AlertLogic CWE collector"
+                    },
+                    {
+                        "Key": "AlertLogic",
+                        "Value": "Collect"
+                    }
+                ]
            }
       },
       "EndpointAPIs": {
@@ -586,7 +639,23 @@
                       ]
                   }
                }
-            }
+            },
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "AlertLogic CWE collector"
+                },
+                {
+                    "Key": "AlertLogic",
+                    "Value": "Collect"
+                },
+                {
+                    "Key": "AlertLogic-AccountID",
+                    "Value": {
+                        "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                    }
+                }
+            ]
          }
       },
       "CollectLambdaPolicy":{

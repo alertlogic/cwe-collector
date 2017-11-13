@@ -142,7 +142,17 @@
                           "Resource": "*"
                        }
                     ]
-                }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AlertLogic CWE collector"
+                    },
+                    {
+                        "Key": "AlertLogic",
+                        "Value": "Collect"
+                    }
+                ]
             }
         },
         "EncryptLambdaRole":{
@@ -298,7 +308,17 @@
                 "Handler":"index.handler",
                 "Runtime":"nodejs6.10",
                 "MemorySize":128,
-                "Timeout": 5
+                "Timeout": 5,
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AlertLogic CWE collector"
+                    },
+                    {
+                        "Key": "AlertLogic",
+                        "Value": "Collect"
+                    }
+                ]
             }
         },
         "EncryptSecretKeyCustomResource": {
@@ -470,7 +490,17 @@
                    }
                },
                "Runtime": "nodejs4.3",
-               "Timeout": "60"
+               "Timeout": "60",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AlertLogic CWE collector"
+                    },
+                    {
+                        "Key": "AlertLogic",
+                        "Value": "Collect"
+                    }
+                ]
            }
       },
       "EndpointAPIs": {
@@ -586,7 +616,17 @@
                       ]
                   }
                }
-            }
+            },
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "AlertLogic CWE collector"
+                },
+                {
+                    "Key": "AlertLogic",
+                    "Value": "Collect"
+                }
+            ]
          }
       },
       "CollectLambdaPolicy":{

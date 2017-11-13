@@ -40,6 +40,9 @@
    "Resources":{
       "KinesisStream":{
          "Type":"AWS::Kinesis::Stream",
+         "DependsOn" : [
+            "EndpointAPIs"
+         ],
          "Properties":{
             "ShardCount" : 1,
             "Tags": [
@@ -50,6 +53,12 @@
                 {
                     "Key": "AlertLogic",
                     "Value": "Collect"
+                },
+                {
+                    "Key": "AlertLogic-AccountID",
+                    "Value": {
+                        "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                    }
                 }
             ]
          }
@@ -80,7 +89,8 @@
             "Type": "AWS::KMS::Key",
             "DependsOn":[
                 "CollectLambdaRole",
-                "EncryptLambdaRole"
+                "EncryptLambdaRole",
+                "EndpointAPIs"
             ],
             "Properties": {
                "Description": "kms key used to encrypt credentials for lambda",
@@ -151,6 +161,12 @@
                     {
                         "Key": "AlertLogic",
                         "Value": "Collect"
+                    },
+                    {
+                        "Key": "AlertLogic-AccountID",
+                        "Value": {
+                            "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                        }
                     }
                 ]
             }
@@ -255,7 +271,8 @@
         "EncryptLambdaFunction":{
             "Type":"AWS::Lambda::Function",
             "DependsOn":[
-                "EncryptLambdaRole"
+                "EncryptLambdaRole",
+                "EndpointAPIs"
             ],
             "Properties":{
                 "Description":"Alert Logic Lambda Encrypt function",
@@ -317,6 +334,12 @@
                     {
                         "Key": "AlertLogic",
                         "Value": "Collect"
+                    },
+                    {
+                        "Key": "AlertLogic-AccountID",
+                        "Value": {
+                            "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                        }
                     }
                 ]
             }
@@ -443,7 +466,7 @@
                                "                function(ingestEndpoint) {\n",
                                "                    return callback({\n",
                                "                        AzcollectApi: azcollectEndpoint.azcollect,\n",
-                               "                        IngestApi: ingestEndpoint.ingest\n",
+                               "                        IngestApi: ingestEndpoint.ingest, ALAccID: accId\n",
                                "                    });\n",
                                "                  }, errFunc);\n",
                                "        }, errFunc);\n",
@@ -625,6 +648,12 @@
                 {
                     "Key": "AlertLogic",
                     "Value": "Collect"
+                },
+                {
+                    "Key": "AlertLogic-AccountID",
+                    "Value": {
+                        "Fn::GetAtt": ["EndpointAPIs", "ALAccID"]
+                    }
                 }
             ]
          }

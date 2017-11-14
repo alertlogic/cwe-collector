@@ -766,7 +766,7 @@
          "DependsOn":[
             "CollectLambdaPolicy",
             "KinesisStream",
-            "RoleForEventsToInvokeKinesis"
+            "CloudWatchEventsRole"
          ],
          "Properties":{
             "Description":"CloudWatch events rule for Guard Duty events",
@@ -787,7 +787,7 @@
                      ]
                   },
                   "RoleArn" : {
-                     "Fn::GetAtt" : ["RoleForEventsToInvokeKinesis", "Arn"] 
+                     "Fn::GetAtt" : ["CloudWatchEventsRole", "Arn"] 
                   }
                }
             ]
@@ -838,7 +838,7 @@
             }
           }
       },
-      "RoleForEventsToInvokeKinesis":{
+      "CloudWatchEventsRole":{
          "Type": "AWS::IAM::Role",
          "DependsOn":[
             "KinesisStream",
@@ -913,7 +913,7 @@
             "CollectLambdaRole",
             "CollectLambdaPolicy",
             "KinesisStream",
-            "RoleForEventsToInvokeKinesis"
+            "CloudWatchEventsRole"
          ],
          "Properties":{
             "EventSourceArn" : { "Fn::GetAtt" : ["KinesisStream", "Arn"] },

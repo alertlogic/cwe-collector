@@ -113,7 +113,7 @@ Follow these steps to deploy the Alert Logic custom template using the [AWS CLI]
     - `SecretKey` - `secret_key` returned from AIMs [above](#create_an_alert_logic_access_key)   
 
     ```
-    aws cloudformation create-stack --template-url https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template --stack-name kk-new-stack --capabilities CAPABILITY_IAM --parameters ParameterKey=AccessKeyId,ParameterValue=<access_key_id> ParameterKey=SecretKey,ParameterValue=<secret_key>
+    aws cloudformation create-stack --template-url https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template --stack-name <alertlogic-collector-stack-name> --capabilities CAPABILITY_IAM --parameters ParameterKey=AccessKeyId,ParameterValue=<access_key_id> ParameterKey=SecretKey,ParameterValue=<secret_key>
     ```
 1. Wait for the stack creation to complete.
 

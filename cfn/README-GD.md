@@ -8,7 +8,7 @@ This folder contains the AWS CWE JavaScript lambda function and the CloudFormati
 
 # Installation
 
-**To install the GuardDuty events collector:
+To install the GuardDuty events collector:
 
 1. In your AWS account, enable GuardDuty CloudWatch event collection.
 1. Create an Alert Logic access key that allows the collector to connect to the Alert Logic Cloud Insight back end.
@@ -17,7 +17,7 @@ for collecting and managing GuardDuty event data.
 1. Use the Cloud Insight console to verify a successful installation.
 
 ## Enable Amazon GuardDuty CloudWatch event collection in your AWS account
-START 
+
 Amazon GuardDuty is a continuous security monitoring service that requires no customer-managed hardware or software. 
 GuardDuty analyzes and processes VPC Flow Logs and AWS CloudTrail event logs. GuardDuty uses security logic and 
 AWS usage statistics techniques to identify unexpected and potentially unauthorized and malicious activity. 

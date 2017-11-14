@@ -553,28 +553,6 @@
             }
          }
       },
-      "KinesisRole":{
-         "Type":"AWS::IAM::Role",
-         "Properties":{
-            "Path":"/",
-            "AssumeRolePolicyDocument":{
-               "Version":"2012-10-17",
-               "Statement":[
-                  {
-                     "Effect":"Allow",
-                     "Principal":{
-                        "Service":[
-                           "events.amazonaws.com"
-                        ]
-                     },
-                     "Action":[
-                        "sts:AssumeRole"
-                     ]
-                  }
-               ]
-            }
-         }
-      },
       "CollectLambdaFunction":{
          "Type":"AWS::Lambda::Function",
          "DependsOn":[
@@ -852,66 +830,12 @@
             }
          }
       },
-      "KinesisPolicy":{
-         "Type":"AWS::IAM::Policy",
-         "DependsOn":[
-            "KinesisStream"
-         ],
-         "Properties":{
-            "Roles":[
-               {
-                  "Ref":"KinesisRole"
-               }
-            ],
-            "PolicyName":"alertlogic-cwe-kinesis-policy",
-            "PolicyDocument":{
-               "Version":"2012-10-17",
-               "Statement":[
-                  {
-                     "Effect":"Allow",
-                     "Action":[
-                        "kinesis:PutRecord",
-                        "kinesis:PutRecords",
-                        "kinesis:GetRecords",
-                        "kinesis:GetShardIterator",
-                        "kinesis:DescribeStream",
-                        "kinesis:ListStreams"
-                     ],
-                     "Resource":[
-                        {
-                           "Fn::GetAtt":[
-                               "KinesisStream",
-                               "Arn"
-                           ]
-                        }
-                     ]
-                  },
-                  {
-                     "Effect":"Allow",
-                     "Action":[
-                         "lambda:*"
-                     ],
-                     "Resource":[
-                         {
-                            "Fn::GetAtt":[
-                                "CollectLambdaFunction",
-                                "Arn"
-                            ]
-                         }
-                     ]
-                  }
-               ]
-            }
-         }
-      },
       "CloudWatchEventsRule":{
          "Type":"AWS::Events::Rule",
          "DependsOn":[
             "CollectLambdaPolicy",
             "KinesisStream",
-            "KinesisRole",
-            "KinesisPolicy",
-            "RoleForEventsToInvokeKinesis"
+            "CloudWatchEventsRole"
          ],
          "Properties":{
             "Description":"CloudWatch events rule for Guard Duty events",
@@ -932,7 +856,7 @@
                      ]
                   },
                   "RoleArn" : {
-                     "Fn::GetAtt" : ["RoleForEventsToInvokeKinesis", "Arn"] 
+                     "Fn::GetAtt" : ["CloudWatchEventsRole", "Arn"] 
                   }
                }
             ]
@@ -983,8 +907,13 @@
             }
           }
       },
-      "RoleForEventsToInvokeKinesis":{
+      "CloudWatchEventsRole":{
          "Type": "AWS::IAM::Role",
+         "DependsOn":[
+            "KinesisStream",
+            "CollectLambdaFunction",
+            "CollectLambdaPolicy"
+         ],
          "Properties": {
             "AssumeRolePolicyDocument": {
                "Version" : "2012-10-17",
@@ -1001,15 +930,49 @@
                "PolicyName": "root",
                "PolicyDocument": {
                   "Version" : "2012-10-17",
-                  "Statement": [ {
-                     "Effect": "Allow",
-                     "Action": "kinesis:*",
-                     "Resource": [
-                        { "Fn::GetAtt" : ["KinesisStream", "Arn"] }
-                     ]
-                  } ]
+                  "Statement": [
+                    {
+                      "Effect":"Allow",
+                      "Action":[
+                        "kinesis:PutRecord",
+                        "kinesis:PutRecords",
+                        "kinesis:GetRecords",
+                        "kinesis:GetShardIterator",
+                        "kinesis:DescribeStream"
+                      ],
+                      "Resource":[
+                        {
+                           "Fn::GetAtt":[
+                               "KinesisStream",
+                               "Arn"
+                           ]
+                        }
+                      ]
+                    },
+                    {
+                      "Effect":"Allow",
+                      "Action":[
+                        "kinesis:ListStreams"
+                      ],
+                      "Resource": "*"
+                    },
+                    {
+                      "Effect":"Allow",
+                      "Action":[
+                         "lambda:*"
+                      ],
+                      "Resource":[
+                         {
+                            "Fn::GetAtt":[
+                                "CollectLambdaFunction",
+                                "Arn"
+                            ]
+                         }
+                      ]
+                    }
+                  ]
                }
-            } ]
+            }]
          }
       },
       "CollectLambdaEventSourceMapping":{
@@ -1019,9 +982,7 @@
             "CollectLambdaRole",
             "CollectLambdaPolicy",
             "KinesisStream",
-            "KinesisRole",
-            "KinesisPolicy",
-            "RoleForEventsToInvokeKinesis"
+            "CloudWatchEventsRole"
          ],
          "Properties":{
             "EventSourceArn" : { "Fn::GetAtt" : ["KinesisStream", "Arn"] },

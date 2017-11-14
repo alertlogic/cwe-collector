@@ -26,10 +26,6 @@ malicious IPs, URLs, or domains. GuardDuty informs you of the status of your AWS
 
 To capture GuardDuty events, see [Setting Up Amazon GuardDuty] (http://docs.aws.amazon.com/AWSGuardDuty/latest/UserGuide/settingup.html).
 
-**Temp Dev and Test Note: The current template is stored here 
-https://s3.amazonaws.com/rcs-test-us-east-1/templates/guardduty.template Access to this template is granted to 
-Route105 (948063967832), Collect (352283894008) and Ozone (481746159046) AWS accounts only.**
-
 ## Create an Alert Logic Access Key
 
 **Before you begin:** Be sure you have an Alert Logic Cloud Insight account with administrator permissions. Log into the Cloud Insight console as an administrator [here](https://console.cloudinsight.alertlogic.com/#/login).
@@ -38,8 +34,6 @@ This procedure assumes a Linux-based local machine using [curl](https://curl.hax
 [jq](https://stedolan.github.io/jq/).
 
 From the bash command line, type the following commands, where `<username>` and `<password>` are your Alert Logic Cloud Insight credentials:
-
-**Temp Dev and Test Note: In the curl command below, use the integration url here api.global-integration.product.dev.alertlogic.com instead.**
 
 ```
 export AL_USERNAME='<username>'
@@ -89,8 +83,7 @@ your setup is in a European region (e.g. `eu-east-1`), use the
 1. On the menu bar, click the file icon, and then click `Open`.
 1. In the `Open a template` window, click `Amazon S3 bucket`.
 1. In the `Template URL` field, type the following: 
-Alert Logic S3 bucket URL: `https://s3.amazonaws.com/alert-logic-cwe-<region>/templates/guardduty.template` 
-where `<region>` matches your AWS region. **TODO: This must be altered before GA**
+Alert Logic S3 bucket URL: `https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template` 
 1. On the menu bar, click the `Create stack` icon.
 1. On the `Select Template` window, click `Next`.
 1. On the `Specify Details` window, provide the following required parameters:
@@ -98,8 +91,6 @@ where `<region>` matches your AWS region. **TODO: This must be altered before GA
    - `AccessKeyId` - `access_key_id` returned from AIMs [above](#create_an_alert_logic_access_key)
    - `AlApiEndpoint` - usually `api.global-services.global.alertlogic.com` 
    - `AlDataResidency` - usually `default`
-   - `S3Bucket` - Use the dropdown menu to select the bucket that matches your region **TODO: field will be removed before GA.**
-   - `S3Zipfile` - **TODO: field will be removed before GA**
    - `SecretKey` - `secret_key` returned from AIMs [above](#create_an_alert_logic_access_key)  
 1. Click Next. 
 1. On the Options panel, click Next.
@@ -122,7 +113,7 @@ Follow these steps to deploy the Alert Logic custom template using the [AWS CLI]
     - `SecretKey` - `secret_key` returned from AIMs [above](#create_an_alert_logic_access_key)   
 
     ```
-    aws cloudformation deploy --template /path_to_template/guardduty.template --stack-name my-new-stack --capabilities CAPABILITY_IAM --parameter-overrides AccessKeyId=<access_key_id> SecretKey=<secret_key>
+    aws cloudformation create-stack --template-url https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template --stack-name kk-new-stack --capabilities CAPABILITY_IAM --parameters ParameterKey=AccessKeyId,ParameterValue=<access_key_id> ParameterKey=SecretKey,ParameterValue=<secret_key>
     ```
 1. Wait for the stack creation to complete.
 

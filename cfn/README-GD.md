@@ -79,13 +79,9 @@ your setup is in a European region (e.g. `eu-east-1`), use the
 
 1. Log in to the [AWS Management Console](https://aws.amazon.com/console/) with an AWS account that has AWS administrator privileges. 
 1. Select the region in which you want to deploy the CFT.
-1. Click `Services`->`CloudFormation`->`Design Template`.
-1. On the menu bar, click the file icon, and then click `Open`.
-1. In the `Open a template` window, click `Amazon S3 bucket`.
-1. In the `Template URL` field, type the following: 
-Alert Logic S3 bucket URL: `https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template` 
-1. On the menu bar, click the `Create stack` icon.
-1. On the `Select Template` window, click `Next`.
+1. Click `Services`->`CloudFormation`->`Create Stack`.
+1. In the `Choose a template` section select `Specify an Amazon S3 template URL`, use the following URL and click `Next`:
+`https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template`
 1. On the `Specify Details` window, provide the following required parameters:
    - `Stack name` - Any name you have used for creating an AWS stack
    - `AccessKeyId` - `access_key_id` returned from AIMs [above](#create_an_alert_logic_access_key)
@@ -100,7 +96,7 @@ Alert Logic S3 bucket URL: `https://s3.amazonaws.com/alertlogic-collectors-us-ea
 select your stack by name.
 
 If deployment was successful, the status appears as: CREATE_COMPLETE. If deployment was not successful, 
-see [Troubleshooting Installation Issues](#Troubleshooting Installation Issues) below.    
+see [Troubleshooting Installation Issues](#troubleshooting-installation-issues) below.    
 
 #### Use a Command Line to deploy
 

@@ -816,6 +816,15 @@
                         "lambda:ListEventSourceMappings"
                      ],
                      "Resource": "*"
+                  },
+                  {
+                     "Effect":"Allow",
+                     "Action":[
+                        "cloudwatch:Get*",
+                        "cloudwatch:Describe*",
+                        "cloudwatch:List*"
+                     ],
+                     "Resource": "*"
                   }
                ]
             }

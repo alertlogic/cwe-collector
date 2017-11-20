@@ -16,17 +16,16 @@ malicious IPs, URLs, or domains. GuardDuty informs you of the status of your AWS
 
 To install the GuardDuty events collector:
 
-1. **Enable CloudWatch event collection** - In your AWS account, enable GuardDuty CloudWatch event collection.
+1. **Enable CloudWatch event collection** - In your AWS account, enable Amazon GuardDuty CloudWatch event collection.
 1. **Alert Logic Access key creation** - Create an Alert Logic access key that allows the collector to connect to the Alert Logic Cloud Insight back end.
-1. **CloudFormation template deployment** - Deploy a custom AWS CloudFormation template to your AWS account to create lambda functions
-for collecting and managing GuardDuty event data.
+1. **CloudFormation template deployment** - Deploy a custom AWS CloudFormation template to your AWS account to create lambda functions.
 1. **Deployment verification** - Use the Cloud Insight console to verify a successful installation.
 
 ## Enable CloudWatch event collection
 
 The Alert Logic CWE collector for GuardDuty collects `findings` from Amazon CloudWatch events.
 
-To enable GuardDuty events, see [Setting Up Amazon GuardDuty] (http://docs.aws.amazon.com/AWSGuardDuty/latest/UserGuide/settingup.html).
+To enable Amazon GuardDuty events, see [Setting Up Amazon GuardDuty](http://docs.aws.amazon.com/AWSGuardDuty/latest/UserGuide/settingup.html).
 
 ## Alert Logic Access key creation
 
@@ -41,7 +40,7 @@ In order to verify the user has administrator permissions:
 The following procedure assumes a Linux-based local machine using [curl](https://curl.haxx.se/) and 
 [jq](https://stedolan.github.io/jq/).
 
-From the bash command line, type the following commands, where `<username>` is your Alert Logic Cloud Insight user, and enter your password when prompted:
+From the bash command line, type the following commands, where `<username>` is your Alert Logic Cloud Insight user name, and then enter your password when prompted:
 
 ```
 export AL_USERNAME='<username>'

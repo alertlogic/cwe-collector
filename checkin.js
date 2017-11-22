@@ -142,7 +142,8 @@ function sendCheckin(event, context, aimsC, healthStatus, callback) {
         status : healthStatus.status,
         details : healthStatus.details,
         error_code: healthStatus.error_code,
-        version : m_packageJson.version
+        version : m_packageJson.version,
+        statistics : healthStatus.statistics
     };
     var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC);
     azcollectSvc.doCheckin(checkinValues)

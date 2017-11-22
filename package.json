@@ -22,8 +22,9 @@
   "dependencies": {
     "async": "*",
     "cfn-response": "*",
-    "request-promise-native": "*",
-    "request": "*"
+    "moment": "^2.19.2",
+    "request": "*",
+    "request-promise-native": "*"
   },
   "author": "Alert Logic Inc."
 }

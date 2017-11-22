@@ -144,6 +144,12 @@ function processCheckin(event, context) {
             });
         },
         function(aimsC, healthStatus, callback) {
+            m_alAws.getStatistics(context, event, healthStatus, function(err, response) {
+                healthStatus.statistics = response;
+                callback(null, aimsC, healthStatus);
+            });
+        },
+        function(aimsC, healthStatus, callback) {
             m_checkin.sendCheckin(event, context, aimsC, healthStatus, callback);
         }
     ],

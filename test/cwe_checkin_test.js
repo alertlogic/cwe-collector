@@ -9,7 +9,6 @@ const cweMockErrors = require('./cwe_mock_errors');
 const cweCheckin = require('../checkin');
 const clone = require('clone');
 var cweRewire = rewire('../index');
-var servicecRewire = rewire('../lib/al_servicec');
 var m_servicec = require('../lib/al_servicec');
 var azcollectStub;
 
@@ -129,7 +128,11 @@ describe('CWE Checkin Tests', function() {
         it('checkHealth', function(done) {
             rewireCheckHealth(cweMock.CHECKIN_TEST_EVENT, cweMock.DEFAULT_LAMBDA_CONTEXT, function(err, healthStatus) {
                 assert.equal(null, err);
-                assert.deepEqual({status: 'ok', details: []}, healthStatus);
+                var expected = {
+                    status: 'ok',
+                    details: []
+                };
+                assert.deepEqual(expected, healthStatus);
                 done();
             });
         });

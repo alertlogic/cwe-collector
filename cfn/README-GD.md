@@ -39,7 +39,7 @@ In order to verify the user has administrator permissions:
 1. Once found check that `user role` list under the `Edit an AIMS User` section has `Administrator` role selected.
 
 The following procedure assumes a Linux-based local machine using [curl](https://curl.haxx.se/) and 
-[jq](https://stedolan.github.io/jq/).
+[jq](https://stedolan.github.io/jq/). For Windows please use command line and windows versions of [curl](https://curl.haxx.se/download.html) and [jq](https://stedolan.github.io/jq/download/).
 
 From the bash command line, type the following commands, where `<username>` is your Alert Logic Cloud Insight user, and enter your password when prompted:
 
@@ -128,7 +128,7 @@ Follow these steps to deploy the Alert Logic custom template using the [AWS CLI]
     - Use the [US console](https://console.cloudinsight.alertlogic.com/#/login) for regions in the US and associated geographical regions.
     - Use the [UK console](https://console.cloudinsight.alertlogic.co.uk/#/login) for regions in Europe and other regions not in the US.
 1. If you have not already created a Cloud Insight deployment, follow the instructions [here](https://docs.alertlogic.com/gsg/amazon-web-services-cloud-insight-get-started.htm) to do so for the AWS account and region where you installed the CFT.
-1. Verify successful deployment by TBD. **TODO: Complete these steps when the UX definition is clearer.**
+1. Verify successful deployment by checking the Incident list in Alert Logic Cloud Insight UI. The list should be populated with Incidents that correspond to recent Amazon GuardFindings which are displayed in Amazon GuardDuty console.
 
 ## Troubleshooting Installation Issues
 

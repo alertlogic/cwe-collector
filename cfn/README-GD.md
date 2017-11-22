@@ -4,36 +4,43 @@ Alert Logic Amazon Web Services (AWS) CloudWatch Events (CWE) Collector CloudFor
 
 # Overview
 
-This folder contains the AWS CWE JavaScript lambda function and the CloudFormation template (CFT) that deploys the GuardDuty events collector to AWS. The GuardDuty collector collects and forwards CloudWatch events to the Cloud Insight backend for display as threats on the Incidents page. 
-
-# Installation
-
-To install the GuardDuty events collector:
-
-1. In your AWS account, enable GuardDuty CloudWatch event collection.
-1. Create an Alert Logic access key that allows the collector to connect to the Alert Logic Cloud Insight back end.
-1. Deploy a custom AWS CloudFormation template to your AWS account to create lambda functions
-for collecting and managing GuardDuty event data.
-1. Use the Cloud Insight console to verify a successful installation.
-
-## Enable Amazon GuardDuty CloudWatch event collection in your AWS account
+This folder contains the AWS CWE JavaScript lambda function and the CloudFormation template (CFT) that deploys the GuardDuty events collector to AWS. The GuardDuty collector collects and forwards CloudWatch events to the Cloud Insight backend for display as threats on the Incidents page.
 
 Amazon GuardDuty is a continuous security monitoring service that requires no customer-managed hardware or software. 
 GuardDuty analyzes and processes VPC Flow Logs and AWS CloudTrail event logs. GuardDuty uses security logic and 
 AWS usage statistics techniques to identify unexpected and potentially unauthorized and malicious activity. 
 Such activity includes escalations of privileges, uses of exposed credentials, or communication with 
-malicious IPs, URLs, or domains. GuardDuty informs you of the status of your AWS infrastructure and applications by producing security `findings`. The Alert Logic CWE collector for GuardDuty collects `findings` from Amazon CloudWatch events.
+malicious IPs, URLs, or domains. GuardDuty informs you of the status of your AWS infrastructure and applications by producing security `findings`. 
 
-To capture GuardDuty events, see [Setting Up Amazon GuardDuty] (http://docs.aws.amazon.com/AWSGuardDuty/latest/UserGuide/settingup.html).
+# Installation
 
-## Create an Alert Logic Access Key
+To install the GuardDuty events collector:
+
+1. **Enable CloudWatch event collection** - In your AWS account, enable Amazon GuardDuty CloudWatch event collection.
+1. **Alert Logic Access key creation** - Create an Alert Logic access key that allows the collector to connect to the Alert Logic Cloud Insight back end.
+1. **CloudFormation template deployment** - Deploy a custom AWS CloudFormation template to your AWS account to create lambda functions.
+1. **Deployment verification** - Use the Cloud Insight console to verify a successful installation.
+
+## Enable CloudWatch event collection
+
+The Alert Logic CWE collector for GuardDuty collects `findings` from Amazon CloudWatch events.
+
+To enable Amazon GuardDuty events, see [Setting Up Amazon GuardDuty](http://docs.aws.amazon.com/AWSGuardDuty/latest/UserGuide/settingup.html).
+
+## Alert Logic Access key creation
 
 **Before you begin:** Be sure you have an Alert Logic Cloud Insight account with administrator permissions. Log into the Cloud Insight console as an administrator [here](https://console.cloudinsight.alertlogic.com/#/login).
+In order to verify the user has administrator permissions:
 
-This procedure assumes a Linux-based local machine using [curl](https://curl.haxx.se/) and 
-[jq](https://stedolan.github.io/jq/).
+1. Once logged in click on the user name at the top-right corner of Cloud Insight console.
+1. In the drop-down menu click `Users`.
+1. Select the user in `AIMS User` section. **Note** you can start typing a name in the search box to find an appropriate user.
+1. Once found check that `user role` list under the `Edit an AIMS User` section has `Administrator` role selected.
 
-From the bash command line, type the following commands, where `<username>` and `<password>` are your Alert Logic Cloud Insight credentials:
+The following procedure assumes a Linux-based local machine using [curl](https://curl.haxx.se/) and 
+[jq](https://stedolan.github.io/jq/). For Windows please use command line and windows versions of [curl](https://curl.haxx.se/download.html) and [jq](https://stedolan.github.io/jq/download/).
+
+From the bash command line, type the following commands, where `<username>` is your Alert Logic Cloud Insight user name, and then enter your password when prompted:
 
 ```
 export AL_USERNAME='<username>'
@@ -65,12 +72,12 @@ curl -s -X GET -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.glo
 curl -X DELETE -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
 ```
 
-## Deploy a custom AWS CloudFormation template to your AWS account
+## CloudFormation template deployment
 
 The Alert Logic CWE collector deploys to a single AWS region. To collect from 
 multiple AWS regions, you must either install the collector in each target region, or 
 set up GuardDuty collection across regions. For more information, see: [Setting up GuardDuty across
-regions and accounts](TBD)).  
+regions and accounts](TBD).
 
 **Note:** This procedure assumes setup in the AWS `us-east-1` region 
 using the Alert Logic Cloud Insight [US console](https://console.cloudinsight.alertlogic.com/#/login). If
@@ -84,10 +91,10 @@ your setup is in a European region (e.g. `eu-east-1`), use the
 `https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template`
 1. On the `Specify Details` window, provide the following required parameters:
    - `Stack name` - Any name you have used for creating an AWS stack
-   - `AccessKeyId` - `access_key_id` returned from AIMs [above](#create_an_alert_logic_access_key)
+   - `AccessKeyId` - `access_key_id` returned from AIMs [above](#alert-logic-access-key-creation)
    - `AlApiEndpoint` - usually `api.global-services.global.alertlogic.com` 
    - `AlDataResidency` - usually `default`
-   - `SecretKey` - `secret_key` returned from AIMs [above](#create_an_alert_logic_access_key)  
+   - `SecretKey` - `secret_key` returned from AIMs [above](#alert-logic-access-key-creation)
 1. Click Next. 
 1. On the Options panel, click Next.
 1. In the Review panel, perform a predeployment check. 
@@ -96,31 +103,31 @@ your setup is in a European region (e.g. `eu-east-1`), use the
 select your stack by name.
 
 If deployment was successful, the status appears as: CREATE_COMPLETE. If deployment was not successful, 
-see [Troubleshooting Installation Issues](#troubleshooting-installation-issues) below.    
+see [Troubleshooting Installation Issues](#troubleshooting-installation-issues) below.
 
 #### Use a Command Line to deploy
 
 Follow these steps to deploy the Alert Logic custom template using the [AWS CLI](https://aws.amazon.com/cli/).
 
-1. Download the Alert Logic custom CFT to your local machine from [the Alert Logic public github repository](). 
+1. Download the Alert Logic custom CFT to your local machine from [the Alert Logic public github repository](https://github.com/alertlogic/cwe-collector/blob/master/cfn/guardduty.template). 
 1. In the command line, type the following command, where the required parameters are:
     - `stack-name` - Any name you have used to create an AWS stack
-    - `AccessKeyId` - `access_key_id` returned from AIMs [above](#create_an_alert_logic_access_key)
-    - `SecretKey` - `secret_key` returned from AIMs [above](#create_an_alert_logic_access_key)   
+    - `AccessKeyId` - `access_key_id` returned from AIMs [above](#alert-logic-access-key-creation)
+    - `SecretKey` - `secret_key` returned from AIMs [above](#alert-logic-access-key-creation)
 
     ```
     aws cloudformation create-stack --template-url https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template --stack-name <alertlogic-collector-stack-name> --capabilities CAPABILITY_IAM --parameters ParameterKey=AccessKeyId,ParameterValue=<access_key_id> ParameterKey=SecretKey,ParameterValue=<secret_key>
     ```
 1. Wait for the stack creation to complete.
 
-## Verify the Installation
+## Deployment verification
 
 1. Log into the Alert Logic Cloud Insight console.
 **Note:** You must log in with an account that has administrator permissions.
     - Use the [US console](https://console.cloudinsight.alertlogic.com/#/login) for regions in the US and associated geographical regions.
     - Use the [UK console](https://console.cloudinsight.alertlogic.co.uk/#/login) for regions in Europe and other regions not in the US.
 1. If you have not already created a Cloud Insight deployment, follow the instructions [here](https://docs.alertlogic.com/gsg/amazon-web-services-cloud-insight-get-started.htm) to do so for the AWS account and region where you installed the CFT.
-1. Verify successful deployment by TBD. **TODO: Complete these steps when the UX definition is clearer.**
+1. Verify successful deployment by checking the Incident list in Alert Logic Cloud Insight UI. The list should be populated with Incidents that correspond to recent Amazon GuardFindings which are displayed in Amazon GuardDuty console.
 
 ## Troubleshooting Installation Issues
 

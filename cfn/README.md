@@ -11,7 +11,7 @@ backend services.
 
 # Contents
 
-[AWS GuardDuty findings collection](./README-GD.md)
+[Amazon GuardDuty findings collection](./README-GD.md)
 
 # Known Issues/ Open Questions
 

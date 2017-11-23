@@ -453,9 +453,9 @@ describe('CWE Checkin Tests', function() {
                 functionName : cweMock.CHECKIN_TEST_FUNCTION_NAME,
                 succeed : () => { return; }
             };
+            
             sendCheckinStub = sinon.stub(cweCheckin, 'sendCheckin').callsFake(
                 function fakeFn(event, context, aimsC, healthStatus, callback) {
-                    console.log(JSON.stringify(healthStatus));
                     return callback(null);
                 });
             checkHealthStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(

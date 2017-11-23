@@ -261,6 +261,7 @@ function processScheduledEvent(event, context) {
 
 
 function getStatistics(context, event, finalCallback) {
+    const kinesisName = m_alAws.arnToName(event.KinesisArn);
     async.waterfall([
        function(asyncCallback) {
            return m_alAws.getLambdaMetrics(context.functionName,
@@ -275,19 +276,19 @@ function getStatistics(context, event, finalCallback) {
                asyncCallback);
        },
        function(statistics, asyncCallback) {
-           return m_alAws.getKinesisMetrics(event.KinesisArn,
+           return m_alAws.getKinesisMetrics(kinesisName,
                'IncomingRecords',
                statistics,
                asyncCallback);
        },
        function(statistics, asyncCallback) {
-           return m_alAws.getKinesisMetrics(event.KinesisArn,
+           return m_alAws.getKinesisMetrics(kinesisName,
                'ReadProvisionedThroughputExceeded',
                statistics,
                asyncCallback);
        },
        function(statistics, asyncCallback) {
-           return m_alAws.getKinesisMetrics(event.KinesisArn,
+           return m_alAws.getKinesisMetrics(kinesisName,
                'WriteProvisionedThroughputExceeded',
                statistics,
                asyncCallback);

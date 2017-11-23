@@ -1,3 +1,14 @@
+/* -----------------------------------------------------------------------------
+ * @copyright (C) 2017, Alert Logic, Inc
+ * @doc
+ *
+ * Lambda function for collecting Amazon CloudWatch events and ingesting them
+ * into Alert Logic backend.
+ *
+ * @end
+ * -----------------------------------------------------------------------------
+ */
+ 
 const https = require('https');
 const util = require('util');
 const AWS = require('aws-sdk');
@@ -243,8 +254,6 @@ function processScheduledEvent(event, context) {
 
 
 exports.handler = function(event, context) {
-    // FIXME: Just for dev.  Delete me later.
-    console.info("Processing event: ", event);
     switch (event.RequestType) {
         case 'ScheduledEvent':
             return processScheduledEvent(event, context);

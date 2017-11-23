@@ -1,3 +1,13 @@
+/* -----------------------------------------------------------------------------
+ * @copyright (C) 2017, Alert Logic, Inc
+ * @doc
+ *
+ * Lambda collector health check functions.
+ *
+ * @end
+ * -----------------------------------------------------------------------------
+ */
+ 
 const AWS = require('aws-sdk');
 const async = require('async');
 const m_alServiceC = require('./lib/al_servicec');
@@ -107,7 +117,7 @@ function checkHealth(event, context, finalCallback) {
     ],
     function(errMsg) {
         if (errMsg) {
-            console.log('Health check failed with',  errMsg);
+            console.warn('Health check failed with',  errMsg);
             return finalCallback(null, {
                 status: errMsg.status,
                 error_code: errMsg.code,

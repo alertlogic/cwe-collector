@@ -9,6 +9,7 @@ const cweMockErrors = require('./cwe_mock_errors');
 const cweCheckin = require('../checkin');
 const clone = require('clone');
 var cweRewire = rewire('../index');
+var cweCheckinRewire = rewire('../checkin');
 var m_servicec = require('../lib/al_servicec');
 var azcollectStub;
 
@@ -361,6 +362,135 @@ describe('CWE Checkin Tests', function() {
             check_error(done, rewireCheckHealth, 
                 'Incorrect event source mapping status: ' + stringify(expectedEventSource));
         });
+    });
+    
+    describe('processCheckin() get statistics', function() {
+        var rewireGetDecryptedCredentials;
+        var rewireGetAlAuth;
+        var rewireProcessCheckin;
+        var rewireCheckHealth;
+        var sendCheckinStub;
+
+        before(function() {
+            setAzcollectStub();
+        });
+
+        beforeEach(function() {
+            rewireProcessCheckin = cweRewire.__get__('processCheckin');
+            rewireGetDecryptedCredentials = cweRewire.__set__(
+                {getDecryptedCredentials: (callback) => { callback(null); }}
+            );
+            rewireGetAlAuth = cweRewire.__set__(
+                {getAlAuth: (callback) => { callback(null, {}); }}
+            );
+            /*rewireCheckHealth = sendCheckinRewire.__set__(
+                {checkHealth: (event, context, callback) => { 
+                    return callback(null, {
+                        status: 'ok',
+                        details: []
+                    }); 
+                }}
+            );*/
+            
+        });
+
+        afterEach(function() {
+            rewireGetDecryptedCredentials();
+            rewireGetAlAuth();
+            sendCheckinStub.restore();
+            checkHealthStub.restore();
+            AWS.restore('CloudWatch', 'getMetricStatistics');
+        });
+
+        after(function() {
+            azcollectStub.restore();
+        });
+
+        it('getStatistics() - OK', function(done) {
+            var context = {
+                invokedFunctionArn : cweMock.FUNCTION_ARN,
+                functionName : cweMock.CHECKIN_TEST_FUNCTION_NAME,
+                succeed : () => { return; }
+            };
+            sendCheckinStub = sinon.stub(cweCheckin, 'sendCheckin').callsFake(
+                function fakeFn(event, context, aimsC, healthStatus, callback) {
+                    return callback(null);
+                });
+            checkHealthStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
+                function fakeFn(event, context, callback) {
+                    return callback(null, {
+                        status: 'ok',
+                        details: []
+                    });
+                });
+            AWS.mock('CloudWatch', 'getMetricStatistics', function (params, callback) {
+                var ret = cweMock.CLOUDWATCH_GET_METRIC_STATS_OK;
+                ret.Label = params.MetricName;
+                return callback(null, ret);
+            });
+            rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
+            
+            expectedHealth = {
+                'status':'ok',
+                'details':[],
+                'statistics':[
+                    {'Label':'Invocations','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
+                    {'Label':'Errors','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
+                    {'Label':'IncomingRecords','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
+                    {'Label':'ReadProvisionedThroughputExceeded','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
+                    {'Label':'WriteProvisionedThroughputExceeded','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]}
+                ]
+            };
+            sinon.assert.callCount(checkHealthStub, 1);
+            sinon.assert.callCount(sendCheckinStub, 1);
+            sinon.assert.calledWith(sendCheckinStub, cweMock.CHECKIN_TEST_EVENT, context, {}, expectedHealth);
+            done();
+        });
+        
+        it('getStatistics() - CloudWatch connection error', function(done) {
+            var context = {
+                invokedFunctionArn : cweMock.FUNCTION_ARN,
+                functionName : cweMock.CHECKIN_TEST_FUNCTION_NAME,
+                succeed : () => { return; }
+            };
+            sendCheckinStub = sinon.stub(cweCheckin, 'sendCheckin').callsFake(
+                function fakeFn(event, context, aimsC, healthStatus, callback) {
+                    console.log(JSON.stringify(healthStatus));
+                    return callback(null);
+                });
+            checkHealthStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
+                function fakeFn(event, context, callback) {
+                    return callback(null, {
+                        status: 'ok',
+                        details: []
+                    });
+                });
+            AWS.mock('CloudWatch', 'getMetricStatistics', function (params, callback) {
+                var err = {
+                    code : 1,
+                    message : 'Some error.'
+                };
+                return callback(err);
+            });
+            rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
+            
+            expectedHealth = {
+                'status' : 'ok',
+                'details' : [],
+                'statistics' : [
+                    {'Label':'Invocations','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
+                    {'Label':'Errors','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
+                    {'Label':'IncomingRecords','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
+                    {'Label':'ReadProvisionedThroughputExceeded','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
+                    {'Label':'WriteProvisionedThroughputExceeded','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'}
+                ]
+            };
+            sinon.assert.callCount(checkHealthStub, 1);
+            sinon.assert.callCount(sendCheckinStub, 1);
+            sinon.assert.calledWith(sendCheckinStub, cweMock.CHECKIN_TEST_EVENT, context, {}, expectedHealth);
+            done();
+        });
+        
     });
 
 });

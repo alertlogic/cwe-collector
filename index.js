@@ -133,22 +133,28 @@ function processResultInContext(context, err, result) {
 function processCheckin(event, context) {
     async.waterfall([
         function(callback) {
-            getDecryptedCredentials(callback);
+            return getDecryptedCredentials(callback);
         },
         function(callback) {
-            getAlAuth(callback);
+            return getAlAuth(callback);
         },
         function(aimsC, callback) {
-            m_checkin.checkHealth(event, context, function(err, healthStatus) {
-                callback(err, aimsC, healthStatus);
+            return m_checkin.checkHealth(event, context, function(err, healthStatus) {
+                return callback(err, aimsC, healthStatus);
             });
         },
         function(aimsC, healthStatus, callback) {
-            m_checkin.sendCheckin(event, context, aimsC, healthStatus, callback);
+            return getStatistics(context, event, function(err, response) {
+                healthStatus.statistics = response;
+                return callback(err, aimsC, healthStatus);
+            });
+        },
+        function(aimsC, healthStatus, callback) {
+            return m_checkin.sendCheckin(event, context, aimsC, healthStatus, callback);
         }
     ],
     function(err, result) {
-        processResultInContext(context, err, result);
+        return processResultInContext(context, err, result);
     });
 }
 
@@ -251,6 +257,50 @@ function processScheduledEvent(event, context) {
             return context.fail("Unknown scheduled event detail type: " + event.type);
     }
 }
+
+
+function getStatistics(context, event, finalCallback) {
+    const kinesisName = m_alAws.arnToName(event.KinesisArn);
+    async.waterfall([
+       function(asyncCallback) {
+           return m_alAws.getLambdaMetrics(context.functionName,
+               'Invocations',
+               [],
+               asyncCallback);
+       },
+       function(statistics, asyncCallback) {
+           return m_alAws.getLambdaMetrics(context.functionName,
+               'Errors',
+               statistics,
+               asyncCallback);
+       },
+       function(statistics, asyncCallback) {
+           return m_alAws.getKinesisMetrics(kinesisName,
+               'IncomingRecords',
+               statistics,
+               asyncCallback);
+       },
+       function(statistics, asyncCallback) {
+           return m_alAws.getKinesisMetrics(kinesisName,
+               'IncomingBytes',
+               statistics,
+               asyncCallback);
+       },
+       function(statistics, asyncCallback) {
+           return m_alAws.getKinesisMetrics(kinesisName,
+               'ReadProvisionedThroughputExceeded',
+               statistics,
+               asyncCallback);
+       },
+       function(statistics, asyncCallback) {
+           return m_alAws.getKinesisMetrics(kinesisName,
+               'WriteProvisionedThroughputExceeded',
+               statistics,
+               asyncCallback);
+       }
+    ], finalCallback);
+};
+
 
 
 exports.handler = function(event, context) {

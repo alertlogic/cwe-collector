@@ -545,7 +545,6 @@
       },
       "CollectLambdaFunction":{
          "Type":"AWS::Lambda::Function",
-         "FunctionName":"alertlogic-cwe-collector",
          "DependsOn":[
             "CollectLambdaRole",
             "EndpointAPIs",
@@ -554,6 +553,7 @@
          ],
          "Properties":{
             "Description":"Alert Logic Lambda Guard Duty event collector",
+            "FunctionName":"alertlogic-cwe-collector",
             "Role":{
                "Fn::GetAtt":[
                   "CollectLambdaRole",

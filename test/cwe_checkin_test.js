@@ -383,15 +383,6 @@ describe('CWE Checkin Tests', function() {
             rewireGetAlAuth = cweRewire.__set__(
                 {getAlAuth: (callback) => { callback(null, {}); }}
             );
-            /*rewireCheckHealth = sendCheckinRewire.__set__(
-                {checkHealth: (event, context, callback) => { 
-                    return callback(null, {
-                        status: 'ok',
-                        details: []
-                    }); 
-                }}
-            );*/
-            
         });
 
         afterEach(function() {

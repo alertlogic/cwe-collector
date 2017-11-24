@@ -17,7 +17,8 @@ describe('al_aws Tests', function() {
         
         it('Invalid input', function(done) {
             assert.ifError(m_alAws.arnToName(''));
-            assert.equal(m_alAws.arnToName('invalid'), 'invalid');
+            assert.ifError(m_alAws.arnToName('invalid'));
+            assert.ifError(m_alAws.arnToName('arn:aws:invalid'));
             done();
         });
     });

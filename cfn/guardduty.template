@@ -552,6 +552,7 @@
          ],
          "Properties":{
             "Description":"Alert Logic Lambda Guard Duty event collector",
+            "FunctionName":"alertlogic-cwe-collector",
             "Role":{
                "Fn::GetAtt":[
                   "CollectLambdaRole",

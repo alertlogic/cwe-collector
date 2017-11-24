@@ -40,7 +40,7 @@ In order to verify the user has administrator permissions:
 The following procedure assumes a Linux-based local machine using [curl](https://curl.haxx.se/) and 
 [jq](https://stedolan.github.io/jq/). For Windows please use command line and windows versions of [curl](https://curl.haxx.se/download.html) and [jq](https://stedolan.github.io/jq/download/).
 
-From the bash command line, type the following commands, where `<email address>` is your Alert Logic Cloud Insight email address, and then enter your password when prompted:
+From the bash command line, type the following commands, where `<email address>` is your Alert Logic Cloud Insight email address you use to log in, and then enter your password when prompted:
 
 ```
 export AL_USERNAME='<email address>'

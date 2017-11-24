@@ -40,10 +40,10 @@ In order to verify the user has administrator permissions:
 The following procedure assumes a Linux-based local machine using [curl](https://curl.haxx.se/) and 
 [jq](https://stedolan.github.io/jq/). For Windows please use command line and windows versions of [curl](https://curl.haxx.se/download.html) and [jq](https://stedolan.github.io/jq/download/).
 
-From the bash command line, type the following commands, where `<username>` is your Alert Logic Cloud Insight user name, and then enter your password when prompted:
+From the bash command line, type the following commands, where `<email address>` is your Alert Logic Cloud Insight email address you use to log in, and then enter your password when prompted:
 
 ```
-export AL_USERNAME='<username>'
+export AL_USERNAME='<email address>'
 auth=$(curl -X POST -s -u $AL_USERNAME https://api.global-services.global.alertlogic.com/aims/v1/authenticate); export AL_ACCOUNT_ID=$(echo $auth | jq -r '.authentication.account.id'); export AL_USER_ID=$(echo $auth | jq -r '.authentication.user.id'); export AL_TOKEN=$(echo $auth | jq -r '.authentication.token'); if [ -z $AL_TOKEN ]; then echo "Authentication failure"; else roles=$(curl -s -X GET -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/roles | jq -r '.roles[].name'); if [ "$roles" != "Administrator" ]; then echo "The $AL_USERNAME doesn’t have Administrator role. Assigned role is '$roles'"; else curl -s -X POST -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys | jq .; fi; fi; unset AL_USERNAME;
 ```
 An example of a successful response is:

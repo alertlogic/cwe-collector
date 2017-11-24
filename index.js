@@ -282,6 +282,12 @@ function getStatistics(context, event, finalCallback) {
        },
        function(statistics, asyncCallback) {
            return m_alAws.getKinesisMetrics(kinesisName,
+               'IncomingBytes',
+               statistics,
+               asyncCallback);
+       },
+       function(statistics, asyncCallback) {
+           return m_alAws.getKinesisMetrics(kinesisName,
                'ReadProvisionedThroughputExceeded',
                statistics,
                asyncCallback);

@@ -437,6 +437,7 @@ describe('CWE Checkin Tests', function() {
                     {'Label':'Invocations','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
                     {'Label':'Errors','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
                     {'Label':'IncomingRecords','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
+                    {'Label':'IncomingBytes','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
                     {'Label':'ReadProvisionedThroughputExceeded','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
                     {'Label':'WriteProvisionedThroughputExceeded','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]}
                 ]
@@ -481,6 +482,7 @@ describe('CWE Checkin Tests', function() {
                     {'Label':'Invocations','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
                     {'Label':'Errors','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
                     {'Label':'IncomingRecords','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
+                    {'Label':'IncomingBytes','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
                     {'Label':'ReadProvisionedThroughputExceeded','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
                     {'Label':'WriteProvisionedThroughputExceeded','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'}
                 ]

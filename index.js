@@ -150,7 +150,6 @@ function processCheckin(event, context) {
             });
         },
         function(aimsC, healthStatus, callback) {
-            console.log('Checkin ', JSON.stringify(healthStatus));
             return m_checkin.sendCheckin(event, context, aimsC, healthStatus, callback);
         }
     ],

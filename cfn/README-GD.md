@@ -102,6 +102,11 @@ your setup is in a European region (e.g. `eu-east-1`), use the
 1. On the CloudFormation, Stacks panel, filter based on the stack name you created, and then 
 select your stack by name.
 
+**Note:** Only one collector installation is allowed per AWS region. Multiple template deployments in same AWS region fail with the following error:
+
+CREATE_FAILED | AWS::Lambda::Function | CollectLambdaFunction | alertlogic-cwe-collector already exists in stack arn:aws:cloudformation:us-east-1:123456789101:stack/test-one/f9536300-d12b-11e7-ac98-50d5cd16c68e
+-- | -- | -- | --
+
 If deployment was successful, the status appears as: CREATE_COMPLETE. If deployment was not successful, 
 see [Troubleshooting Installation Issues](#troubleshooting-installation-issues) below.
 

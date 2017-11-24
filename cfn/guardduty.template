@@ -545,6 +545,7 @@
       },
       "CollectLambdaFunction":{
          "Type":"AWS::Lambda::Function",
+         "FunctionName":"alertlogic-cwe-collector",
          "DependsOn":[
             "CollectLambdaRole",
             "EndpointAPIs",

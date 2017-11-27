@@ -24,7 +24,12 @@ function checkCloudFormationStatus(event, callback) {
         } else {
             var stackStatus = data.Stacks[0].StackStatus;
             if (stackStatus == 'CREATE_COMPLETE' ||
-                stackStatus == 'UPDATE_COMPLETE') {
+                stackStatus == 'UPDATE_COMPLETE' ||
+                stackStatus == 'UPDATE_IN_PROGRESS' ||
+                stackStatus == 'UPDATE_ROLLBACK_COMPLETE' ||
+                stackStatus == 'UPDATE_ROLLBACK_IN_PROGRESS' ||
+                stackStatus == 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS' ||
+                stackStatus == 'REVIEW_IN_PROGRESS') {
                 return callback(null);
             } else {
                 return callback(errorMsg('CWE00002', 'CF stack has wrong status: ' + stackStatus));

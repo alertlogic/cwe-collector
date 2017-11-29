@@ -56,8 +56,6 @@ Please use the following [code style](https://github.com/airbnb/javascript) as m
 # Useful Links
 
 - [Alert Logic AIMs service API](https://console.cloudinsight.alertlogic.com/api/aims/)
-- [Alert Logic Ingest service API](https://console.cloudinsight.alertlogic.com/api/ingest/)
-- [Alert Logic Azcollect service API](https://console.cloudinsight.alertlogic.com/api/azcollect/)
 - [Alert Logic Sources service API](https://console.cloudinsight.alertlogic.com/api/sources/)
 - [How to monitor AWS Lambda functions](http://docs.aws.amazon.com/lambda/latest/dg/monitoring-functions.html)
 - [Node.js static code analysis tool](http://jshint.com/install/)

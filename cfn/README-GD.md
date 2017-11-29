@@ -25,7 +25,7 @@ To install the GuardDuty events collector:
 
 The Alert Logic CWE collector for GuardDuty collects `findings` from Amazon CloudWatch events.
 
-To enable Amazon GuardDuty events, see [Setting Up Amazon GuardDuty](http://docs.aws.amazon.com/AWSGuardDuty/latest/UserGuide/settingup.html).
+To enable Amazon GuardDuty events, see [Setting Up Amazon GuardDuty](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html).
 
 ## Alert Logic Access key creation
 
@@ -77,7 +77,7 @@ curl -X DELETE -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.glo
 The Alert Logic CWE collector deploys to a single AWS region. To collect from 
 multiple AWS regions, you must either install the collector in each target region, or 
 set up GuardDuty collection across regions. For more information, see: [Setting up GuardDuty across
-regions and accounts](TBD).
+regions and accounts](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_accounts.html).
 
 **Note:** This procedure assumes setup in the AWS `us-east-1` region 
 using the Alert Logic Cloud Insight [US console](https://console.cloudinsight.alertlogic.com/#/login). If
@@ -151,7 +151,7 @@ aws cloudformation describe-stack-events --stack-name my-new-stack
 
 1. If `GetEndpointsLambdaFunction` fails, an issue could exist with the AIMs access key id or the secret key
  you provided. Be sure the key id is correct, your secret key is valid, and your user account has administrative permissions for the Alert Logic Cloud Insight account.
-1.  Other issues, TBD.
+1. Other issues, TBD.
 
 
 # Known Issues/ Open Questions
@@ -162,5 +162,5 @@ aws cloudformation describe-stack-events --stack-name my-new-stack
 
 - [Alert Logic AIMs service API](https://console.cloudinsight.alertlogic.com/api/aims/)
 - [How to monitor AWS Lambda functions](http://docs.aws.amazon.com/lambda/latest/dg/monitoring-functions.html)
-- [AWS GuardDuty Development Guide](http://docs.aws.amazon.com/guardduty/latest/dg/welcome.html)
+- [AWS GuardDuty API Reference](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_api_ref.html)
 

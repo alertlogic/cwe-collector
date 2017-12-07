@@ -1,5 +1,7 @@
 # cwe-collector
 
+[![Build Status](https://secure.travis-ci.org/alertlogic/cwe-collector.png?branch=master)](http://travis-ci.org/alertlogic/cwe-collector)
+
 Alert Logic Amazon Web Services (AWS) CloudWatch Events (CWE) Collector.
 
 

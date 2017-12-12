@@ -559,7 +559,7 @@
       "EndpointAPIs": {
         "Type": "AWS::CloudFormation::CustomResource",
          "DependsOn":[
-               "CollectLambdaRole",
+               "BasicLambdaRole",
                "GetEndpointsLambdaFunction"
            ],
          "Properties": {

@@ -186,7 +186,6 @@
             "Type":"AWS::IAM::Policy",
             "DependsOn":[
                 "BasicLambdaRole",
-                "EncryptLambdaFunction",
                 "GetEndpointsLambdaFunction"
             ],
             "Properties":{
@@ -203,26 +202,6 @@
                             "Effect":"Allow",
                             "Action":"logs:CreateLogGroup",
                             "Resource":[
-                                {
-                                    "Fn::Join":[
-                                        "",
-                                        [
-                                            "arn:aws:logs:",
-                                            {
-                                                "Ref":"AWS::Region"
-                                            },
-                                            ":",
-                                            {
-                                                "Ref":"AWS::AccountId"
-                                            },
-                                            ":log-group:/aws/lambda/",
-                                            {
-                                                "Ref":"EncryptLambdaFunction"
-                                            },
-                                            ":*"
-                                        ]
-                                    ]
-                                },
                                 {
                                     "Fn::Join":[
                                         "",
@@ -266,12 +245,89 @@
                                             },
                                             ":log-group:/aws/lambda/",
                                             {
-                                                "Ref":"EncryptLambdaFunction"
+                                                "Ref":"GetEndpointsLambdaFunction"
                                             },
                                             ":log-stream:*"
                                         ]
                                     ]
-                                },
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "EncryptLambdaRole":{
+            "Type":"AWS::IAM::Role",
+            "Properties":{
+                "Path":"/",
+                "AssumeRolePolicyDocument":{
+                    "Version":"2012-10-17",
+                    "Statement":[
+                        {
+                            "Effect":"Allow",
+                            "Principal":{
+                                "Service":[
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                   ]
+                }
+            }
+        },
+        "EncryptLambdaPolicy":{
+            "Type":"AWS::IAM::Policy",
+            "DependsOn":[
+                "EncryptLambdaRole",
+                "EncryptLambdaFunction"
+            ],
+            "Properties":{
+                "Roles":[
+                   {
+                      "Ref":"EncryptLambdaRole"
+                   }
+                ],
+                "PolicyName":"alertlogic-encrypt-lambda-policy",
+                "PolicyDocument":{
+                    "Version":"2012-10-17",
+                    "Statement":[
+                        {
+                            "Effect":"Allow",
+                            "Action":"logs:CreateLogGroup",
+                            "Resource":[
+                                {
+                                    "Fn::Join":[
+                                        "",
+                                        [
+                                            "arn:aws:logs:",
+                                            {
+                                                "Ref":"AWS::Region"
+                                            },
+                                            ":",
+                                            {
+                                                "Ref":"AWS::AccountId"
+                                            },
+                                            ":log-group:/aws/lambda/",
+                                            {
+                                                "Ref":"EncryptLambdaFunction"
+                                            },
+                                            ":*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Effect":"Allow",
+                            "Action":[
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource":[
                                 {
                                    "Fn::Join":[
                                         "",
@@ -286,7 +342,7 @@
                                             },
                                             ":log-group:/aws/lambda/",
                                             {
-                                                "Ref":"GetEndpointsLambdaFunction"
+                                                "Ref":"EncryptLambdaFunction"
                                             },
                                             ":log-stream:*"
                                         ]
@@ -301,7 +357,7 @@
         "EncryptLambdaFunction":{
             "Type":"AWS::Lambda::Function",
             "DependsOn":[
-                "BasicLambdaRole",
+                "EncryptLambdaRole",
                 "EndpointAPIs"
             ],
             "Properties":{
@@ -559,7 +615,7 @@
       "EndpointAPIs": {
         "Type": "AWS::CloudFormation::CustomResource",
          "DependsOn":[
-               "BasicLambdaRole",
+               "BasicLambdaPolicy",
                "GetEndpointsLambdaFunction"
            ],
          "Properties": {

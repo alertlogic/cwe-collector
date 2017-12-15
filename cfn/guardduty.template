@@ -78,7 +78,7 @@
             "Type": "AWS::KMS::Key",
             "DependsOn":[
                 "CollectLambdaRole",
-                "BasicLambdaRole",
+                "EncryptLambdaRole",
                 "EndpointAPIs"
             ],
             "Properties": {
@@ -130,7 +130,7 @@
                           "Principal": {
                              "AWS": {
                                 "Fn::GetAtt": [
-                                   "BasicLambdaRole",
+                                   "EncryptLambdaRole",
                                    "Arn"
                                 ]
                              }
@@ -364,7 +364,7 @@
                 "Description":"Alert Logic Lambda Encrypt function",
                 "Role":{
                     "Fn::GetAtt":[
-                        "BasicLambdaRole",
+                        "EncryptLambdaRole",
                         "Arn"
                     ]
                 },
@@ -435,7 +435,7 @@
             "DependsOn": [
                 "LambdaKmsKey",
                 "EncryptLambdaFunction",
-                "BasicLambdaPolicy"
+                "EncryptLambdaPolicy"
             ],
             "Properties": {
                 "ServiceToken": {

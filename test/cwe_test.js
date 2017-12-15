@@ -273,6 +273,75 @@ describe('CWE Unit Tests', function() {
         });
     });
 
+    describe('formatIngestData()', function() {
+        var rewireFormatIngestData;
+
+        beforeEach(function() {
+            rewireFormatIngestData = cweRewire.__get__('formatIngestData');
+        });
+
+        it('formatIngestData()', function(done) {
+            rewireFormatIngestData(cweMock.COLLECTED_BATCH,
+                function(err, ingestData) {
+                    assert.equal(JSON.stringify(cweMock.INGEST_DATA), JSON.stringify(ingestData));
+                });
+            done();
+        });
+
+    });
+
+    describe('processIngestError()', function() {
+        var rewireProcessIngestError;
+
+        beforeEach(function() {
+            rewireProcessIngestError = cweRewire.__get__('processIngestError');
+        });
+
+        afterEach(function() {
+
+        });
+
+        it('ingest temporary error - processIngestError()', function(done) {
+            var context = {
+                fail : (reason) => { if (reason == 'test error') done(); }
+            };
+            rewireSendToIngest = cweRewire.__set__(
+                {sendToIngest: (event, context, aimsC, message, callback) => { callback('test error'); }}
+            );
+            let exception = {
+                "response": {
+                    "statusCode" : 503
+                }
+            };
+
+            rewireProcessIngestError(cweMock.GD_ONLY_KINESIS_TEST_EVENT, cweMock.COLLECTED_BATCH, exception,
+                function(err) {
+                    assert.equal(null, err);
+                });
+            done();
+        });
+
+        it('ingest permanent error - processIngestError()', function(done) {
+            var context = {
+                fail : (reason) => { if (reason == 'test error') done(); }
+            };
+            rewireSendToIngest = cweRewire.__set__(
+                {sendToIngest: (event, context, aimsC, message, callback) => { callback('test error'); }}
+            );
+            let exception = {
+                "response": {
+                    "statusCode" : 404
+                }
+            };
+
+            rewireProcessIngestError(cweMock.GD_ONLY_KINESIS_TEST_EVENT, cweMock.COLLECTED_BATCH, exception,
+                function(err) {
+                    assert.equal(null, err);
+                });
+            done();
+        });
+
+    });
 
     describe('getAlAuth()', function() {
         var rewireGetAlAuth;
@@ -348,15 +417,20 @@ describe('CWE Unit Tests', function() {
                 var expected = {
                     collected_batch : {
                         source_id : context.invokedFunctionArn,
-                        collected_messages : [cweMock.GD_EVENT]
+                        collected_messages : [{
+                                "kinesis_partitionKey": cweMock.KINESIS_PARTITION_KEY,
+                                "kinesis_arn": cweMock.KINESIS_ARN_2,
+                                "cwEvent": cweMock.GD_EVENT
+                            }
+                        ]
                     }
                 };
                 assert.equal(null, formatError);
-                assert.equal(JSON.stringify(expected), collectedData);
+                assert.equal(JSON.stringify(expected), JSON.stringify(collectedData));
                 done();
             });
         });
-        
+
         it('Guard Duty events filtering', function(done) {
             var context = {
                 invokedFunctionArn : 'test:arn'
@@ -365,11 +439,16 @@ describe('CWE Unit Tests', function() {
                 var expected = {
                     collected_batch : {
                         source_id : context.invokedFunctionArn,
-                        collected_messages : [cweMock.GD_EVENT]
+                        collected_messages : [{
+                                "kinesis_partitionKey": cweMock.KINESIS_PARTITION_KEY,
+                                "kinesis_arn": cweMock.KINESIS_ARN_2,
+                                "cwEvent": cweMock.GD_EVENT
+                            }
+                        ]
                     }
                 };
                 assert.equal(null, formatError);
-                assert.equal(JSON.stringify(expected), collectedData);
+                assert.equal(JSON.stringify(expected), JSON.stringify(collectedData));
                 done();
             });
         });

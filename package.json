@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "async": "*",
+    "delay": "*",
     "cfn-response": "*",
     "moment": "^2.19.2",
     "request": "*",

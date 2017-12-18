@@ -14,6 +14,7 @@ const util = require('util');
 const AWS = require('aws-sdk');
 const async = require('async');
 const zlib = require('zlib');
+const delay = require('delay');
 
 const m_alServiceC = require('./lib/al_servicec');
 const m_alAws = require('./lib/al_aws');
@@ -27,6 +28,8 @@ let AIMS_CREDS;
 const INGEST_ENDPOINT = process.env.ingest_api;
 const AL_ENDPOINT = process.env.al_api;
 const AZCOLLECT_ENDPOINT = process.env.azollect_api;
+const KINESIS_ARN = process.env.kinesis_arn;
+const KINESIS_REWRITE_DELAY_MILLIS = 5000;
 
 function getDecryptedCredentials(callback) {
     if (AIMS_CREDS) {
@@ -61,11 +64,14 @@ function getKinesisData(event, callback) {
     async.map(event.Records, function(record, mapCallback) {
         var cwEvent = new Buffer(record.kinesis.data, 'base64').toString('utf-8');
         try {
-            return mapCallback(null, JSON.parse(cwEvent));
+            return mapCallback(null, {
+                kinesis_partitionKey : record.kinesis.partitionKey,
+                kinesis_arn : record.eventSourceARN,
+                cwEvent: JSON.parse(cwEvent)});
         } catch (ex) {
             console.warn('Event parse failed.', ex);
             console.warn('Skipping', record.kinesis.data);
-            return mapCallback(null, {});
+            return mapCallback(null, {record, cwEvent : {}});
         }
     }, callback);
 }
@@ -73,7 +79,7 @@ function getKinesisData(event, callback) {
 function filterGDEvents(cwEvents, callback) {
     async.filter(cwEvents,
         function(cwEvent, filterCallback){
-            return filterCallback(null, cwEvent.source && cwEvent.source == 'aws.guardduty');
+            return filterCallback(null, cwEvent.cwEvent.source && cwEvent.cwEvent.source == 'aws.guardduty');
         },
         callback
     );
@@ -89,12 +95,12 @@ function formatMessages(event, context, callback) {
         },
         function(collectedData, asyncCallback) {
             if (collectedData.length > 0) {
-                return asyncCallback(null, JSON.stringify({ 
+                return asyncCallback(null, {
                     collected_batch : {
                         source_id : context.invokedFunctionArn,
                         collected_messages : collectedData
                     }
-                }));
+                });
             } else {
                 return asyncCallback(null, '');
             }
@@ -102,26 +108,84 @@ function formatMessages(event, context, callback) {
         callback);
 }
 
+function formatIngestData(ingestData, callback) {
+    async.map(ingestData.collected_batch.collected_messages, function(message, mapCallback) {
+        return mapCallback(null, {cwEvent: message.cwEvent});
+    },
+    callback);
+}
+
+function handleTransientIngestFailure(event, collectedBatch, delayMillis, callback) {
+    async.map(collectedBatch.collected_batch.collected_messages,
+        function(message, mapCallback) {
+            let kinesis_partitionKey = message.kinesis_partitionKey;
+            let kinesis_arn = message.kinesis_arn;
+            let kinesis_record = message.cwEvent;
+            try {
+                console.warn(`Re-queueing kinesis record for re-try. ARN: ${kinesis_arn} Parition key:
+                    ${kinesis_partitionKey} Record: ${kinesis_record}`);
+                m_alAws.writeKinesisRecord(kinesis_arn,
+                    kinesis_partitionKey,
+                    JSON.stringify(kinesis_record));
+                return mapCallback(null, message);
+            } catch (exception) {
+                console.warn(`Failed to re-write kinesis record - exception: ${exception} record: ${message}`);
+                return mapCallback(null, {});
+            }
+        },
+        function (err, resp) {
+            console.warn(`Waiting ${delayMillis} milliseconds for throttling`);
+            delay(delayMillis).then(() => {
+                return callback;
+            });
+        });
+}
+
+function handlePermanentIngestFailure(err, event, callback) {
+    console.warn(`Unable to send event to Ingest ${JSON.stringify(err)} event: ${event}`);
+    return callback(null);
+}
+
+function processIngestError(event, collectedBatch, exception, callback) {
+    switch(exception.response.statusCode) {
+        case 503 :  // temporary failure
+            handleTransientIngestFailure(event, collectedBatch, KINESIS_REWRITE_DELAY_MILLIS, callback);
+            break;
+        case 400 :  // bad entity
+        case 403 :  // invalid identity or invalid environment
+        case 415 :  // invalid encoding
+        case 404 :  // ingest type not found
+        default:
+            handlePermanentIngestFailure(exception, JSON.stringify(event, null, 0), callback);
+    }
+}
 
 function sendToIngest(event, context, aimsC, collectedBatch, callback) {
-    zlib.deflate(collectedBatch, function(compressionErr, compressed) {
-        if (compressionErr) {
-            return callback(compressionErr);
-        } else {
-            var ingest = new m_alServiceC.IngestC(INGEST_ENDPOINT, aimsC);
-            ingest.sendSecmsgs(compressed)
-                .then(resp => {
-                    return callback(null, resp);
-                })
-                .catch(exception =>{
-                    return callback(`Unable to send to Ingest ${exception}`);
-                });
-        }
+    formatIngestData(collectedBatch, function(err, ingestData) {
+        let inflatedData = JSON.stringify({ collected_batch : {
+                "source_id": collectedBatch.collected_batch.source_id,
+                "collected_messages": ingestData
+            }
+        });
+        zlib.deflate(inflatedData, function(compressionErr, compressed) {
+            if (compressionErr) {
+                return callback(compressionErr);
+            } else {
+                var ingest = new m_alServiceC.IngestC(INGEST_ENDPOINT, aimsC);
+                ingest.sendSecmsgs(compressed)
+                    .then(resp => {
+                        return callback(null, resp);
+                    })
+                    .catch(exception =>{
+                        console.warn(`Unexpected error sending to ingest - exception: ${exception} event: ${event}`);
+                        return processIngestError(event, collectedBatch, exception, callback);
+                    });
+            }
+        });
     });
 }
 
-
-function processResultInContext(context, err, result) {
+function processResultInContext(context, err) {
     if (err) {
         return context.fail(err);
     } else {

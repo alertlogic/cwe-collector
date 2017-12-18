@@ -14,7 +14,9 @@ const S3_BUCKET = 'rcs-test-us-east-1';
 const ACCESS_KEY_ID = '854gdsn8gstgd34bg';
 const CWE_RULE_NAME = 'test-CloudWatchEventsRule-EHIZIHJYHTOD';
 const CWE_RULE_ARN = 'arn:aws:events:us-east-1:352283894008:rule/test-CloudWatchEventsRule-EHIZIHJYHTOD';
-const KINESIS_ARN = 'arn:aws:kinesis:us-east-1:353333894008:stream/test-KinesisStream-11Z7IDV7G2XDV';
+const KINESIS_ARN_1 = 'arn:aws:kinesis:us-east-1:353333894008:stream/test-KinesisStream-11Z7IDV7G2XDV';
+const KINESIS_ARN_2 = 'arn:aws:kinesis:us-east-1:352283894008:stream/kkuzmin-gd-test';
+const KINESIS_PARTITION_KEY = '52badd7d-edd6-ac34-b543-393e309cb977_dee8b923-1314-47b0-b820-68030eaf93e3';
 
 const CHECKIN_TEST_EVENT = {
     'RequestType': 'ScheduledEvent',
@@ -22,7 +24,7 @@ const CHECKIN_TEST_EVENT = {
     'AwsAccountId': '353333894008',
     'StackName' : STACK_NAME,
     'CloudWatchEventsRule' : CWE_RULE_NAME,
-    'KinesisArn' : KINESIS_ARN,
+    'KinesisArn' : KINESIS_ARN_1,
     'CweRulePattern' : '{\"source\":[\"aws.guardduty\"]}'
 };
 
@@ -350,7 +352,7 @@ const CWE_LIST_TARGETS_BY_RULE = {
   'Targets': [
     {
       'Id': '1',
-      'Arn': KINESIS_ARN,
+      'Arn': KINESIS_ARN_1,
       'RoleArn': 'arn:aws:iam::352283894008:role/test-RoleForEventsToInvokeKinesis-GWGPM7IZAOH3'
     }
   ]
@@ -365,7 +367,7 @@ const LAMBDA_LIST_EVENTSOURCE_MAPPINGS_OK = {
             'BatchSize': 100, 
             'State': 'Enabled', 
             'FunctionArn': FUNCTION_ARN, 
-            'EventSourceArn': KINESIS_ARN, 
+            'EventSourceArn': KINESIS_ARN_1,
             'LastProcessingResult': 'OK'
         }, 
         {
@@ -392,6 +394,347 @@ const CLOUDWATCH_GET_METRIC_STATS_OK = {
     'Label': 'Invocations'
 };
 
+const COLLECTED_BATCH = { collected_batch : {
+    "source_id": "arn:aws:lambda:us-west-1:352283894008:function:alertlogic-cwe-collector",
+    "collected_messages": [
+        {
+            "kinesis_partitionKey" : "52badd7d-edd6-ac34-b543-393e309cb977_dee8b923-1314-47b0-b820-68030eaf93e3",
+            "kinesis_arn" : "arn:aws:kinesis:us-east-1:352283894008:stream/kkuzmin-gd-test",
+            "cwEvent": {
+                "version": "0",
+                "id": "880b8365-26e8-43ac-e069-fc274813d3fe",
+                "detail-type": "GuardDuty Finding",
+                "source": "aws.guardduty",
+                "account": "352283894008",
+                "time": "1970-01-01T00:00:00Z",
+                "region": "us-west-1",
+                "resources": [],
+                "detail": {
+                    "schemaVersion": "2.0",
+                    "accountId": "352283894008",
+                    "region": "us-west-1",
+                    "partition": "aws",
+                    "id": "cab02531f9197fc6f8e384eca60263f0",
+                    "arn": "arn:aws:guardduty:us-west-1:352283894008:detector/352283894008/finding/cab02531f9197fc6f8e384eca60263f0",
+                    "type": "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess.B",
+                    "resource": {
+                        "resourceType": "AccessKey",
+                        "accessKeyDetails": {
+                            "accessKeyId": "GeneratedFindingAccessKeyId",
+                            "principalId": "GeneratedFindingPrincipalId",
+                            "userType": "IAMUser",
+                            "userName": "GeneratedFindingUserName"
+                        }
+                    },
+                    "service": {
+                        "serviceName": "guardduty",
+                        "detectorId": "0eb003540a2431026e2c5e7a108755d5",
+                        "action": {
+                            "actionType": "AWS_API_CALL",
+                            "awsApiCallAction": {
+                                "api": "GeneratedFindingAPIName",
+                                "serviceName": "GeneratedFindingAPIServiceName",
+                                "callerType": "Remote IP",
+                                "remoteIpDetails": {
+                                    "ipAddressV4": "198.51.100.0",
+                                    "organization": {
+                                        "asn": -1,
+                                        "asnOrg": "GeneratedFindingASNOrg",
+                                        "isp": "GeneratedFindingISP",
+                                        "org": "GeneratedFindingORG"
+                                    },
+                                    "country": {
+                                        "countryName": "United States"
+                                    },
+                                    "city": {
+                                        "cityName": "GeneratedFindingCityName"
+                                    },
+                                    "geoLocation": {
+                                        "lat": 0,
+                                        "lon": 0
+                                    }
+                                },
+                                "affectedResources": {
+                                    "AWS::EC2::Instance": "i-99999999",
+                                    "AWS::CloudTrail::Trail": "GeneratedFindingTrailName"
+                                }
+                            }
+                        },
+                        "resourceRole": "TARGET",
+                        "additionalInfo": {
+                            "threatListName": "GeneratedFindingCustomerListName",
+                            "unusual": {
+                                "isps": "amazon.com"
+                            },
+                            "sample": true
+                        },
+                        "eventFirstSeen": "2017-12-12T11:02:32Z",
+                        "eventLastSeen": "2017-12-12T11:02:32Z",
+                        "archived": false,
+                        "count": 1
+                    },
+                    "severity": 5,
+                    "createdAt": "2017-12-12T11:02:32.242Z",
+                    "updatedAt": "2017-12-12T11:02:32.242Z",
+                    "title": "IAM User GeneratedFindingUserName logged into the AWS Console from multiple countries simultaneously.",
+                    "description": "Login attempts to the AWS Console were seen from mutiple countries simultaneously, using the credentials of IAM principal GeneratedFindingUserName. This could an indication of the unauthorized use of this users password."
+                }
+            }
+        },
+        {
+            "kinesis_partitionKey" : "52badd7d-edd6-ac34-b543-393e309cb977_dee8b923-1314-47b0-b820-68030eaf93e3",
+            "kinesis_arn" : "arn:aws:kinesis:us-east-1:352283894008:stream/kkuzmin-gd-test",
+            "cwEvent": {
+                "version": "0",
+                "id": "1ef3a241-b34e-2373-84e7-b0be757ce609",
+                "detail-type": "GuardDuty Finding",
+                "source": "aws.guardduty",
+                "account": "352283894008",
+                "time": "1970-01-01T00:00:00Z",
+                "region": "us-west-1",
+                "resources": [],
+                "detail": {
+                    "schemaVersion": "2.0",
+                    "accountId": "352283894008",
+                    "region": "us-west-1",
+                    "partition": "aws",
+                    "id": "a0b02531f91b2a67ab69e78d2b6ae70d",
+                    "arn": "arn:aws:guardduty:us-west-1:352283894008:detector/352283894008/finding/a0b02531f91b2a67ab69e78d2b6ae70d",
+                    "type": "Behavior:EC2/TrafficVolumeUnusual",
+                    "resource": {
+                        "resourceType": "Instance",
+                        "instanceDetails": {
+                            "instanceId": "i-99999999"
+                        }
+                    },
+                    "service": {
+                        "serviceName": "guardduty",
+                        "detectorId": "0eb003540a2431026e2c5e7a108755d5",
+                        "action": {
+                            "actionType": "NETWORK_CONNECTION",
+                            "networkConnectionAction": {
+                                "connectionDirection": "OUTBOUND",
+                                "remoteIpDetails": {
+                                    "ipAddressV4": "198.51.100.0",
+                                    "organization": {
+                                        "asn": -1,
+                                        "asnOrg": "GeneratedFindingASNOrg",
+                                        "isp": "GeneratedFindingISP",
+                                        "org": "GeneratedFindingORG"
+                                    },
+                                    "country": {
+                                        "countryName": "United States"
+                                    },
+                                    "city": {
+                                        "cityName": "GeneratedFindingCityName"
+                                    },
+                                    "geoLocation": {
+                                        "lat": 0,
+                                        "lon": 0
+                                    }
+                                },
+                                "remotePortDetails": {
+                                    "port": 22,
+                                    "portName": "SSH"
+                                },
+                                "localPortDetails": {
+                                    "port": 2000,
+                                    "portName": "Unknown"
+                                },
+                                "protocol": "TCP",
+                                "blocked": false
+                            }
+                        },
+                        "resourceRole": "TARGET",
+                        "additionalInfo": {
+                            "unusualProtocol": "UDP",
+                            "threatListName": "GeneratedFindingCustomerListName",
+                            "unusual": 22,
+                            "sample": true
+                        },
+                        "eventFirstSeen": "2017-12-12T11:02:32Z",
+                        "eventLastSeen": "2017-12-12T11:02:32Z",
+                        "archived": false,
+                        "count": 1
+                    },
+                    "severity": 5,
+                    "createdAt": "2017-12-12T11:02:32.246Z",
+                    "updatedAt": "2017-12-12T11:02:32.246Z",
+                    "title": "Unusually large amount of network traffic from EC2 instance i-99999999.",
+                    "description": "EC2 instance i-99999999 is generating unusually large amounts of network traffic to remote host 198.51.100.0."
+                }
+            }
+        }
+    ]
+}};
+
+const INGEST_DATA = [
+    {
+        "cwEvent": {
+            "version": "0",
+            "id": "880b8365-26e8-43ac-e069-fc274813d3fe",
+            "detail-type": "GuardDuty Finding",
+            "source": "aws.guardduty",
+            "account": "352283894008",
+            "time": "1970-01-01T00:00:00Z",
+            "region": "us-west-1",
+            "resources": [],
+            "detail": {
+                "schemaVersion": "2.0",
+                "accountId": "352283894008",
+                "region": "us-west-1",
+                "partition": "aws",
+                "id": "cab02531f9197fc6f8e384eca60263f0",
+                "arn": "arn:aws:guardduty:us-west-1:352283894008:detector/352283894008/finding/cab02531f9197fc6f8e384eca60263f0",
+                "type": "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess.B",
+                "resource": {
+                    "resourceType": "AccessKey",
+                    "accessKeyDetails": {
+                        "accessKeyId": "GeneratedFindingAccessKeyId",
+                        "principalId": "GeneratedFindingPrincipalId",
+                        "userType": "IAMUser",
+                        "userName": "GeneratedFindingUserName"
+                    }
+                },
+                "service": {
+                    "serviceName": "guardduty",
+                    "detectorId": "0eb003540a2431026e2c5e7a108755d5",
+                    "action": {
+                        "actionType": "AWS_API_CALL",
+                        "awsApiCallAction": {
+                            "api": "GeneratedFindingAPIName",
+                            "serviceName": "GeneratedFindingAPIServiceName",
+                            "callerType": "Remote IP",
+                            "remoteIpDetails": {
+                                "ipAddressV4": "198.51.100.0",
+                                "organization": {
+                                    "asn": -1,
+                                    "asnOrg": "GeneratedFindingASNOrg",
+                                    "isp": "GeneratedFindingISP",
+                                    "org": "GeneratedFindingORG"
+                                },
+                                "country": {
+                                    "countryName": "United States"
+                                },
+                                "city": {
+                                    "cityName": "GeneratedFindingCityName"
+                                },
+                                "geoLocation": {
+                                    "lat": 0,
+                                    "lon": 0
+                                }
+                            },
+                            "affectedResources": {
+                                "AWS::EC2::Instance": "i-99999999",
+                                "AWS::CloudTrail::Trail": "GeneratedFindingTrailName"
+                            }
+                        }
+                    },
+                    "resourceRole": "TARGET",
+                    "additionalInfo": {
+                        "threatListName": "GeneratedFindingCustomerListName",
+                        "unusual": {
+                            "isps": "amazon.com"
+                        },
+                        "sample": true
+                    },
+                    "eventFirstSeen": "2017-12-12T11:02:32Z",
+                    "eventLastSeen": "2017-12-12T11:02:32Z",
+                    "archived": false,
+                    "count": 1
+                },
+                "severity": 5,
+                "createdAt": "2017-12-12T11:02:32.242Z",
+                "updatedAt": "2017-12-12T11:02:32.242Z",
+                "title": "IAM User GeneratedFindingUserName logged into the AWS Console from multiple countries simultaneously.",
+                "description": "Login attempts to the AWS Console were seen from mutiple countries simultaneously, using the credentials of IAM principal GeneratedFindingUserName. This could an indication of the unauthorized use of this users password."
+            }
+        },
+    },
+    {
+        "cwEvent": {
+            "version": "0",
+            "id": "1ef3a241-b34e-2373-84e7-b0be757ce609",
+            "detail-type": "GuardDuty Finding",
+            "source": "aws.guardduty",
+            "account": "352283894008",
+            "time": "1970-01-01T00:00:00Z",
+            "region": "us-west-1",
+            "resources": [],
+            "detail": {
+                "schemaVersion": "2.0",
+                "accountId": "352283894008",
+                "region": "us-west-1",
+                "partition": "aws",
+                "id": "a0b02531f91b2a67ab69e78d2b6ae70d",
+                "arn": "arn:aws:guardduty:us-west-1:352283894008:detector/352283894008/finding/a0b02531f91b2a67ab69e78d2b6ae70d",
+                "type": "Behavior:EC2/TrafficVolumeUnusual",
+                "resource": {
+                    "resourceType": "Instance",
+                    "instanceDetails": {
+                        "instanceId": "i-99999999"
+                    }
+                },
+                "service": {
+                    "serviceName": "guardduty",
+                    "detectorId": "0eb003540a2431026e2c5e7a108755d5",
+                    "action": {
+                        "actionType": "NETWORK_CONNECTION",
+                        "networkConnectionAction": {
+                            "connectionDirection": "OUTBOUND",
+                            "remoteIpDetails": {
+                                "ipAddressV4": "198.51.100.0",
+                                "organization": {
+                                    "asn": -1,
+                                    "asnOrg": "GeneratedFindingASNOrg",
+                                    "isp": "GeneratedFindingISP",
+                                    "org": "GeneratedFindingORG"
+                                },
+                                "country": {
+                                    "countryName": "United States"
+                                },
+                                "city": {
+                                    "cityName": "GeneratedFindingCityName"
+                                },
+                                "geoLocation": {
+                                    "lat": 0,
+                                    "lon": 0
+                                }
+                            },
+                            "remotePortDetails": {
+                                "port": 22,
+                                "portName": "SSH"
+                            },
+                            "localPortDetails": {
+                                "port": 2000,
+                                "portName": "Unknown"
+                            },
+                            "protocol": "TCP",
+                            "blocked": false
+                        }
+                    },
+                    "resourceRole": "TARGET",
+                    "additionalInfo": {
+                        "unusualProtocol": "UDP",
+                        "threatListName": "GeneratedFindingCustomerListName",
+                        "unusual": 22,
+                        "sample": true
+                    },
+                    "eventFirstSeen": "2017-12-12T11:02:32Z",
+                    "eventLastSeen": "2017-12-12T11:02:32Z",
+                    "archived": false,
+                    "count": 1
+                },
+                "severity": 5,
+                "createdAt": "2017-12-12T11:02:32.246Z",
+                "updatedAt": "2017-12-12T11:02:32.246Z",
+                "title": "Unusually large amount of network traffic from EC2 instance i-99999999.",
+                "description": "EC2 instance i-99999999 is generating unusually large amounts of network traffic to remote host 198.51.100.0."
+            }
+        }
+    }
+];
+
 module.exports = {
     AIMS_TEST_CREDS : AIMS_TEST_CREDS,
     CHECKIN_TEST_FUNCTION_NAME : CHECKIN_TEST_FUNCTION_NAME,
@@ -415,5 +758,10 @@ module.exports = {
     CWE_RULE_NAME : CWE_RULE_NAME,
     DEFAULT_LAMBDA_CONTEXT : DEFAULT_LAMBDA_CONTEXT,
     LAMBDA_LIST_EVENTSOURCE_MAPPINGS_OK : LAMBDA_LIST_EVENTSOURCE_MAPPINGS_OK,
-    CLOUDWATCH_GET_METRIC_STATS_OK : CLOUDWATCH_GET_METRIC_STATS_OK
+    CLOUDWATCH_GET_METRIC_STATS_OK : CLOUDWATCH_GET_METRIC_STATS_OK,
+    KINESIS_ARN_1 : KINESIS_ARN_1,
+    KINESIS_ARN_2 : KINESIS_ARN_2,
+    KINESIS_PARTITION_KEY : KINESIS_PARTITION_KEY,
+    COLLECTED_BATCH : COLLECTED_BATCH,
+    INGEST_DATA : INGEST_DATA
 };

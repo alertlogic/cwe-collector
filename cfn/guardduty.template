@@ -645,7 +645,8 @@
             "CollectLambdaRole",
             "EndpointAPIs",
             "LambdaKmsKey",
-            "EncryptSecretKeyCustomResource"
+            "EncryptSecretKeyCustomResource",
+            "KinesisStream"
          ],
          "Properties":{
             "Description":"Alert Logic Lambda Guard Duty event collector",

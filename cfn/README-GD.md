@@ -33,7 +33,7 @@ To enable Amazon GuardDuty events, see [Setting Up Amazon GuardDuty](https://doc
 In order to verify the user has administrator permissions:
 
 1. Once logged in click on the user name at the top-right corner of Cloud Insight console.
-1. In the drop-down menu click `Users`.
+1. In the drop-down menu, click `Users`.
 1. Select the user in `AIMS User` section. **Note** you can start typing a name in the search box to find an appropriate user.
 1. Once found check that `user role` list under the `Edit an AIMS User` section has `Administrator` role selected.
 

@@ -73,7 +73,8 @@ function getKinesisData(event, callback) {
 function filterGDEvents(cwEvents, callback) {
     async.filter(cwEvents,
         function(cwEvent, filterCallback){
-            return filterCallback(null, cwEvent.source && cwEvent.source == 'aws.guardduty');
+            return filterCallback(null, cwEvent.source && 
+                cwEvent.source === 'aws.guardduty');
         },
         callback
     );
@@ -225,7 +226,7 @@ function processKinesisRecords(event, context) {
             });
         },
         function(aimsC, collectedData, callback) {
-            if (collectedData != '') {
+            if (collectedData !== '') {
                 sendToIngest(event, context, aimsC, collectedData, callback);
             } else {
                 return callback(null);

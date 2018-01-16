@@ -36,7 +36,7 @@ describe('CWE Checkin Tests', function() {
 
         before(function() {
             setAzcollectStub();
-        });
+});
 
         beforeEach(function() {
             rewireProcessCheckin = cweRewire.__get__('processCheckin');
@@ -73,7 +73,7 @@ describe('CWE Checkin Tests', function() {
 
         it('checkin waterfall flow error - getDecryptedCredentials()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'decryption_error') done(); }
+                fail : (reason) => { if (reason === 'decryption_error') done(); }
             };
             rewireGetDecryptedCredentials = cweRewire.__set__(
                 {getDecryptedCredentials: function(callback) { callback('decryption_error'); }}
@@ -83,7 +83,7 @@ describe('CWE Checkin Tests', function() {
 
         it('checkin waterfall flow error - getAlAuth()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'test error') done(); }
+                fail : (reason) => { if (reason === 'test error') done(); }
             };
             rewireGetAlAuth = cweRewire.__set__(
                 {getAlAuth: function(callback) { callback('test error'); }}
@@ -93,7 +93,7 @@ describe('CWE Checkin Tests', function() {
 
         it('checkin waterfall flow error - checkHealth()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'check_health_error') done(); }
+                fail : (reason) => { if (reason === 'check_health_error') done(); }
             };
             checkinStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
                 function fakeFn(event, context, callback) {
@@ -368,7 +368,7 @@ describe('CWE Checkin Tests', function() {
         var rewireGetDecryptedCredentials;
         var rewireGetAlAuth;
         var rewireProcessCheckin;
-        var rewireCheckHealth;
+        var checkHealthStub;
         var sendCheckinStub;
 
         before(function() {

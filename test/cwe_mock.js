@@ -5,6 +5,8 @@ const AIMS_TEST_CREDS = {
     secret_key: 'test-secret-key'
 };
 
+const TEST_AL_API = 'api.test.product.dev.alertlogic.com';
+const INGEST_TEST_URL = '/data/secmsgs';
 const CHECKIN_TEST_FUNCTION_NAME = 'test-CollectLambdaFunction-1JNNKQIPOTEST';
 const CHECKIN_TEST_URL = '/aws/cwe/checkin/353333894008/us-east-1/' + encodeURIComponent(CHECKIN_TEST_FUNCTION_NAME);
 const FUNCTION_ARN = 'arn:aws:lambda:us-east-1:352283894008:function:test-guardduty-01-CollectLambdaFunction-2CWNLPPW5XO8';
@@ -392,7 +394,15 @@ const CLOUDWATCH_GET_METRIC_STATS_OK = {
     'Label': 'Invocations'
 };
 
+const TEST_COLLECTED_BATCH = {
+    collected_batch: {
+        source_id: FUNCTION_ARN,
+        collected_messages: [GD_EVENT]
+    }
+};
+
 module.exports = {
+    TEST_AL_API : TEST_AL_API,
     AIMS_TEST_CREDS : AIMS_TEST_CREDS,
     CHECKIN_TEST_FUNCTION_NAME : CHECKIN_TEST_FUNCTION_NAME,
     CHECKIN_TEST_URL : CHECKIN_TEST_URL,
@@ -415,5 +425,7 @@ module.exports = {
     CWE_RULE_NAME : CWE_RULE_NAME,
     DEFAULT_LAMBDA_CONTEXT : DEFAULT_LAMBDA_CONTEXT,
     LAMBDA_LIST_EVENTSOURCE_MAPPINGS_OK : LAMBDA_LIST_EVENTSOURCE_MAPPINGS_OK,
-    CLOUDWATCH_GET_METRIC_STATS_OK : CLOUDWATCH_GET_METRIC_STATS_OK
+    CLOUDWATCH_GET_METRIC_STATS_OK : CLOUDWATCH_GET_METRIC_STATS_OK,
+    TEST_COLLECTED_BATCH : TEST_COLLECTED_BATCH,
+    INGEST_TEST_URL : INGEST_TEST_URL
 };

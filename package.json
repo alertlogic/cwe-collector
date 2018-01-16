@@ -5,12 +5,14 @@
   "repository": {},
   "private": true,
   "scripts": {
+    "start": "node index.js",
     "lint": "jshint --exclude \"./node_modules/*\" **/*.js",
     "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura mocha --colors --reporter mocha-jenkins-reporter"
   },
   "devDependencies": {
     "aws-sdk": "*",
     "aws-sdk-mock": "*",
+    "dotenv": "*",
     "clone": "*",
     "jshint": "^2.9.5",
     "mocha": "^3.5.3",

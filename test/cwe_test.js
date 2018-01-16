@@ -92,7 +92,7 @@ describe('CWE Unit Tests', function() {
         it('registration waterfall flow OK - sendRegistration()', function(done) {
             var context = {
                 functionName : cweMock.REGISTRATION_TEST_FUNCTION_NAME,
-                fail : (reason) => { if (reason == 'test error') done(); },
+                fail : (reason) => { if (reason === 'test error') done(); },
                 done : () => { done(); }
             };
             rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, true);
@@ -112,7 +112,7 @@ describe('CWE Unit Tests', function() {
 
         it('registration waterfall flow error - getAlAuth()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'test error') done(); }
+                fail : (reason) => { if (reason === 'test error') done(); }
             };
             rewireGetAlAuth = cweRewire.__set__(
                 {getAlAuth: function(callback) { callback('test error'); }}
@@ -166,7 +166,7 @@ describe('CWE Unit Tests', function() {
         it('deregistration waterfall flow OK - sendRegistration()', function(done) {
             var context = {
                 functionName : cweMock.REGISTRATION_TEST_FUNCTION_NAME,
-                fail : (reason) => { if (reason == 'test error') done(); },
+                fail : (reason) => { if (reason === 'test error') done(); },
                 done : () => { done(); }
             };
             rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, false);
@@ -186,7 +186,7 @@ describe('CWE Unit Tests', function() {
 
         it('registration waterfall flow error - getAlAuth()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'test error') done(); }
+                fail : (reason) => { if (reason === 'test error') done(); }
             };
             rewireGetAlAuth = cweRewire.__set__(
                 {getAlAuth: function(callback) { callback('test error'); }}
@@ -235,7 +235,7 @@ describe('CWE Unit Tests', function() {
         });
         
         it('waterfall flow error - getDecryptedCredentials()', function(done) {
-            var context = {fail : (reason) => { if (reason == 'decryption_error') done(); } };
+            var context = {fail : (reason) => { if (reason === 'decryption_error') done(); } };
             rewireGetDecryptedCredentials = cweRewire.__set__(
                 {getDecryptedCredentials: function(callback) { callback('decryption_error'); }}
             );
@@ -244,8 +244,9 @@ describe('CWE Unit Tests', function() {
 
         it('waterfall flow error - getAlAuth()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'test error') done(); } 
+                fail : (reason) => { if (reason === 'test error') done(); } 
             };
+            rewireGetAlAuth();
             rewireGetAlAuth = cweRewire.__set__(
                 {getAlAuth: function(callback) { callback('test error'); }}
             );
@@ -254,7 +255,7 @@ describe('CWE Unit Tests', function() {
 
         it('waterfall flow error - formatMessages()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'test error') done(); }
+                fail : (reason) => { if (reason === 'test error') done(); }
             };
             rewireFormatMessages = cweRewire.__set__(
                 {formatMessages: (event, context, callback) => { callback('test error'); }}
@@ -264,8 +265,9 @@ describe('CWE Unit Tests', function() {
 
         it('waterfall flow error - sendToIngest()', function(done) {
             var context = {
-                fail : (reason) => { if (reason == 'test error') done(); }
+                fail : (reason) => { if (reason === 'test error') done(); }
             };
+            rewireSendToIngest();
             rewireSendToIngest = cweRewire.__set__(
                 {sendToIngest: (event, context, aimsC, message, callback) => { callback('test error'); }}
             );
@@ -273,6 +275,87 @@ describe('CWE Unit Tests', function() {
         });
     });
 
+    describe('sendToIngest()', function() {
+        var rewireGetDecryptedCredentials;
+        var rewireGetAlAuth;
+        var rewireSendToIngest;
+        var aimscStub;
+        var responseStub;
+        var ingestStub;
+
+        before(function() {
+            aimscStub = sinon.stub(m_aimsc.prototype, 'authenticate').
+            callsFake(
+                function fake(aa,bb) {
+                    return new Promise(function(resolve, reject) {
+                        resolve();
+                    });
+                }
+            );
+            responseStub = sinon.stub(m_response, 'send').callsFake(
+                 function fakeFn() {
+                 });
+        });
+
+        beforeEach(function() {
+            rewireSendToIngest = cweRewire.__get__('sendToIngest');
+            rewireGetDecryptedCredentials = cweRewire.__set__(
+                {getDecryptedCredentials: (callback) => { callback(null); }}
+            );
+            rewireGetAlAuth = cweRewire.__set__(
+                {getAlAuth: (callback) => { callback(null, {}); }}
+            );
+        });
+
+        afterEach(function() {
+            rewireGetDecryptedCredentials();
+            rewireGetAlAuth();
+            ingestStub.restore();
+        });
+
+        after(function() {
+            responseStub.restore();
+            aimscStub.restore();
+        });
+
+        it('waterfall send to ingest OK', function(done) {
+            ingestStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
+                function fakeFn(path, extraOptions) {
+                    assert.equal(cweMock.INGEST_TEST_URL, path);
+                    return new Promise(function(resolve, reject) {
+                                resolve();
+                           });
+                });
+            
+            var context = {};            
+            var collectedBatch = JSON.stringify(cweMock.TEST_COLLECTED_BATCH);
+            rewireSendToIngest(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context,
+                aimscStub, collectedBatch, 
+                function(arg) { 
+                    done();
+                });            
+        });
+
+        it('waterfall send to ingest Error', function(done) {
+            ingestStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
+                function fakeFn(path, extraOptions) {
+                    assert.equal(cweMock.INGEST_TEST_URL, path);
+                    return new Promise(function(resolve, reject) {
+                                throw 'exception';
+                           });
+                });
+            
+            var context = {};            
+            var collectedBatch = JSON.stringify(cweMock.TEST_COLLECTED_BATCH);
+            rewireSendToIngest(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context,
+                aimscStub, collectedBatch, 
+                function(exception) {
+                    assert.equal('Unable to send to Ingest exception', exception);                    
+                    done();
+                });            
+        });
+        
+    });
 
     describe('getAlAuth()', function() {
         var rewireGetAlAuth;
@@ -314,7 +397,7 @@ describe('CWE Unit Tests', function() {
                 }
             );
 
-            rewireGetAlAuth(function(err) { if (err == 'reject') done(); });
+            rewireGetAlAuth(function(err) { if (err === 'reject') done(); });
         });
 
         it('aims throws exception', function(done) {
@@ -322,12 +405,12 @@ describe('CWE Unit Tests', function() {
             callsFake(
                 function fake(aa,bb) {
                     return new Promise(function(resolve, reject) {
-                        throw('exception');
+                        throw 'exception';
                     });
                 }
             );
 
-            rewireGetAlAuth(function(err) { if (err == 'exception') done(); });
+            rewireGetAlAuth(function(err) { if (err === 'exception') done(); });
         });
     });
     

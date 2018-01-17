@@ -70,7 +70,7 @@ Make a note of the `access_key_id` and `secret_key` values, which you need when 
 curl -s -X GET -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys | jq
 ```
 
-**Use the selected access_key_id in the following curl command to delete the key:**
+**Use the selected access_key_id in the following command to delete the key:**
 
 ```
 curl -X DELETE -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
@@ -124,7 +124,7 @@ Make a note of the `access_key_id` and `secret_key` values, which you need when 
 Invoke-RestMethod -Method Get -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys
 ```
 
-**Use the selected access_key_id in the following curl command to delete the key:**
+**Use the selected access_key_id in the following command to delete the key:**
 
 ```
 Invoke-RestMethod -Method Delete -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>

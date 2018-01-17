@@ -10,7 +10,7 @@
  
 const AWS = require('aws-sdk');
 const async = require('async');
-const m_alServiceC = require('./lib/al_servicec');
+const m_alServiceC = require('al-collector-js/al_servicec');
 const m_packageJson = require('./package.json');
 
 const AZCOLLECT_ENDPOINT = process.env.azollect_api;
@@ -23,13 +23,13 @@ function checkCloudFormationStatus(event, callback) {
             return callback(errorMsg('CWE00001', stringify(err)));
         } else {
             var stackStatus = data.Stacks[0].StackStatus;
-            if (stackStatus == 'CREATE_COMPLETE' ||
-                stackStatus == 'UPDATE_COMPLETE' ||
-                stackStatus == 'UPDATE_IN_PROGRESS' ||
-                stackStatus == 'UPDATE_ROLLBACK_COMPLETE' ||
-                stackStatus == 'UPDATE_ROLLBACK_IN_PROGRESS' ||
-                stackStatus == 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS' ||
-                stackStatus == 'REVIEW_IN_PROGRESS') {
+            if (stackStatus === 'CREATE_COMPLETE' ||
+                stackStatus === 'UPDATE_COMPLETE' ||
+                stackStatus === 'UPDATE_IN_PROGRESS' ||
+                stackStatus === 'UPDATE_ROLLBACK_COMPLETE' ||
+                stackStatus === 'UPDATE_ROLLBACK_IN_PROGRESS' ||
+                stackStatus === 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS' ||
+                stackStatus === 'REVIEW_IN_PROGRESS') {
                 return callback(null);
             } else {
                 return callback(errorMsg('CWE00002', 'CF stack has wrong status: ' + stackStatus));
@@ -46,8 +46,8 @@ function checkCloudWatchEventsRule(event, finalCallback) {
                 if (err) {
                     return callback(errorMsg('CWE00003', stringify(err)));
                 } else {
-                    if (data.State == 'ENABLED' &&
-                        data.EventPattern == event.CweRulePattern) {
+                    if (data.State === 'ENABLED' &&
+                        data.EventPattern === event.CweRulePattern) {
                         return callback(null);
                     } else {
                         return callback(errorMsg('CWE00004', 'CWE Rule is incorrectly configured: ' + stringify(data)));
@@ -60,8 +60,8 @@ function checkCloudWatchEventsRule(event, finalCallback) {
                 if (err) {
                     return callback(errorMsg('CWE00005', stringify(err)));
                 } else {
-                    if (data.Targets.length == 1 &&
-                        data.Targets[0].Arn == event.KinesisArn) {
+                    if (data.Targets.length === 1 &&
+                        data.Targets[0].Arn === event.KinesisArn) {
                         return callback(null);
                     } else {
                         return callback(errorMsg('CWE00006', 'CWE rule ' + event.CloudWatchEventsRule + ' has incorrect target set'));

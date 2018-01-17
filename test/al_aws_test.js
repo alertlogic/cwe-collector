@@ -1,7 +1,7 @@
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const m_alAws = require('../lib/al_aws');
+const m_alAws = require('al-collector-js/al_aws');
 var AWS = require('aws-sdk-mock');
 
 describe('al_aws Tests', function() {

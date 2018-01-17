@@ -37,8 +37,12 @@ In order to verify the user has administrator permissions:
 1. Select the user in `AIMS User` section. **Note** you can start typing a name in the search box to find an appropriate user.
 1. Once found check that `user role` list under the `Edit an AIMS User` section has `Administrator` role selected.
 
-The following procedure assumes a Linux-based local machine using [curl](https://curl.haxx.se/) and 
-[jq](https://stedolan.github.io/jq/). For Windows please use command line and windows versions of [curl](https://curl.haxx.se/download.html) and [jq](https://stedolan.github.io/jq/download/).
+
+Depending on operation system, please proceed with the Unix (MacOS, Linux) or with Windows section.
+
+### Unix
+
+The following procedure assumes a Unux-based local machine using [curl](https://curl.haxx.se/) and [jq](https://stedolan.github.io/jq/).
 
 From the bash command line, type the following commands, where `<email address>` is your Alert Logic Cloud Insight email address you use to log in, and then enter your password when prompted:
 
@@ -55,7 +59,7 @@ An example of a successful response is:
 }
 ```
 
-**Important:** If the command returns no output, verify your Alert Logic account has administrator permissions. Click [here](https://console.cloudinsight.alertlogic.com/api/aims/) for more information about AIMS APIs.
+**Important:** If the command returns error about not having necessary role, verify your Alert Logic account has administrator permissions. Click [here](https://console.cloudinsight.alertlogic.com/api/aims/) for more information about AIMS APIs.
 
 Make a note of the `access_key_id` and `secret_key` values, which you need when you deploy the CloudFormation template to your AWS account. 
 
@@ -71,6 +75,65 @@ curl -s -X GET -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.glo
 ```
 curl -X DELETE -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
 ```
+
+
+### Windows
+
+The instruction depends on which version of PowerShell you have installed.
+You can check it by running PowerShell and typing in:
+
+```
+PS C:\Users\Username> $PSVersionTable.PSVersion
+```
+
+An example of output:
+
+```
+Major  Minor  Build  Revision
+-----  -----  -----  --------
+5      1      16299  98
+
+```
+
+(In that example it says that PowerShell 5.1 is installed)
+
+
+#### PowerShell >= 3.0
+
+
+In PowerShell console, please type the following commands, where `<email address>` is your Alert Logic Cloud Insight email address you use to log in, and then enter your password when prompted:
+
+```
+$AL_USERNAME = "<email address>"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $creds = Get-Credential -Message "Please enter password for AlertLogic account" -UserName $AL_USERNAME; $unsecureCreds = $creds.GetNetworkCredential(); $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $unsecureCreds.UserName,$unsecureCreds.Password))); Remove-Variable unsecureCreds; $AUTH = Invoke-RestMethod -Method Post -Headers @{"Authorization"=("Basic {0}" -f $base64AuthInfo)} -Uri https://api.global-services.global.alertlogic.com/aims/v1/authenticate ; Remove-Variable base64AuthInfo; $AL_ACCOUNT_ID = $AUTH.authentication.account.id; $AL_USER_ID = $AUTH.authentication.user.id; $AL_TOKEN = $AUTH.authentication.token; if (!$AL_TOKEN) { Write-Host "Authentication failure"} else { $ROLES_RESP = Invoke-RestMethod -Method Get -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/roles ; $ROLES = $ROLES_RESP.roles.name; if ($ROLES -ne "Administrator" ) { Write-Host "The $AL_USERNAME doesn’t have Administrator role. Assigned role is '$ROLES'" } else { $ACCESS_KEY = Invoke-RestMethod -Method Post -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys ; Write-Host $ACCESS_KEY } }
+```
+An example of a successful response is:
+
+```
+@{access_key_id=712c0b413eef41f6; secret_key=1234567890b3eea8880d292fb31aa96902242a076d3d0e320cc036eb51bf25ad}
+```
+
+**Important:** If the command returns error about not having necessary role, verify your Alert Logic account has administrator permissions. Click [here](https://console.cloudinsight.alertlogic.com/api/aims/) for more information about AIMS APIs.
+
+Make a note of the `access_key_id` and `secret_key` values, which you need when you deploy the CloudFormation template to your AWS account.
+
+**Note:** Each user can create only five access keys. If a "limit exceeded" response appears, you must delete one or more access keys before you can create new keys.
+
+**Type the following command to list access keys:**
+```
+Invoke-RestMethod -Method Get -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys
+```
+
+**Use the selected access_key_id in the following curl command to delete the key:**
+
+```
+Invoke-RestMethod -Method Delete -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
+```
+
+
+#### PowerShell < 3.0
+
+If you don't have PowerShell >= 3.0 installed, we suggest to [upgrade it](https://docs.microsoft.com/en-us/powershell/scripting/setup/installing-windows-powershell#upgrading-existing-windows-powershell) to any version which is >= 3.0 or use command line and windows versions of [curl](https://curl.haxx.se/download.html) and [jq](https://stedolan.github.io/jq/download/) and follow the [instruction for Unix](#unix).
 
 ## CloudFormation template deployment
 

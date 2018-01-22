@@ -20,7 +20,6 @@ const m_alServiceC = require('./lib/al_servicec');
 const m_alAws = require('./lib/al_aws');
 const m_checkin = require('./checkin');
 const m_packageJson = require('./package.json');
-const m_alUtil = require('./lib/al_util');
 
 const response = require('cfn-response');
 

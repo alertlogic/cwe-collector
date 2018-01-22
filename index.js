@@ -9,6 +9,7 @@
  * -----------------------------------------------------------------------------
  */
  
+const debug = require('debug') ('index'); 
 const https = require('https');
 const util = require('util');
 const AWS = require('aws-sdk');
@@ -305,6 +306,7 @@ function getStatistics(context, event, finalCallback) {
 
 
 exports.handler = function(event, context) {
+    debug("DEBUG0001: Received event: ", JSON.stringify(event));
     switch (event.RequestType) {
         case 'ScheduledEvent':
             return processScheduledEvent(event, context);

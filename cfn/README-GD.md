@@ -1,6 +1,6 @@
 # guardduty.template
 
-Alert Logic Amazon Web Services (AWS) CloudWatch Events (CWE) Collector CloudFormation templates.
+Alert Logic Amazon Web Services (AWS) CloudWatch Events (CWE) Collector CloudFormation template.
 
 # Overview
 
@@ -14,9 +14,9 @@ malicious IPs, URLs, or domains. GuardDuty informs you of the status of your AWS
 
 # Before you begin
 
-This procedure requires you to have administrative permissions in AWS and your Alert Logic Cloud Insight account.  You also need to download the Alert Logic custom CFT to your local machine from [the Alert Logic public github repository](https://github.com/alertlogic/cwe-collector/blob/master/cfn/guardduty.template).
+This procedure requires administrative permissions in AWS and your Alert Logic Cloud Insight account.  You also need to download the Alert Logic custom CFT to your local machine from [the Alert Logic public github repository](https://github.com/alertlogic/cwe-collector/blob/master/cfn/guardduty.template).
 
-Windows systems will also require PowerShell version 3.0 or later. If you have an earlier version, we suggest you [upgrade it](https://docs.microsoft.com/en-us/powershell/scripting/setup/installing-windows-powershell#upgrading-existing-windows-powershell) to version 3.0 or later. 
+Windows systems also require PowerShell version 3.0 or later. If you have an earlier version of PowerShell, we suggest you [upgrade it](https://docs.microsoft.com/en-us/powershell/scripting/setup/installing-windows-powershell#upgrading-existing-windows-powershell) to version 3.0 or later. 
 
 # Installation
 
@@ -44,15 +44,15 @@ Log into the Cloud Insight console as an administrator [here](https://console.cl
 1. Select the user in `AIMS User` section. **Note:** you can start typing a name in the search box to find the appropriate user.
 1. Verify the `user role` as listed under `Edit an AIMS User` has the `Administrator` role selected.
 
-###Key creation
+### Key creation
 
-Use the instructions matching your operating system: Unix (MacOS, Linux) or Windows.
+Use the instructions below that match your operating system: Unix (MacOS, Linux) or Windows.
 
-### Unix (MacOS, Linux)
+#### Unix (MacOS, Linux)
 
 The following procedure assumes a Unix-based local machine using [curl](https://curl.haxx.se/) and [jq](https://stedolan.github.io/jq/).
 
-From the bash command line, type the following commands, where `<email address>` is your Alert Logic Cloud Insight email address you use to log in, and then enter your password when prompted:
+From the bash command line, type the following commands, where `<email address>` is the Alert Logic Cloud Insight email address you use to log in. Enter your password when prompted.
 
 ```
 export AL_USERNAME='<email address>'
@@ -67,25 +67,27 @@ An example of a successful response is:
 }
 ```
 
-**Important:** If the command returns an error about not having the necessary role, please verify your Alert Logic account has administrator permissions. Click [here](https://console.cloudinsight.alertlogic.com/api/aims/) for more information about AIMS APIs.
-
 Make a note of the `access_key_id` and `secret_key` values, which you need to deploy the CloudFormation template to your AWS account. 
 
-**Note:** Each user can create only five access keys. If a "limit exceeded" response appears, you must delete one or more access keys before you can create new keys. 
+**Necessary role error**
 
-**Type the following command to list access keys:**
+If the command returns an error about not having the necessary role, please verify your Alert Logic account has administrator permissions. Click [here](https://console.cloudinsight.alertlogic.com/api/aims/) for more information about AIMS APIs.
+
+**"Limit exceeded" error**
+
+Each user can create only five access keys. If a "limit exceeded" response appears, you must delete one or more access keys before you can create new keys. 
+
+1. Type the following command to list access keys:
 ```
 curl -s -X GET -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys | jq
 ```
-
-**Use the selected access_key_id in the following command to delete the key:**
-
+1. Use the selected access_key_id in the following command to delete the key:
 ```
 curl -X DELETE -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
 ```
 
 
-### Windows
+#### Windows
 
 **Note:** These instructions require PowerShell 3.0 or later.
 
@@ -115,8 +117,7 @@ Each user can create only five access keys. If a "limit exceeded" response appea
 ```
 Invoke-RestMethod -Method Get -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys
 ```
-
-1. Use the selected access_key_id in the following command to delete the key:
+1. Use the selected `access_key_id` in the following command to delete the key:
 ```
 Invoke-RestMethod -Method Delete -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
 ```
@@ -129,16 +130,16 @@ multiple AWS regions, you must either install the collector in each target regio
 set up GuardDuty collection across regions. For more information, see: [Setting up GuardDuty across
 regions and accounts](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_accounts.html).
 
-**Note:** This procedure assumes setup in the AWS `us-east-1` region 
-using the Alert Logic Cloud Insight [US console](https://console.cloudinsight.alertlogic.com/#/login). If
-your setup is in a European region (e.g., `eu-east-1`), use the 
-[UK console](https://console.cloudinsight.alertlogic.co.uk/#/login).
+### Use the Amazon console to deploy
+
+**Note:** This procedure assumes setup in the AWS `us-east-1` region using the Alert Logic Cloud Insight [US console](https://console.cloudinsight.alertlogic.com/#/login). If your setup is in a European region (e.g., `eu-east-1`), use the [UK console](https://console.cloudinsight.alertlogic.co.uk/#/login).
 
 1. Log in to the [AWS Management Console](https://aws.amazon.com/console/) with an AWS account that has AWS administrator privileges. 
 1. Select the region in which you want to deploy the CFT.
 1. Click **Services**->**CloudFormation**->**Create Stack**.
-1. In the `Choose a template` section select **Specify an Amazon S3 template URL**, use the following URL, and click **Next**:
+1. In the `Choose a template` section select **Specify an Amazon S3 template URL** and enter the following URL.
 `https://s3.amazonaws.com/alertlogic-collectors-us-east-1/cfn/guardduty.template`
+1. Click **Next**.
 1. On the `Specify Details` window, provide the following required parameters:
    - `Stack name` - Any name you have used for creating an AWS stack
    - `AccessKeyId` - `access_key_id` returned from AIMs [above](#alert-logic-access-key-creation)
@@ -146,11 +147,14 @@ your setup is in a European region (e.g., `eu-east-1`), use the
    - `AlDataResidency` - usually `default`
    - `SecretKey` - `secret_key` returned from AIMs [above](#alert-logic-access-key-creation)
 1. Click **Next**. 
-1. On the Options panel, click **Next**.
+1. On the `Options` panel, click **Next**.
 1. In the `Review` panel, perform a predeployment check. 
 1. Select **"I acknowledge that AWS CloudFormation might create IAM resources"**, then click **Create**.
 1. On the CloudFormation, `Stacks` panel, filter based on the stack name you created, and then 
 select your stack by name.
+
+If the deployment was successful, the status appears as: CREATE_COMPLETE. If the deployment was not successful, 
+see [Troubleshooting Installation Issues](#troubleshooting-installation-issues) below.
 
 **Note:** Only one collector installation is allowed per AWS region. If you try to deploy the template multiple times in the same region, if will fail with the following error:
 
@@ -159,10 +163,7 @@ Status | Type | Logical ID | Status Reason
 CREATE_FAILED | AWS::Lambda::Function | CollectLambdaFunction | alertlogic-cwe-collector already exists in stack arn:aws:cloudformation:us-east-1:123456789101:stack/test-one/f9536300-d12b-11e7-ac98-50d5cd16c68e
 
 
-If the deployment was successful, the status appears as: CREATE_COMPLETE. If the deployment was not successful, 
-see [Troubleshooting Installation Issues](#troubleshooting-installation-issues) below.
-
-#### Use a Command Line to deploy
+### Use a Command Line to deploy
 
 Follow these steps to deploy the Alert Logic custom template using the [AWS CLI](https://aws.amazon.com/cli/). This procedure requires the previously downloaded [Alert Logic custom CFT](https://github.com/alertlogic/cwe-collector/blob/master/cfn/guardduty.template).
 
@@ -197,8 +198,8 @@ If installation through the AWS CLI is not successful, issue the following comma
 aws cloudformation describe-stack-events --stack-name my-new-stack
 ```
 
-1. If `GetEndpointsLambdaFunction` fails, an issue could exist with the AIMs access key id or the secret key
- you provided. Be sure the key id is correct, your secret key is valid, and your user account has administrative permissions for the Alert Logic Cloud Insight account.
+1. If `GetEndpointsLambdaFunction` fails, an issue could exist with the `access_key_id` or the `secret_key`
+ you provided. Be sure the `access_key_id` is correct, your `secret_key` is valid, and your user account has administrative permissions for the Alert Logic Cloud Insight account.
 1. Other issues, TBD.
 
 

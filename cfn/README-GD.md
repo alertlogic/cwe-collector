@@ -78,10 +78,12 @@ If the command returns an error about not having the necessary role, please veri
 Each user can create only five access keys. If a "limit exceeded" response appears, you must delete one or more access keys before you can create new keys. 
 
 1. Type the following command to list access keys:
+
   ```
   curl -s -X GET -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys | jq
   ```
 1. Use the selected access_key_id in the following command to delete the key:
+
   ```
   curl -X DELETE -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
   ```
@@ -114,10 +116,12 @@ If the command returns an error about not having the necessary role, please veri
 Each user can create only five access keys. If a "limit exceeded" response appears, you must delete one or more access keys before you can create new keys.
 
 1. Type the following command to list access keys:
+  
   ```
   Invoke-RestMethod -Method Get -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys
   ```
 1. Use the selected `access_key_id` in the following command to delete the key:
+
   ```
   Invoke-RestMethod -Method Delete -Headers @{"x-aims-auth-token"=$AL_TOKEN} -Uri https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
   ```

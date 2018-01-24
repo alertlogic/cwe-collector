@@ -27,7 +27,8 @@
     "moment": "^2.19.2",
     "request": "*",
     "request-promise-native": "*",
-    "al-collector": "git://github.com/alertlogic/al-collector-js#master"
+    "al-collector-js": "git://github.com/alertlogic/al-collector-js#master",
+    "al-aws-collector-js": "git://github.com/alertlogic/al-aws-collector-js#master"
   },
   "author": "Alert Logic Inc."
 }

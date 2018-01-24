@@ -165,7 +165,7 @@ CREATE_FAILED | AWS::Lambda::Function | CollectLambdaFunction | alertlogic-cwe-c
 
 ### Use a Command Line to deploy
 
-Follow these steps to deploy the Alert Logic custom template using the [AWS CLI](https://aws.amazon.com/cli/). This procedure requires the previously downloaded [Alert Logic custom CFT](https://github.com/alertlogic/cwe-collector/blob/master/cfn/guardduty.template).
+Follow these steps to deploy the Alert Logic custom template using the [AWS CLI](https://aws.amazon.com/cli/).
 
 1. In the command line, type the following command, where the required parameters are:
     - `stack-name` - Any name you have used to create an AWS stack

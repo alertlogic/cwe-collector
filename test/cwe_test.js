@@ -2,12 +2,12 @@
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const m_aimsc = require('../lib/al_servicec').AimsC;
+const m_aimsc = require('al-collector-js/al_servicec').AimsC;
 var AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 var cweRewire = rewire('../index');
-var servicecRewire = rewire('../lib/al_servicec');
-var m_servicec = require('../lib/al_servicec');
+var servicecRewire = rewire('al-collector-js/al_servicec');
+var m_servicec = require('al-collector-js/al_servicec');
 var m_response = require('cfn-response');
 
 describe('CWE Unit Tests', function() {

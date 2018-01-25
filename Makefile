@@ -22,7 +22,7 @@ cfn: $(AWS_TEMPLATES)
 	
 package: test package.zip
 
-package.zip: node_modules/ lib/ *.js package.json
+package.zip: node_modules/ *.js package.json
 	zip -r $(AWS_LAMBDA_CWE_PACKAGE_NAME) $^
 
 deploy:

@@ -16,8 +16,8 @@ const AWS = require('aws-sdk');
 const async = require('async');
 const zlib = require('zlib');
 
-const m_alServiceC = require('./lib/al_servicec');
-const m_alAws = require('./lib/al_aws');
+const m_alServiceC = require('al-collector-js/al_servicec');
+const m_alAws = require('al-aws-collector-js/al_aws');
 const m_checkin = require('./checkin');
 const m_packageJson = require('./package.json');
 

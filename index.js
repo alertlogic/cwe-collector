@@ -9,6 +9,7 @@
  * -----------------------------------------------------------------------------
  */
  
+const debug = require('debug') ('index'); 
 const https = require('https');
 const util = require('util');
 const AWS = require('aws-sdk');
@@ -73,6 +74,13 @@ function getKinesisData(event, callback) {
 function filterGDEvents(cwEvents, callback) {
     async.filter(cwEvents,
         function(cwEvent, filterCallback){
+            if (cwEvent.source && cwEvent.source === 'aws.guardduty') {
+                debug(`DEBUG0002: filterGDEvents - including event: ` +
+                    `${JSON.stringify(cwEvent)} `);
+            } else {
+                debug(`DEBUG0003: filterGDEvents - filtering out event: ` +
+                    `${JSON.stringify(cwEvent)} `); 
+            };
             return filterCallback(null, cwEvent.source && 
                 cwEvent.source === 'aws.guardduty');
         },
@@ -305,6 +313,7 @@ function getStatistics(context, event, finalCallback) {
 
 
 exports.handler = function(event, context) {
+    debug("DEBUG0001: Received event: ", JSON.stringify(event));
     switch (event.RequestType) {
         case 'ScheduledEvent':
             return processScheduledEvent(event, context);

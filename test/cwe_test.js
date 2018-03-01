@@ -233,7 +233,7 @@ describe('CWE Unit Tests', function() {
             };
             rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
         });
-        
+
         it('waterfall flow error - getDecryptedCredentials()', function(done) {
             var context = {fail : (reason) => { if (reason === 'decryption_error') done(); } };
             rewireGetDecryptedCredentials = cweRewire.__set__(
@@ -456,6 +456,19 @@ describe('CWE Unit Tests', function() {
                 done();
             });
         });
+
+        it('Non-Guard Duty events filtering', function(done) {
+            var context = {
+                invokedFunctionArn : 'test:arn'
+            };
+            rewireFormatMessages(cweMock.NON_GD_OTHER_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
+                var expected = '';
+                assert.equal(formatError, null);
+                assert.equal(collectedData, expected);
+                done();
+            });
+        });
+        
         
         it('Zero Guard Duty events filtering', function(done) {
             var context = {

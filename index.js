@@ -74,7 +74,9 @@ function getKinesisData(event, callback) {
 function filterGDEvents(cwEvents, callback) {
     async.filter(cwEvents,
         function(cwEvent, filterCallback){
-            if (cwEvent.source && cwEvent.source === 'aws.guardduty') {
+            if ((cwEvent.source && 
+                 cwEvent.source === 'aws.guardduty' &&
+                 cwEvent['detail-type'] === 'GuardDuty Finding')) {
                 debug(`DEBUG0002: filterGDEvents - including event: ` +
                     `${JSON.stringify(cwEvent)} `);
             } else {

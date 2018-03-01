@@ -937,6 +937,9 @@
          "Properties":{
             "Description":"CloudWatch events rule for Guard Duty events",
             "EventPattern":{
+                "detail-type":[
+                  "GuardDuty Finding"
+               ],
                "source":[
                   "aws.guardduty"
                ]
@@ -1134,7 +1137,7 @@
                                    ]
                                 },
                                 "\", \"CloudWatchEventsRule\": \"", { "Ref": "CloudWatchEventsRule" },
-                                "\", \"CweRulePattern\": \"{\\\"source\\\":[\\\"aws.guardduty\\\"]}\"",
+                                "\", \"CweRulePattern\": \"{\\\"detail-type\\\":[\\\"GuardDuty Finding\\\"],\\\"source\\\":[\\\"aws.guardduty\\\"]}\"",
                                 "}"
                             ]
                         ]

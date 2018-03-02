@@ -65,7 +65,7 @@ function getKinesisData(event, callback) {
             return mapCallback(null, JSON.parse(cwEvent));
         } catch (ex) {
             console.warn('Event parse failed.', ex);
-            console.warn('Skipping', record.kinesis.data);
+            console.warn('Skipping: ', record.kinesis.data);
             return mapCallback(null, {});
         }
     }, callback);
@@ -74,17 +74,17 @@ function getKinesisData(event, callback) {
 function filterGDEvents(cwEvents, callback) {
     async.filter(cwEvents,
         function(cwEvent, filterCallback){
-            if ((cwEvent.source && 
+            var isValid = (typeof(cwEvent.source) !== 'undefined') && 
                  cwEvent.source === 'aws.guardduty' &&
-                 cwEvent['detail-type'] === 'GuardDuty Finding')) {
+                 cwEvent['detail-type'] === 'GuardDuty Finding';
+            if (isValid) {
                 debug(`DEBUG0002: filterGDEvents - including event: ` +
                     `${JSON.stringify(cwEvent)} `);
             } else {
                 debug(`DEBUG0003: filterGDEvents - filtering out event: ` +
                     `${JSON.stringify(cwEvent)} `); 
             };
-            return filterCallback(null, cwEvent.source && 
-                cwEvent.source === 'aws.guardduty');
+            return filterCallback(null, isValid);
         },
         callback
     );

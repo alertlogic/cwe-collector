@@ -65,7 +65,7 @@ function getKinesisData(event, callback) {
             return mapCallback(null, JSON.parse(cwEvent));
         } catch (ex) {
             console.warn('Event parse failed.', ex);
-            console.warn('Skipping', record.kinesis.data);
+            console.warn('Skipping: ', record.kinesis.data);
             return mapCallback(null, {});
         }
     }, callback);

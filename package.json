@@ -1,6 +1,6 @@
 {
   "name": "al-cwe-collector",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Alert Logic CloudWatch Events Collector",
   "repository": {},
   "private": true,

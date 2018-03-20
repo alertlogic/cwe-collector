@@ -5,6 +5,7 @@ const sinon = require('sinon');
 const m_aimsc = require('al-collector-js/al_servicec').AimsC;
 var AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
+const cweMockErrors = require('./cwe_mock_errors');
 var cweRewire = rewire('../index');
 var servicecRewire = rewire('al-collector-js/al_servicec');
 var m_servicec = require('al-collector-js/al_servicec');
@@ -336,6 +337,25 @@ describe('CWE Unit Tests', function() {
                 });            
         });
 
+        it('waterfall send to ingest 400 response', function(done) {
+            ingestStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
+                function fakeFn(path, extraOptions) {
+                    assert.equal(cweMock.INGEST_TEST_URL, path);
+                    return new Promise(function(resolve, reject) {
+                                throw cweMockErrors.INGEST_400_RESPONSE;
+                           });
+                });
+
+            var context = {};
+            var collectedBatch = JSON.stringify(cweMock.TEST_COLLECTED_BATCH);
+            rewireSendToIngest(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context,
+                aimscStub, collectedBatch,
+                function(arg) {
+                    assert.equal(null, arg);
+                    done();
+                });
+        });
+
         it('waterfall send to ingest Error', function(done) {
             ingestStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
                 function fakeFn(path, extraOptions) {
@@ -355,6 +375,38 @@ describe('CWE Unit Tests', function() {
                 });            
         });
         
+    });
+
+    describe('ingestError()', function() {
+        var rewireIngestError;
+
+        before(function() {
+            rewireIngestError = cweRewire.__get__('ingestError');
+        });
+
+        it('return OK in case of 400', function(done) {
+            rewireIngestError({}, {}, cweMockErrors.INGEST_400_RESPONSE,
+                function(error) {
+                    assert.equal(null, error);
+                    done();
+                });
+        });
+
+        it('return OK in case of 400 but no body message', function(done) {
+            rewireIngestError({}, {}, cweMockErrors.INGEST_400_NO_OPTIONS_RESPONSE,
+                function(error) {
+                    assert.equal(null, error);
+                    done();
+                });
+        });
+
+        it('return failure in case of non 400 status', function(done) {
+            rewireIngestError({}, {}, cweMockErrors.INGEST_500_RESPONSE,
+                function(error) {
+                    assert.equal(`Unable to send to Ingest ${cweMockErrors.INGEST_500_RESPONSE}`, error);
+                    done();
+                });
+        });
     });
 
     describe('getAlAuth()', function() {

@@ -125,10 +125,22 @@ function sendToIngest(event, context, aimsC, collectedBatch, callback) {
                     return callback(null, resp);
                 })
                 .catch(exception =>{
-                    return callback(`Unable to send to Ingest ${exception}`);
+                    return ingestError(event, context, exception, callback);
                 });
         }
     });
+}
+
+
+function ingestError(event, context, error, callback) {
+    if (error && error.statusCode && error.statusCode == 400) {
+        var body = (error.options && error.options.body) ?
+            error.options.body.toString('base64') : undefined;
+        console.error(`Unable to send to Ingest. Message: ${body}`);
+        return callback(null);
+    } else {
+        return callback(`Unable to send to Ingest ${error}`);
+    }
 }
 
 

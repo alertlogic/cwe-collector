@@ -189,7 +189,9 @@ function sendRegistration(event, context, aimsC, isRegistration, callback) {
         functionName : context.functionName,
         stackName : event.ResourceProperties.StackName,
         version : m_packageJson.version,
-        collectRule : event.ResourceProperties.CollectRule
+        custom_fields: {
+            collect_rule : event.ResourceProperties.CollectRule
+        }
     };
 
     var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC);

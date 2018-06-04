@@ -25,6 +25,7 @@ const response = require('cfn-response');
 
 let AIMS_CREDS;
 
+const COLLECTOR_TYPE = 'cwe';
 const INGEST_ENDPOINT = process.env.ingest_api;
 const AL_ENDPOINT = process.env.al_api;
 const AZCOLLECT_ENDPOINT = process.env.azollect_api;
@@ -183,7 +184,7 @@ function processCheckin(event, context) {
 
 function sendRegistration(event, context, aimsC, isRegistration, callback) {
     var registrationValues = {
-        collectorType : 'cwe',
+        collectorType : COLLECTOR_TYPE,
         awsAccountId : event.ResourceProperties.AwsAccountId,
         region : process.env.AWS_REGION,
         functionName : context.functionName,
@@ -194,7 +195,7 @@ function sendRegistration(event, context, aimsC, isRegistration, callback) {
         }
     };
 
-    var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC);
+    var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC, COLLECTOR_TYPE);
 
     if (isRegistration) {
         azcollectSvc.doRegistration(registrationValues)

@@ -141,7 +141,6 @@ function checkHealth(event, context, finalCallback) {
 
 function sendCheckin(event, context, aimsC, healthStatus, callback) {
     var checkinValues = {
-        collectorType : COLLECTOR_TYPE,
         awsAccountId : event.AwsAccountId,
         region : process.env.AWS_REGION,
         functionName : context.functionName,

@@ -184,7 +184,6 @@ function processCheckin(event, context) {
 
 function sendRegistration(event, context, aimsC, isRegistration, callback) {
     var registrationValues = {
-        collectorType : COLLECTOR_TYPE,
         awsAccountId : event.ResourceProperties.AwsAccountId,
         region : process.env.AWS_REGION,
         functionName : context.functionName,

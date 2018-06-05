@@ -120,7 +120,7 @@ function sendToIngest(event, context, aimsC, collectedBatch, callback) {
         if (compressionErr) {
             return callback(compressionErr);
         } else {
-            var ingest = new m_alServiceC.IngestC(INGEST_ENDPOINT, aimsC);
+            var ingest = new m_alServiceC.IngestC(INGEST_ENDPOINT, aimsC, 'lambda_function');
             ingest.sendSecmsgs(compressed)
                 .then(resp => {
                     return callback(null, resp);

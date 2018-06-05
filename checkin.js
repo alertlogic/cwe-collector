@@ -14,6 +14,7 @@ const m_alServiceC = require('al-collector-js/al_servicec');
 const m_packageJson = require('./package.json');
 
 const AZCOLLECT_ENDPOINT = process.env.azollect_api;
+const COLLECTOR_TYPE = 'cwe';
 
 function checkCloudFormationStatus(event, callback) {
     var stackName = event.StackName;
@@ -140,7 +141,7 @@ function checkHealth(event, context, finalCallback) {
 
 function sendCheckin(event, context, aimsC, healthStatus, callback) {
     var checkinValues = {
-        collectorType : 'cwe',
+        collectorType : COLLECTOR_TYPE,
         awsAccountId : event.AwsAccountId,
         region : process.env.AWS_REGION,
         functionName : context.functionName,
@@ -150,8 +151,8 @@ function sendCheckin(event, context, aimsC, healthStatus, callback) {
         version : m_packageJson.version,
         statistics : healthStatus.statistics
     };
-    var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC);
-    azcollectSvc.doCheckin(checkinValues)
+    var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC, COLLECTOR_TYPE);
+    azcollectSvc.checkin(checkinValues)
         .then(resp => {
             return callback(null);
         })

@@ -198,7 +198,7 @@ function sendRegistration(event, context, aimsC, isRegistration, callback) {
     var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC, COLLECTOR_TYPE);
 
     if (isRegistration) {
-        azcollectSvc.doRegistration(registrationValues)
+        azcollectSvc.register(registrationValues)
             .then(resp => {
                 return callback(null);
             })
@@ -206,7 +206,7 @@ function sendRegistration(event, context, aimsC, isRegistration, callback) {
                 return callback(`Registration failed: ${exception}`);
             });
     } else {
-        azcollectSvc.doDeregistration(registrationValues)
+        azcollectSvc.deregister(registrationValues)
             .then(resp => {
                 return callback(null);
             })

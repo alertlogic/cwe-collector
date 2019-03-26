@@ -2,14 +2,12 @@ process.env.AWS_REGION = 'us-east-1';
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const m_aimsc = require('al-collector-js/al_servicec').AimsC;
 const AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 const cweMockErrors = require('./cwe_mock_errors');
 const cweCheckin = require('../checkin');
 const clone = require('clone');
 var cweRewire = rewire('../index');
-var cweCheckinRewire = rewire('../checkin');
 var m_servicec = require('al-collector-js/al_servicec');
 var azcollectStub;
 
@@ -31,7 +29,6 @@ describe('CWE Checkin Tests', function() {
         var rewireGetDecryptedCredentials;
         var rewireGetAlAuth;
         var rewireProcessCheckin;
-        var rewireCheckHealth;
         var checkinStub;
 
         before(function() {
@@ -64,7 +61,7 @@ describe('CWE Checkin Tests', function() {
                 functionName : cweMock.CHECKIN_TEST_FUNCTION_NAME
             };
             checkinStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
-                function fakeFn(event, context, callback) {
+                function fakeFn(event, fakeContext, callback) {
                     return callback(null, {status: 'ok', details: []});
                 });
             rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
@@ -96,7 +93,7 @@ describe('CWE Checkin Tests', function() {
                 fail : (reason) => { if (reason === 'check_health_error') done(); }
             };
             checkinStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
-                function fakeFn(event, context, callback) {
+                function fakeFn(event, fakeContext, callback) {
                     return callback('check_health_error', {});
                 });
             rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
@@ -254,7 +251,7 @@ describe('CWE Checkin Tests', function() {
         });
 
         it('describeRule - DISABLED state', function(done) {
-            expected = clone(cweMock.CWE_DESCRIBE_RULE);
+            var expected = clone(cweMock.CWE_DESCRIBE_RULE);
             expected.State = 'DISABLED';
             mockCWEDescribeRule(function(data, callback) {
                 return callback(null, expected);
@@ -404,11 +401,11 @@ describe('CWE Checkin Tests', function() {
                 succeed : () => { return; }
             };
             sendCheckinStub = sinon.stub(cweCheckin, 'sendCheckin').callsFake(
-                function fakeFn(event, context, aimsC, healthStatus, callback) {
+                function fakeFn(event, fakeContext, aimsC, healthStatus, callback) {
                     return callback(null);
                 });
             checkHealthStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
-                function fakeFn(event, context, callback) {
+                function fakeFn(event, fakeContext, callback) {
                     return callback(null, {
                         status: 'ok',
                         details: []
@@ -421,7 +418,7 @@ describe('CWE Checkin Tests', function() {
             });
             rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
             
-            expectedHealth = {
+            var expectedHealth = {
                 'status':'ok',
                 'details':[],
                 'statistics':[
@@ -447,11 +444,11 @@ describe('CWE Checkin Tests', function() {
             };
             
             sendCheckinStub = sinon.stub(cweCheckin, 'sendCheckin').callsFake(
-                function fakeFn(event, context, aimsC, healthStatus, callback) {
+                function fakeFn(event, fakeContext, aimsC, healthStatus, callback) {
                     return callback(null);
                 });
             checkHealthStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
-                function fakeFn(event, context, callback) {
+                function fakeFn(event, fakeContext, callback) {
                     return callback(null, {
                         status: 'ok',
                         details: []
@@ -466,7 +463,7 @@ describe('CWE Checkin Tests', function() {
             });
             rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
             
-            expectedHealth = {
+            var expectedHealth = {
                 'status' : 'ok',
                 'details' : [],
                 'statistics' : [

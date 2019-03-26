@@ -6,7 +6,6 @@ const m_aimsc = require('al-collector-js/al_servicec').AimsC;
 var AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 var cweRewire = rewire('../index');
-var servicecRewire = rewire('al-collector-js/al_servicec');
 var m_servicec = require('al-collector-js/al_servicec');
 var m_response = require('cfn-response');
 
@@ -258,7 +257,7 @@ describe('CWE Unit Tests', function() {
                 fail : (reason) => { if (reason === 'test error') done(); }
             };
             rewireFormatMessages = cweRewire.__set__(
-                {formatMessages: (event, context, callback) => { callback('test error'); }}
+                {formatMessages: (event, fakeContext, callback) => { callback('test error'); }}
             );
             rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
         });
@@ -269,7 +268,7 @@ describe('CWE Unit Tests', function() {
             };
             rewireSendToIngest();
             rewireSendToIngest = cweRewire.__set__(
-                {sendToIngest: (event, context, aimsC, message, callback) => { callback('test error'); }}
+                {sendToIngest: (event, fakeContext, aimsC, message, callback) => { callback('test error'); }}
             );
             rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
         });
@@ -415,6 +414,7 @@ describe('CWE Unit Tests', function() {
     });
     
     describe('formatMessages()', function() {
+        var rewireFormatMessages;
 
         beforeEach(function() {
             rewireFormatMessages = cweRewire.__get__('formatMessages');
@@ -496,7 +496,6 @@ describe('CWE Unit Tests', function() {
 
     describe('getDecryptedCredentials()', function() {
         var rewireGetDecryptedCredentials;
-        var stub;
 
         const ACCESS_KEY_ID = 'access_key_id';
         const ENCRYPTED_SECRET_KEY = 'encrypted_secret_key';

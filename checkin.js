@@ -11,6 +11,7 @@
 const AWS = require('aws-sdk');
 const async = require('async');
 const m_alServiceC = require('al-collector-js/al_servicec');
+const m_alAzCollectC = require('al-collector-js/azcollectc');
 const m_packageJson = require('./package.json');
 
 const AZCOLLECT_ENDPOINT = process.env.azollect_api;
@@ -150,7 +151,7 @@ function sendCheckin(event, context, aimsC, healthStatus, callback) {
         version : m_packageJson.version,
         statistics : healthStatus.statistics
     };
-    var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC, COLLECTOR_TYPE);
+    var azcollectSvc = new m_alAzCollectC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC, COLLECTOR_TYPE);
     azcollectSvc.checkin(checkinValues)
         .then(resp => {
             return callback(null);

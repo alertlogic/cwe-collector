@@ -9,3 +9,4 @@ al-cwe-collector.zip
 coverage/
 test/ide_test.js
 .env
+*.swp

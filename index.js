@@ -19,6 +19,8 @@ const zlib = require('zlib');
 const m_alServiceC = require('al-collector-js/al_servicec');
 const m_alAzCollectC = require('al-collector-js/azcollectc');
 const m_alAws = require('al-aws-collector-js/al_aws');
+const m_statsTemplate = require('al-aws-collector-js/statistics_templates');
+const AlAwsCollector = require('al-aws-collector-js/al_aws_collector');
 const m_checkin = require('./checkin');
 const m_packageJson = require('./package.json');
 
@@ -52,14 +54,6 @@ function getDecryptedCredentials(callback) {
     }
 }
 
-function getAlAuth(callback) {
-    var aimsC = new m_alServiceC.AimsC(AL_ENDPOINT, AIMS_CREDS);
-    aimsC.authenticate().then(
-        ok => { return callback(null, aimsC); },
-        err => { return callback(err); }
-    );
-}
-
 function getKinesisData(event, callback) {
     async.map(event.Records, function(record, mapCallback) {
         var cwEvent = new Buffer(record.kinesis.data, 'base64').toString('utf-8');
@@ -85,7 +79,7 @@ function filterGDEvents(cwEvents, callback) {
             } else {
                 debug(`DEBUG0003: filterGDEvents - filtering out event: ` +
                     `${JSON.stringify(cwEvent)} `); 
-            };
+            }
             return filterCallback(null, isValid);
         },
         callback
@@ -116,168 +110,16 @@ function formatMessages(event, context, callback) {
 }
 
 
-function sendToIngest(event, context, aimsC, collectedBatch, callback) {
-    zlib.deflate(collectedBatch, function(compressionErr, compressed) {
-        if (compressionErr) {
-            return callback(compressionErr);
-        } else {
-            var ingest = new m_alServiceC.IngestC(INGEST_ENDPOINT, aimsC, 'lambda_function');
-            ingest.sendSecmsgs(compressed)
-                .then(resp => {
-                    return callback(null, resp);
-                })
-                .catch(exception =>{
-                    return ingestError(event, context, exception, callback);
-                });
-        }
-    });
-}
-
-
-function ingestError(event, context, error, callback) {
-    if (error && error.statusCode && error.statusCode == 400) {
-        var body = (error.options && error.options.body) ?
-            error.options.body.toString('base64') : undefined;
-        console.error(`Unable to send to Ingest. Message: ${body}`);
-        return callback(null);
-    } else {
-        return callback(`Unable to send to Ingest ${error}`);
-    }
-}
-
-
-function processResultInContext(context, err, result) {
-    if (err) {
-        return context.fail(err);
-    } else {
-        return context.succeed();
-    }
-}
-
-
-function processCheckin(event, context) {
-    async.waterfall([
-        function(callback) {
-            return getDecryptedCredentials(callback);
-        },
-        function(callback) {
-            return getAlAuth(callback);
-        },
-        function(aimsC, callback) {
-            return m_checkin.checkHealth(event, context, function(err, healthStatus) {
-                return callback(err, aimsC, healthStatus);
-            });
-        },
-        function(aimsC, healthStatus, callback) {
-            return getStatistics(context, event, function(err, response) {
-                healthStatus.statistics = response;
-                return callback(err, aimsC, healthStatus);
-            });
-        },
-        function(aimsC, healthStatus, callback) {
-            return m_checkin.sendCheckin(event, context, aimsC, healthStatus, callback);
-        }
-    ],
-    function(err, result) {
-        return processResultInContext(context, err, result);
-    });
-}
-
-function sendRegistration(event, context, aimsC, isRegistration, callback) {
-    var registrationValues = {
-        awsAccountId : event.ResourceProperties.AwsAccountId,
-        region : process.env.AWS_REGION,
-        functionName : context.functionName,
-        stackName : event.ResourceProperties.StackName,
-        version : m_packageJson.version,
-        custom_fields: {
-            collect_rule : event.ResourceProperties.CollectRule
-        }
-    };
-
-    var azcollectSvc = new m_alAzCollectC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC, COLLECTOR_TYPE);
-
-    if (isRegistration) {
-        azcollectSvc.register(registrationValues)
-            .then(resp => {
-                return callback(null);
-            })
-            .catch(exception => {
-                return callback(`Registration failed: ${exception}`);
-            });
-    } else {
-        azcollectSvc.deregister(registrationValues)
-            .then(resp => {
-                return callback(null);
-            })
-            .catch(exception => {
-                return callback(`De-registration failed: ${exception}`);
-            });
-    }
-}
-
-function processRegistration(event, context, isRegistration) {
-      async.waterfall([
-          function(callback) {
-              getDecryptedCredentials(callback);
-          },
-          function(callback) {
-              getAlAuth(callback);
-          },
-          function(aimsC, callback) {
-              sendRegistration(event, context, aimsC, isRegistration, callback);
-          }
-      ],
-      function(err, result) {
-          if (err) {
-              return response.send(event, context, response.FAILED, {Error: err});
-          } else {
-              return response.send(event, context, response.SUCCESS);
-          }
-      });
-}
-
-function processKinesisRecords(event, context) {
-    async.waterfall([
-        function(callback) {
-            getDecryptedCredentials(callback);
-        },
-        function(callback) {
-            getAlAuth(callback);
-        },
-        function(aimsC, callback) {
-            formatMessages(event, context, function(formatError, collectedData) {
-                return callback(formatError, aimsC, collectedData);
-            });
-        },
-        function(aimsC, collectedData, callback) {
-            if (collectedData !== '') {
-                sendToIngest(event, context, aimsC, collectedData, callback);
-            } else {
-                return callback(null);
-            }
-        }
-    ],
-    function(err, result) {
-        processResultInContext(context, err, result);
-    });
-}
-
-
-function processScheduledEvent(event, context) {
+function processScheduledEvent(event, collector, callback) {
     console.info("Processing scheduled event: ", event);
     switch (event.Type) {
         case 'SelfUpdate':
-            m_alAws.selfUpdate(function(err) {
-                if (err) {
-                    return context.fail(err);
-                } else {
-                    return context.succeed();
-                }
-            });
+            console.info("starting framework self update");
+            collector.update(callback);
             break;
         case 'Checkin':
-            processCheckin(event, context);
+            console.info("starting framework checkin");
+            collector.checkin(callback);
             break;
         default:
             return context.fail("Unknown scheduled event detail type: " + event.type);
@@ -285,64 +127,90 @@ function processScheduledEvent(event, context) {
 }
 
 
-function getStatistics(context, event, finalCallback) {
+function getStatisticsFunctions(event) {
+    if(!event.KinesisArn){
+        return [];
+    }
     const kinesisName = m_alAws.arnToName(event.KinesisArn);
-    async.waterfall([
-       function(asyncCallback) {
-           return m_alAws.getLambdaMetrics(context.functionName,
-               'Invocations',
-               [],
-               asyncCallback);
-       },
-       function(statistics, asyncCallback) {
-           return m_alAws.getLambdaMetrics(context.functionName,
-               'Errors',
-               statistics,
-               asyncCallback);
-       },
-       function(statistics, asyncCallback) {
-           return m_alAws.getKinesisMetrics(kinesisName,
+    return [
+       function(callback) {
+           return m_statsTemplate.getKinesisMetrics(kinesisName,
                'IncomingRecords',
-               statistics,
-               asyncCallback);
+               callback);
        },
-       function(statistics, asyncCallback) {
-           return m_alAws.getKinesisMetrics(kinesisName,
+       function(callback) {
+           return m_statsTemplate.getKinesisMetrics(kinesisName,
                'IncomingBytes',
-               statistics,
-               asyncCallback);
+               callback);
        },
-       function(statistics, asyncCallback) {
-           return m_alAws.getKinesisMetrics(kinesisName,
+       function(callback) {
+           return m_statsTemplate.getKinesisMetrics(kinesisName,
                'ReadProvisionedThroughputExceeded',
-               statistics,
-               asyncCallback);
+               callback);
        },
-       function(statistics, asyncCallback) {
-           return m_alAws.getKinesisMetrics(kinesisName,
+       function(callback) {
+           return m_statsTemplate.getKinesisMetrics(kinesisName,
                'WriteProvisionedThroughputExceeded',
-               statistics,
-               asyncCallback);
+               callback);
        }
-    ], finalCallback);
-};
-
+    ];
+}
 
 
 exports.handler = function(event, context) {
-    debug("DEBUG0001: Received event: ", JSON.stringify(event));
-    switch (event.RequestType) {
-        case 'ScheduledEvent':
-            return processScheduledEvent(event, context);
-        case 'Create':
-            return processRegistration(event, context, true);
-        case 'Delete':
-            return processRegistration(event, context, false);
-        default:
-            if (event.Records) {
-                return processKinesisRecords(event, context);
-            } else {
-                return context.fail('Unknown event source: ' + event.source);
+    async.waterfall([
+        getDecryptedCredentials,
+        function(asyncCallback){
+            //migration code for old collectors
+            if(!process.env.aws_lambda_update_config_name){
+                process.env.aws_lambda_update_config_name = 'configs/lambda/config.json';
             }
-    }
+
+            const collector = new AlAwsCollector(
+                context,
+                "cwe",
+                AlAwsCollector.IngestTypes.SECMSGS,
+                m_packageJson.version,
+                AIMS_CREDS,
+                formatMessages,
+                [m_checkin.checkHealth(event, context)],
+                getStatisticsFunctions(event)
+            );
+
+            debug("DEBUG0001: Received event: ", JSON.stringify(event));
+            switch (event.RequestType) {
+                case 'ScheduledEvent':
+                    processScheduledEvent(event, collector, asyncCallback);
+                    break;
+                case 'Create':
+                    var registrationValues = {
+                        stackName : event.ResourceProperties.StackName,
+                        custom_fields: {
+                            collect_rule : event.ResourceProperties.CollectRule
+                        }
+                    };
+
+                    collector.register(event, registrationValues);
+                    break;
+                case 'Delete':
+                    collector.deregister(event);
+                    break;
+                default:
+                    if (event.Records) {
+                        return collector.process(event, asyncCallback);
+                    } else {
+                        return context.fail('Unknown event source: ' + event.source);
+                    }
+            }
+        }
+    ],
+    function(err, result){
+        if(err){
+            console.log('Invocation failed: ', err);
+            context.fail(err);
+        } else {
+            console.log('Invocation success: ', result);
+            context.succeed();
+        }
+    });
 };

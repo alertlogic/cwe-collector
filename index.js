@@ -70,7 +70,7 @@ function getKinesisData(event, callback) {
 function filterGDEvents(cwEvents, callback) {
     async.filter(cwEvents,
         function(cwEvent, filterCallback){
-            var isValid = (typeof(cwEvent.source) !== 'undefined') && 
+            var isValid = (typeof(cwEvent.source) !== 'undefined') &&
                  cwEvent.source === 'aws.guardduty' &&
                  cwEvent['detail-type'] === 'GuardDuty Finding';
             if (isValid) {
@@ -78,7 +78,7 @@ function filterGDEvents(cwEvents, callback) {
                     `${JSON.stringify(cwEvent)} `);
             } else {
                 debug(`DEBUG0003: filterGDEvents - filtering out event: ` +
-                    `${JSON.stringify(cwEvent)} `); 
+                    `${JSON.stringify(cwEvent)} `);
             }
             return filterCallback(null, isValid);
         },
@@ -110,15 +110,15 @@ function formatMessages(event, context, callback) {
 }
 
 
-function processScheduledEvent(event, collector, callback) {
+function processScheduledEvent(event, collector, context, callback) {
     console.info("Processing scheduled event: ", event);
     switch (event.Type) {
         case 'SelfUpdate':
-            console.info("starting framework self update");
+            console.info("Starting framework self update");
             collector.update(callback);
             break;
         case 'Checkin':
-            console.info("starting framework checkin");
+            console.info("Starting framework checkin");
             collector.checkin(callback);
             break;
         default:
@@ -161,7 +161,7 @@ exports.handler = function(event, context) {
     async.waterfall([
         getDecryptedCredentials,
         function(asyncCallback){
-            //migration code for old collectors
+            // migration code for old collectors. This needs to be done because the collector lambda does not have premissions to set its own env vars
             if(!process.env.aws_lambda_update_config_name){
                 process.env.aws_lambda_update_config_name = 'configs/lambda/config.json';
             }
@@ -180,7 +180,7 @@ exports.handler = function(event, context) {
             debug("DEBUG0001: Received event: ", JSON.stringify(event));
             switch (event.RequestType) {
                 case 'ScheduledEvent':
-                    processScheduledEvent(event, collector, asyncCallback);
+                    processScheduledEvent(event, collector, context, asyncCallback);
                     break;
                 case 'Create':
                     var registrationValues = {
@@ -206,11 +206,9 @@ exports.handler = function(event, context) {
     ],
     function(err, result){
         if(err){
-            console.log('Invocation failed: ', err);
             context.fail(err);
         } else {
-            console.log('Invocation success: ', result);
-            context.succeed();
+            context.succeed(result);
         }
     });
 };

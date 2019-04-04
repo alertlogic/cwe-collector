@@ -13,41 +13,21 @@ var m_servicec = require('al-collector-js/al_servicec');
 var m_response = require('cfn-response');
 
 describe('CWE Unit Tests', function() {
-/* TODO: fix these test by figuring out how to stub the collector Class
-    describe('processEvent()', function() {
-        var rewireFun;
-        var rewireGetDecryptedCredentials; 
-
-        beforeEach(function(){
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: (callback) => { callback(null); }}
-            );
-        });
-        afterEach(function() {
-            rewireFun();
-        });
-
-        it('cloudwatch event triggers processKinesisRecords()', function(done) {
-            const AlAwsCollectorStub = sinon.stub().callsFake(() => {return {};});
-            Object.setPrototypeOf(AlAwsCollector, AlAwsCollectorStub);
-            rewireFun = cweRewire.__set__({processKinesisRecords: () => { done();}});
-            cweRewire.handler(cweMock.GD_ONLY_KINESIS_TEST_EVENT, null);
-        });
-
-        it('scheduled event triggers processScheduledEvent()', function(done) {
-            const AlAwsCollectorStub = sinon.stub().callsFake(() => {return {};});
-            Object.setPrototypeOf(AlAwsCollector, AlAwsCollectorStub);
-            rewireFun = cweRewire.__set__({processScheduledEvent: () => { done(); }});
-            cweRewire.handler({RequestType : 'ScheduledEvent'}, null);
-        });
-    });
-*/
 
     // FIXME - check lambda update call
     describe('processScheduledEvent()', function() {
+        var rewireProcessScheduleEvent;
+        var mockCollector = {
+            update: (callback) => {
+                return callback("update");
+            },
+            checkin: (callback) => {
+                return callback("checkin");
+            }
+        };
 
         before(function() {
-
+            rewireProcessScheduleEvent = cweRewire.__get__('processScheduledEvent');
         });
 
         after(function() {
@@ -55,6 +35,23 @@ describe('CWE Unit Tests', function() {
         });
 
         it('call function update', function(done) {
+            rewireProcessScheduleEvent(cweMock.UPDATE_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
+                assert(result === "update");
+                done();
+            });
+        });
+
+        it('call function checkin', function(done) {
+            rewireProcessScheduleEvent(cweMock.CHECKIN_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
+                assert(result === "checkin");
+                done();
+            });
+        });
+
+        it('fails when an unknown event is passed', function(done) {
+            const stub = sinon.stub(cweMock.DEFAULT_LAMBDA_CONTEXT, "fail");
+            rewireProcessScheduleEvent({"RequestType": "InvalidType"}, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, null);
+            assert(stub.called);
             done();
         });
     });

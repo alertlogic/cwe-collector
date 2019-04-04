@@ -10,28 +10,16 @@
  */
  
 const debug = require('debug') ('index'); 
-const https = require('https');
-const util = require('util');
 const AWS = require('aws-sdk');
 const async = require('async');
-const zlib = require('zlib');
 
-const m_alServiceC = require('al-collector-js/al_servicec');
-const m_alAzCollectC = require('al-collector-js/azcollectc');
 const m_alAws = require('al-aws-collector-js/al_aws');
 const m_statsTemplate = require('al-aws-collector-js/statistics_templates');
 const AlAwsCollector = require('al-aws-collector-js/al_aws_collector');
 const m_checkin = require('./checkin');
 const m_packageJson = require('./package.json');
 
-const response = require('cfn-response');
-
 let AIMS_CREDS;
-
-const COLLECTOR_TYPE = 'cwe';
-const INGEST_ENDPOINT = process.env.ingest_api;
-const AL_ENDPOINT = process.env.al_api;
-const AZCOLLECT_ENDPOINT = process.env.azollect_api;
 
 function getDecryptedCredentials(callback) {
     if (AIMS_CREDS) {

@@ -10,12 +10,6 @@
  
 const AWS = require('aws-sdk');
 const async = require('async');
-const m_alServiceC = require('al-collector-js/al_servicec');
-const m_alAzCollectC = require('al-collector-js/azcollectc');
-const m_packageJson = require('./package.json');
-
-const AZCOLLECT_ENDPOINT = process.env.azollect_api;
-const COLLECTOR_TYPE = 'cwe';
 
 function checkCloudWatchEventsRule(event, finalCallback) {
     var cwe = new AWS.CloudWatchEvents();

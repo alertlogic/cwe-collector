@@ -56,6 +56,27 @@ describe('CWE Unit Tests', function() {
         });
     });
 
+    describe('getStatisticsFunctions()', () => {
+        beforeEach(function() {
+            rewireGetStatisticsFunctions = cweRewire.__get__('getStatisticsFunctions');
+        });
+
+        it('generates an empty list when passed a GD event', () => {
+            const result = rewireGetStatisticsFunctions(cweMock.GD_OTHER_KINESIS_TEST_EVENT);
+            assert(result.length === 0);
+        });
+
+        it('generates a list of functions when passed a Checkin Event', () => {
+            const result = rewireGetStatisticsFunctions(cweMock.CHECKIN_TEST_EVENT);
+            assert(result.length !== 0);
+        });
+
+        it('generates an empty array when an update event is passed', () => {
+            const result = rewireGetStatisticsFunctions(cweMock.UPDATE_TEST_EVENT);
+            assert(result.length === 0);
+        });
+    });
+
     describe('formatMessages()', function() {
 
         beforeEach(function() {

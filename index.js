@@ -161,7 +161,8 @@ exports.handler = function(event, context) {
     async.waterfall([
         getDecryptedCredentials,
         function(asyncCallback){
-            // migration code for old collectors. This needs to be done because the collector lambda does not have premissions to set its own env vars
+            // Migration code for old collectors.
+            // This needs to be done because the collector lambda does not have premissions to set its own env vars.
             if(!process.env.aws_lambda_update_config_name){
                 process.env.aws_lambda_update_config_name = 'configs/lambda/config.json';
             }

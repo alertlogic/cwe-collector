@@ -124,6 +124,8 @@ module.exports = {
         if(!process.env.stack_name){
             process.env.stack_name = event.StackName;
         }
+
+        //close over the event and context to creat a function compatible with the framework.
         return function(callback){
             checkHealth(event, context, callback);
         };

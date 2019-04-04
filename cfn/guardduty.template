@@ -409,7 +409,7 @@
                     }
                 },
                 "Handler":"index.handler",
-                "Runtime":"nodejs6.10",
+                "Runtime":"nodejs8.10",
                 "MemorySize":128,
                 "Timeout": 5,
                 "Tags": [
@@ -598,7 +598,7 @@
                        ]
                    }
                },
-               "Runtime": "nodejs6.10",
+               "Runtime": "nodejs8.10",
                "Timeout": "60",
                 "Tags": [
                     {
@@ -670,7 +670,7 @@
                "S3Key": "packages/lambda/al-cwe-collector.zip"
             },
             "Handler":"index.handler",
-            "Runtime":"nodejs6.10",
+            "Runtime":"nodejs8.10",
             "MemorySize":128,
             "Timeout":300,
             "Environment":{

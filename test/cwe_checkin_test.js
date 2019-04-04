@@ -2,14 +2,10 @@ process.env.AWS_REGION = 'us-east-1';
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const m_aimsc = require('al-collector-js/al_servicec').AimsC;
 const AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 const cweMockErrors = require('./cwe_mock_errors');
-const cweCheckin = require('../checkin');
 const clone = require('clone');
-var cweRewire = rewire('../index');
-var cweCheckinRewire = rewire('../checkin');
 var m_servicec = require('al-collector-js/al_servicec');
 var azcollectStub;
 
@@ -93,7 +89,7 @@ describe('CWE Checkin Tests', function() {
         });
 
         it('describeRule - DISABLED state', function(done) {
-            expected = clone(cweMock.CWE_DESCRIBE_RULE);
+            const expected = clone(cweMock.CWE_DESCRIBE_RULE);
             expected.State = 'DISABLED';
             mockCWEDescribeRule(function(data, callback) {
                 return callback(null, expected);
@@ -348,15 +344,6 @@ function unmock() {
     AWS.restore('CloudWatchEvents', 'describeRule');
     AWS.restore('CloudWatchEvents', 'listTargetsByRule');
     AWS.restore('Lambda', 'listEventSourceMappings');
-}
-
-
-function mockCFDescribeStacks(fun) {
-    AWS.restore('CloudFormation', 'describeStacks');
-    AWS.mock('CloudFormation', 'describeStacks', function (data, callback) {
-        assert.equal(data.StackName, cweMock.STACK_NAME);
-        return fun(data, callback);
-    });
 }
 
 

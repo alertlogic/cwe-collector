@@ -2,15 +2,9 @@
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const m_aimsc = require('al-collector-js/al_servicec').AimsC;
-const AlAwsCollector = require('al-aws-collector-js/al_aws_collector');
 var AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
-const cweMockErrors = require('./cwe_mock_errors');
 var cweRewire = rewire('../index');
-var servicecRewire = rewire('al-collector-js/al_servicec');
-var m_servicec = require('al-collector-js/al_servicec');
-var m_response = require('cfn-response');
 
 describe('CWE Unit Tests', function() {
 
@@ -57,6 +51,7 @@ describe('CWE Unit Tests', function() {
     });
 
     describe('getStatisticsFunctions()', () => {
+        var rewireGetStatisticsFunctions;
         beforeEach(function() {
             rewireGetStatisticsFunctions = cweRewire.__get__('getStatisticsFunctions');
         });
@@ -78,6 +73,7 @@ describe('CWE Unit Tests', function() {
     });
 
     describe('formatMessages()', function() {
+        var rewireFormatMessages;
 
         beforeEach(function() {
             rewireFormatMessages = cweRewire.__get__('formatMessages');
@@ -159,7 +155,6 @@ describe('CWE Unit Tests', function() {
 
     describe('getDecryptedCredentials()', function() {
         var rewireGetDecryptedCredentials;
-        var stub;
 
         const ACCESS_KEY_ID = 'access_key_id';
         const ENCRYPTED_SECRET_KEY = 'encrypted_secret_key';

@@ -28,9 +28,15 @@ const CHECKIN_TEST_EVENT = {
     'CweRulePattern' : '{\"source\":[\"aws.guardduty\"], \"detail-type\":[\"GuardDuty Finding\"]}'
 };
 
+const UPDATE_TEST_EVENT = {
+    "RequestType": "ScheduledEvent",
+    "Type": "SelfUpdate"
+};
+
 const DEFAULT_LAMBDA_CONTEXT = {
     invokedFunctionArn : FUNCTION_ARN,
-    functionName : CHECKIN_TEST_FUNCTION_NAME
+    functionName : CHECKIN_TEST_FUNCTION_NAME,
+    fail: () => "context failed"
 };
 
 const REGISTRATION_TEST_FUNCTION_NAME = 'test-CollectLambdaFunction-1JNNKQIPOTEST';
@@ -445,6 +451,7 @@ module.exports = {
     CHECKIN_TEST_URL : CHECKIN_TEST_URL,
     FUNCTION_ARN : FUNCTION_ARN,
     CHECKIN_TEST_EVENT : CHECKIN_TEST_EVENT,
+    UPDATE_TEST_EVENT : UPDATE_TEST_EVENT,
     STACK_NAME : STACK_NAME,
     REGISTRATION_TEST_FUNCTION_NAME : REGISTRATION_TEST_FUNCTION_NAME,
     REGISTRATION_STACK_NAME : REGISTRATION_STACK_NAME,

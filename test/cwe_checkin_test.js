@@ -2,14 +2,10 @@ process.env.AWS_REGION = 'us-east-1';
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const m_aimsc = require('al-collector-js/al_servicec').AimsC;
 const AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 const cweMockErrors = require('./cwe_mock_errors');
-const cweCheckin = require('../checkin');
 const clone = require('clone');
-var cweRewire = rewire('../index');
-var cweCheckinRewire = rewire('../checkin');
 var m_servicec = require('al-collector-js/al_servicec');
 var azcollectStub;
 
@@ -24,86 +20,7 @@ function setAzcollectStub() {
             });
         });
 }
-
 describe('CWE Checkin Tests', function() {
-
-    describe('processCheckin() waterfall check', function() {
-        var rewireGetDecryptedCredentials;
-        var rewireGetAlAuth;
-        var rewireProcessCheckin;
-        var rewireCheckHealth;
-        var checkinStub;
-
-        before(function() {
-            setAzcollectStub();
-});
-
-        beforeEach(function() {
-            rewireProcessCheckin = cweRewire.__get__('processCheckin');
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: (callback) => { callback(null); }}
-            );
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: (callback) => { callback(null, {}); }}
-            );
-        });
-
-        afterEach(function() {
-            rewireGetDecryptedCredentials();
-            rewireGetAlAuth();
-            checkinStub.restore();
-        });
-
-        after(function() {
-            azcollectStub.restore();
-        });
-
-        it('checkin waterfall flow OK - doCheckin()', function(done) {
-            var context = {
-                invokedFunctionArn : cweMock.FUNCTION_ARN,
-                functionName : cweMock.CHECKIN_TEST_FUNCTION_NAME
-            };
-            checkinStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
-                function fakeFn(event, context, callback) {
-                    return callback(null, {status: 'ok', details: []});
-                });
-            rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
-            done();
-        });
-
-        it('checkin waterfall flow error - getDecryptedCredentials()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'decryption_error') done(); }
-            };
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: function(callback) { callback('decryption_error'); }}
-            );
-            rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
-        });
-
-        it('checkin waterfall flow error - getAlAuth()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'test error') done(); }
-            };
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: function(callback) { callback('test error'); }}
-            );
-            rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
-        });
-
-        it('checkin waterfall flow error - checkHealth()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'check_health_error') done(); }
-            };
-            checkinStub = sinon.stub(cweCheckin, 'checkHealth').callsFake(
-                function fakeFn(event, context, callback) {
-                    return callback('check_health_error', {});
-                });
-            rewireProcessCheckin(cweMock.CHECKIN_TEST_EVENT, context);
-        });
-
-    });
-
 
     describe('checkHealth() sunny case check', function() {
         var checkinRewire = rewire('../checkin');
@@ -129,94 +46,12 @@ describe('CWE Checkin Tests', function() {
         it('checkHealth', function(done) {
             rewireCheckHealth(cweMock.CHECKIN_TEST_EVENT, cweMock.DEFAULT_LAMBDA_CONTEXT, function(err, healthStatus) {
                 assert.equal(null, err);
-                var expected = {
-                    status: 'ok',
-                    details: []
-                };
+                var expected = null;
                 assert.deepEqual(expected, healthStatus);
                 done();
             });
         });
     });
-
-
-    describe('checkHealth() unexpected error case check', function() {
-        var checkinRewire = rewire('../checkin');
-        var rewireCheckHealth;
-
-        before(function() {
-            setAzcollectStub();
-        });
-
-        beforeEach(function() {
-            mock();
-            rewireCheckHealth = checkinRewire.__get__('checkHealth');
-        });
-
-        afterEach(function() {
-            unmock();
-        });
-
-        after(function() {
-            azcollectStub.restore();
-        });
-
-        //TODO maybe test case when err message does not contain `code` field
-        //TODO test Throttling message
-        //TODO test Internal AWS error case
-        it('checkHealth unexpected error code', function(done) {
-            mockCFDescribeStacks(function(data, callback) {
-                return callback(cweMockErrors.UNEXPECTED_ERROR, {});
-            });
-            check_error(done, rewireCheckHealth, stringify(cweMockErrors.UNEXPECTED_ERROR));
-        });
-    });
-
-    describe('checkHealth() - checkCloudFormationStatus errors', function() {
-        var checkinRewire = rewire('../checkin');
-        var rewireCheckHealth;
-
-        before(function() {
-            setAzcollectStub();
-        });
-
-        beforeEach(function() {
-            mock();
-            rewireCheckHealth = checkinRewire.__get__('checkHealth');
-        });
-
-        afterEach(function() {
-            unmock();
-        });
-
-        after(function() {
-            azcollectStub.restore();
-        });
-
-        it('describeStacks - access denied', function(done) {
-            mockCFDescribeStacks(function(data, callback) {
-                return callback(cweMockErrors.CF_DESCRIBE_STACKS_ACCESS_DENIED, {});
-            });
-            check_error(done, rewireCheckHealth, stringify(cweMockErrors.CF_DESCRIBE_STACKS_ACCESS_DENIED));
-        });
-
-        it('describeStacks - stack not found', function(done) {
-            mockCFDescribeStacks(function(data, callback) {
-                return callback(cweMockErrors.CF_DESCRIBE_STACKS_NOT_FOUND, {});
-            });
-            check_error(done, rewireCheckHealth, stringify(cweMockErrors.CF_DESCRIBE_STACKS_NOT_FOUND));
-        });
-
-        it('describeStacks - StackStatus is wrong', function(done) {
-            mockCFDescribeStacks(function(data, callback) {
-                var resp = clone(cweMock.CF_DESCRIBE_STACKS_RESPONSE);
-                resp.Stacks[0].StackStatus = 'NOT_CREATE_COMPLETE';
-                return callback(null, resp);
-            });
-            check_error(done, rewireCheckHealth, 'CF stack has wrong status: NOT_CREATE_COMPLETE');
-        });
-    });
-
 
     describe('checkHealth() - checkCloudWatchEventsRule errors', function() {
         var checkinRewire = rewire('../checkin');
@@ -254,7 +89,7 @@ describe('CWE Checkin Tests', function() {
         });
 
         it('describeRule - DISABLED state', function(done) {
-            expected = clone(cweMock.CWE_DESCRIBE_RULE);
+            const expected = clone(cweMock.CWE_DESCRIBE_RULE);
             expected.State = 'DISABLED';
             mockCWEDescribeRule(function(data, callback) {
                 return callback(null, expected);
@@ -363,7 +198,7 @@ describe('CWE Checkin Tests', function() {
                 'Incorrect event source mapping status: ' + stringify(expectedEventSource));
         });
     });
-    
+   /* 
     describe('processCheckin() get statistics', function() {
         var rewireGetDecryptedCredentials;
         var rewireGetAlAuth;
@@ -425,8 +260,6 @@ describe('CWE Checkin Tests', function() {
                 'status':'ok',
                 'details':[],
                 'statistics':[
-                    {'Label':'Invocations','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
-                    {'Label':'Errors','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
                     {'Label':'IncomingRecords','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
                     {'Label':'IncomingBytes','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
                     {'Label':'ReadProvisionedThroughputExceeded','Datapoints':[{'Timestamp':'2017-11-21T16:40:00Z','Sum':1,'Unit':'Count'}]},
@@ -470,8 +303,6 @@ describe('CWE Checkin Tests', function() {
                 'status' : 'ok',
                 'details' : [],
                 'statistics' : [
-                    {'Label':'Invocations','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
-                    {'Label':'Errors','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
                     {'Label':'IncomingRecords','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
                     {'Label':'IncomingBytes','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
                     {'Label':'ReadProvisionedThroughputExceeded','StatisticsError':'{\"code\":1,\"message\":\"Some error.\"}'},
@@ -485,9 +316,8 @@ describe('CWE Checkin Tests', function() {
         });
         
     });
-
+    */
 });
-
 
 function mock() {
     AWS.mock('CloudFormation', 'describeStacks', function (data, callback) {
@@ -514,15 +344,6 @@ function unmock() {
     AWS.restore('CloudWatchEvents', 'describeRule');
     AWS.restore('CloudWatchEvents', 'listTargetsByRule');
     AWS.restore('Lambda', 'listEventSourceMappings');
-}
-
-
-function mockCFDescribeStacks(fun) {
-    AWS.restore('CloudFormation', 'describeStacks');
-    AWS.mock('CloudFormation', 'describeStacks', function (data, callback) {
-        assert.equal(data.StackName, cweMock.STACK_NAME);
-        return fun(data, callback);
-    });
 }
 
 
@@ -553,10 +374,9 @@ function mockLambdaListEventSourceMappings(fun) {
 
 function check_error(done, rewireCheckHealth, details) {
     rewireCheckHealth(cweMock.CHECKIN_TEST_EVENT, cweMock.DEFAULT_LAMBDA_CONTEXT, function(err, healthStatus) {
-        assert.equal(null, err);
-        assert.equal('error', healthStatus.status);
-        assert.deepEqual([details], healthStatus.details);
-        assert.notEqual(undefined, healthStatus.error_code);
+        assert.equal('error', err.status);
+        assert.deepEqual(details, err.details);
+        assert.notEqual(undefined, err.code);
         done();
     });
 }

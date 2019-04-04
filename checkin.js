@@ -10,34 +10,6 @@
  
 const AWS = require('aws-sdk');
 const async = require('async');
-const m_alServiceC = require('al-collector-js/al_servicec');
-const m_packageJson = require('./package.json');
-
-const AZCOLLECT_ENDPOINT = process.env.azollect_api;
-const COLLECTOR_TYPE = 'cwe';
-
-function checkCloudFormationStatus(event, callback) {
-    var stackName = event.StackName;
-    var cloudformation = new AWS.CloudFormation();
-    cloudformation.describeStacks({StackName: stackName}, function(err, data) {
-        if (err) {
-            return callback(errorMsg('CWE00001', stringify(err)));
-        } else {
-            var stackStatus = data.Stacks[0].StackStatus;
-            if (stackStatus === 'CREATE_COMPLETE' ||
-                stackStatus === 'UPDATE_COMPLETE' ||
-                stackStatus === 'UPDATE_IN_PROGRESS' ||
-                stackStatus === 'UPDATE_ROLLBACK_COMPLETE' ||
-                stackStatus === 'UPDATE_ROLLBACK_IN_PROGRESS' ||
-                stackStatus === 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS' ||
-                stackStatus === 'REVIEW_IN_PROGRESS') {
-                return callback(null);
-            } else {
-                return callback(errorMsg('CWE00002', 'CF stack has wrong status: ' + stackStatus));
-            }
-        }
-    });
-}
 
 function checkCloudWatchEventsRule(event, finalCallback) {
     var cwe = new AWS.CloudWatchEvents();
@@ -96,11 +68,11 @@ function checkEventSourceMapping(checkinEvent, context, callback) {
 function checkEventSourceStatus(checkinEvent, eventSource, callback) {
     var lastProcessingResult = eventSource.LastProcessingResult;
     var state = eventSource.State;
-    
+
     if (state === 'Enabled' &&
         (lastProcessingResult === 'OK' ||
          // At this point the assumption is that all kinesis and events configuration
-         // around collect lambda is correct and 'No records processed' 
+         // around collect lambda is correct and 'No records processed'
          // means just no events being generated.
          lastProcessingResult === 'No records processed')) {
         return callback(null);
@@ -112,9 +84,6 @@ function checkEventSourceStatus(checkinEvent, eventSource, callback) {
 function checkHealth(event, context, finalCallback) {
     async.waterfall([
         function(callback) {
-            checkCloudFormationStatus(event, callback);
-        },
-        function(callback) {
             checkCloudWatchEventsRule(event, callback);
         },
         function(callback) {
@@ -124,42 +93,12 @@ function checkHealth(event, context, finalCallback) {
     function(errMsg) {
         if (errMsg) {
             console.warn('Health check failed with',  errMsg);
-            return finalCallback(null, {
-                status: errMsg.status,
-                error_code: errMsg.code,
-                details: [errMsg.details]
-            });
+            return finalCallback(errMsg);
         } else {
-            return finalCallback(null, {
-                status: 'ok',
-                details: []
-            });
+            return finalCallback(null);
         }
     });
 }
-
-
-function sendCheckin(event, context, aimsC, healthStatus, callback) {
-    var checkinValues = {
-        awsAccountId : event.AwsAccountId,
-        region : process.env.AWS_REGION,
-        functionName : context.functionName,
-        status : healthStatus.status,
-        details : healthStatus.details,
-        error_code: healthStatus.error_code,
-        version : m_packageJson.version,
-        statistics : healthStatus.statistics
-    };
-    var azcollectSvc = new m_alServiceC.AzcollectC(AZCOLLECT_ENDPOINT, aimsC, COLLECTOR_TYPE);
-    azcollectSvc.checkin(checkinValues)
-        .then(resp => {
-            return callback(null);
-        })
-        .catch(function(exception) {
-            return callback(`Checkin failed: ${exception}`);
-        });
-}
-
 
 function stringify(jsonObj) {
     return JSON.stringify(jsonObj, null, 0);
@@ -174,6 +113,15 @@ function errorMsg(code, message) {
 }
 
 module.exports = {
-    checkHealth : checkHealth,
-    sendCheckin : sendCheckin
+    checkHealth : function(event, context){
+        //add in the env var for the framework
+        if(!process.env.stack_name){
+            process.env.stack_name = event.StackName;
+        }
+
+        //close over the event and context to creat a function compatible with the framework.
+        return function(callback){
+            checkHealth(event, context, callback);
+        };
+    }
 };

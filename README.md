@@ -71,7 +71,17 @@ See [debug](https://www.npmjs.com/package/debug) for further details.
 
 # Known Issues/ Open Questions
 
-- TBD.
+- **Warning**: Do Not add additional envrionment varaibles to `config.json` as older collectors do not have the permissions to edit their own environment variables. Adding these to teh config file will break updates on older collectors.
+
+Eg. Dont do this:
+    ```{
+    {
+        "Environment": {
+            "path": "Envrioment.Variables.some_env_var_name",
+            "value": "DO_NOT_DO_THIS"
+        }
+    }
+    ```
 
 # Useful Links
 

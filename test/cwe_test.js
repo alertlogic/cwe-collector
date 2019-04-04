@@ -2,41 +2,26 @@
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const m_aimsc = require('al-collector-js/al_servicec').AimsC;
 var AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
-const cweMockErrors = require('./cwe_mock_errors');
 var cweRewire = rewire('../index');
-var servicecRewire = rewire('al-collector-js/al_servicec');
-var m_servicec = require('al-collector-js/al_servicec');
-var m_response = require('cfn-response');
 
 describe('CWE Unit Tests', function() {
 
-    describe('processEvent()', function() {
-        var rewireFun;
-
-        afterEach(function() {
-            rewireFun();
-        });
-
-        it('cloudwatch event triggers processKinesisRecords()', function(done) {
-            rewireFun = cweRewire.__set__({processKinesisRecords: () => { done();}});
-            cweRewire.handler(cweMock.GD_ONLY_KINESIS_TEST_EVENT, null);
-        });
-
-        it('scheduled event triggers processScheduledEvent()', function(done) {
-            rewireFun = cweRewire.__set__({processScheduledEvent: () => { done(); }});
-            cweRewire.handler({RequestType : 'ScheduledEvent'}, null);
-        });
-    });
-
-
     // FIXME - check lambda update call
     describe('processScheduledEvent()', function() {
+        var rewireProcessScheduleEvent;
+        var mockCollector = {
+            update: (callback) => {
+                return callback("update");
+            },
+            checkin: (callback) => {
+                return callback("checkin");
+            }
+        };
 
         before(function() {
-
+            rewireProcessScheduleEvent = cweRewire.__get__('processScheduledEvent');
         });
 
         after(function() {
@@ -44,429 +29,51 @@ describe('CWE Unit Tests', function() {
         });
 
         it('call function update', function(done) {
-            done();
-        });
-    });
-
-    describe('processRegistration()', function() {
-        var rewireGetDecryptedCredentials;
-        var rewireGetAlAuth;
-        var rewireProcessRegistration;
-        var responseStub;
-        var azcollectStub;
-
-        before(function() {
-            azcollectStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
-                function fakeFn(path, extraOptions) {
-                    assert.equal(cweMock.REGISTRATION_TEST_URL, path);
-                    assert.equal(cweMock.REGISTRATION_STACK_NAME, extraOptions.body.cf_stack_name);
-                    assert.equal(cweMock.REGISTRATION_COLLECT_RULE, extraOptions.body.collect_rule);
-                    return new Promise(function(resolve, reject) {
-                                return [{}];
-                           });
-                });
-            responseStub = sinon.stub(m_response, 'send').callsFake(
-                 function fakeFn() {
-                 });
-        });
-
-        beforeEach(function() {
-            rewireProcessRegistration = cweRewire.__get__('processRegistration');
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: (callback) => { callback(null); }}
-            );
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: (callback) => { callback(null, {}); }}
-            );
-        });
-
-        afterEach(function() {
-            rewireGetDecryptedCredentials();
-            rewireGetAlAuth();
-        });
-
-        after(function() {
-            azcollectStub.restore();
-            responseStub.restore();
-        });
-
-        it('registration waterfall flow OK - sendRegistration()', function(done) {
-            var context = {
-                functionName : cweMock.REGISTRATION_TEST_FUNCTION_NAME,
-                fail : (reason) => { if (reason === 'test error') done(); },
-                done : () => { done(); }
-            };
-            rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, true);
-            done();
-        });
-
-        it('registration waterfall flow error - getDecryptedCredentials()', function(done) {
-            var context = {
-                fail : (reason) => { }
-            };
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: function(callback) { callback('decryption_error'); }}
-            );
-            rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, true);
-            done();
-        });
-
-        it('registration waterfall flow error - getAlAuth()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'test error') done(); }
-            };
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: function(callback) { callback('test error'); }}
-            );
-            rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, true);
-            done();
-        });
-
-    });
-
-    describe('processDeregistration()', function() {
-        var rewireGetDecryptedCredentials;
-        var rewireGetAlAuth;
-        var rewireProcessRegistration;
-        var responseStub;
-        var azcollectStub;
-
-        before(function() {
-            azcollectStub = sinon.stub(m_servicec.AlServiceC.prototype, 'deleteRequest').callsFake(
-                function fakeFn(path, extraOptions) {
-                    assert.equal(cweMock.REGISTRATION_TEST_URL, path);
-                    return new Promise(function(resolve, reject) {
-                                return [{}];
-                           });
-                });
-            responseStub = sinon.stub(m_response, 'send').callsFake(
-                 function fakeFn() {
-                 });
-        });
-
-        beforeEach(function() {
-            rewireProcessRegistration = cweRewire.__get__('processRegistration');
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: (callback) => { callback(null); }}
-            );
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: (callback) => { callback(null, {}); }}
-            );
-        });
-
-        afterEach(function() {
-            rewireGetDecryptedCredentials();
-            rewireGetAlAuth();
-        });
-
-        after(function() {
-            azcollectStub.restore();
-            responseStub.restore();
-        });
-
-        it('deregistration waterfall flow OK - sendRegistration()', function(done) {
-            var context = {
-                functionName : cweMock.REGISTRATION_TEST_FUNCTION_NAME,
-                fail : (reason) => { if (reason === 'test error') done(); },
-                done : () => { done(); }
-            };
-            rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, false);
-            done();
-        });
-
-        it('deregistration waterfall flow error - getDecryptedCredentials()', function(done) {
-            var context = {
-                fail : (reason) => { }
-            };
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: function(callback) { callback('decryption_error'); }}
-            );
-            rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, false);
-            done();
-        });
-
-        it('registration waterfall flow error - getAlAuth()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'test error') done(); }
-            };
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: function(callback) { callback('test error'); }}
-            );
-            rewireProcessRegistration(cweMock.REGISTRATION_TEST_EVENT, context, false);
-            done();
-        });
-
-    });
-
-    describe('processKinesisRecords()', function() {
-        var rewireGetDecryptedCredentials;
-        var rewireGetAlAuth;
-        var rewireFormatMessages;
-        var rewireSendToIngest;
-        var rewireProcessKinesisRecords;
-
-        beforeEach(function() {
-            rewireProcessKinesisRecords = cweRewire.__get__('processKinesisRecords');
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: (callback) => { callback(null); }}
-            );
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: (callback) => { callback(null, {}); }}
-            );
-            rewireFormatMessages = cweRewire.__set__(
-                {formatMessages: (event, context, callback) => { callback(null, 'msg'); }}
-            );
-            rewireSendToIngest = cweRewire.__set__(
-                {sendToIngest: (event, context, aimsC, message, callback) => { callback(null, 'resp'); }}
-            );
-        });
-
-        afterEach(function() {
-            rewireGetDecryptedCredentials();
-            rewireGetAlAuth();
-            rewireFormatMessages();
-            rewireSendToIngest();
-        });
-
-        it('waterfall flow OK', function(done) {
-            var context = {
-                succeed : () => { done(); }
-            };
-            rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
-        });
-
-        it('waterfall flow error - getDecryptedCredentials()', function(done) {
-            var context = {fail : (reason) => { if (reason === 'decryption_error') done(); } };
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: function(callback) { callback('decryption_error'); }}
-            );
-            rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
-        });
-
-        it('waterfall flow error - getAlAuth()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'test error') done(); } 
-            };
-            rewireGetAlAuth();
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: function(callback) { callback('test error'); }}
-            );
-            rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
-        });
-
-        it('waterfall flow error - formatMessages()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'test error') done(); }
-            };
-            rewireFormatMessages = cweRewire.__set__(
-                {formatMessages: (event, context, callback) => { callback('test error'); }}
-            );
-            rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
-        });
-
-        it('waterfall flow error - sendToIngest()', function(done) {
-            var context = {
-                fail : (reason) => { if (reason === 'test error') done(); }
-            };
-            rewireSendToIngest();
-            rewireSendToIngest = cweRewire.__set__(
-                {sendToIngest: (event, context, aimsC, message, callback) => { callback('test error'); }}
-            );
-            rewireProcessKinesisRecords(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
-        });
-    });
-
-    describe('sendToIngest()', function() {
-        var rewireGetDecryptedCredentials;
-        var rewireGetAlAuth;
-        var rewireSendToIngest;
-        var aimscStub;
-        var responseStub;
-        var ingestStub;
-
-        before(function() {
-            aimscStub = sinon.stub(m_aimsc.prototype, 'authenticate').
-            callsFake(
-                function fake(aa,bb) {
-                    return new Promise(function(resolve, reject) {
-                        resolve();
-                    });
-                }
-            );
-            responseStub = sinon.stub(m_response, 'send').callsFake(
-                 function fakeFn() {
-                 });
-        });
-
-        beforeEach(function() {
-            rewireSendToIngest = cweRewire.__get__('sendToIngest');
-            rewireGetDecryptedCredentials = cweRewire.__set__(
-                {getDecryptedCredentials: (callback) => { callback(null); }}
-            );
-            rewireGetAlAuth = cweRewire.__set__(
-                {getAlAuth: (callback) => { callback(null, {}); }}
-            );
-        });
-
-        afterEach(function() {
-            rewireGetDecryptedCredentials();
-            rewireGetAlAuth();
-            ingestStub.restore();
-        });
-
-        after(function() {
-            responseStub.restore();
-            aimscStub.restore();
-        });
-
-        it('waterfall send to ingest OK', function(done) {
-            ingestStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
-                function fakeFn(path, extraOptions) {
-                    assert.equal(cweMock.INGEST_TEST_URL, path);
-                    return new Promise(function(resolve, reject) {
-                                resolve();
-                           });
-                });
-            
-            var context = {};            
-            var collectedBatch = JSON.stringify(cweMock.TEST_COLLECTED_BATCH);
-            rewireSendToIngest(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context,
-                aimscStub, collectedBatch, 
-                function(arg) { 
-                    done();
-                });            
-        });
-
-        it('waterfall send to ingest 400 response', function(done) {
-            ingestStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
-                function fakeFn(path, extraOptions) {
-                    assert.equal(cweMock.INGEST_TEST_URL, path);
-                    return new Promise(function(resolve, reject) {
-                                throw cweMockErrors.INGEST_400_RESPONSE;
-                           });
-                });
-
-            var context = {};
-            var collectedBatch = JSON.stringify(cweMock.TEST_COLLECTED_BATCH);
-            rewireSendToIngest(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context,
-                aimscStub, collectedBatch,
-                function(arg) {
-                    assert.equal(null, arg);
-                    done();
-                });
-        });
-
-        it('waterfall send to ingest Error', function(done) {
-            ingestStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
-                function fakeFn(path, extraOptions) {
-                    assert.equal(cweMock.INGEST_TEST_URL, path);
-                    return new Promise(function(resolve, reject) {
-                                throw 'exception';
-                           });
-                });
-            
-            var context = {};            
-            var collectedBatch = JSON.stringify(cweMock.TEST_COLLECTED_BATCH);
-            rewireSendToIngest(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context,
-                aimscStub, collectedBatch, 
-                function(exception) {
-                    assert.equal('Unable to send to Ingest exception', exception);                    
-                    done();
-                });            
-        });
-        
-    });
-
-    describe('ingestError()', function() {
-        var rewireIngestError;
-
-        before(function() {
-            rewireIngestError = cweRewire.__get__('ingestError');
-        });
-
-        it('return OK in case of 400', function(done) {
-            rewireIngestError({}, {}, cweMockErrors.INGEST_400_RESPONSE,
-                function(error) {
-                    assert.equal(null, error);
-                    done();
-                });
-        });
-
-        it('return OK in case of 400 but no body message', function(done) {
-            rewireIngestError({}, {}, cweMockErrors.INGEST_400_NO_OPTIONS_RESPONSE,
-                function(error) {
-                    assert.equal(null, error);
-                    done();
-                });
-        });
-
-        it('return failure in case of non 400 status', function(done) {
-            rewireIngestError({}, {}, cweMockErrors.INGEST_500_RESPONSE,
-                function(error) {
-                    assert.equal(`Unable to send to Ingest ${cweMockErrors.INGEST_500_RESPONSE}`, error);
-                    done();
-                });
-        });
-    });
-
-    describe('getAlAuth()', function() {
-        var rewireGetAlAuth;
-        var stub;
-
-        before(function() {
-            cweRewire = rewire('../index');
-            cweRewire.__set__('AIMS_CREDS', {
-                access_key_id : 'access_key_id',
-                secret_key: 'secret_key_value'
+            rewireProcessScheduleEvent(cweMock.UPDATE_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
+                assert(result === "update");
+                done();
             });
-            rewireGetAlAuth = cweRewire.__get__('getAlAuth');
         });
 
-        afterEach(function() {
-            stub.restore();
+        it('call function checkin', function(done) {
+            rewireProcessScheduleEvent(cweMock.CHECKIN_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
+                assert(result === "checkin");
+                done();
+            });
         });
 
-        it('aims returns ok', function(done) {
-            stub = sinon.stub(m_aimsc.prototype, 'authenticate').
-            callsFake(
-                function fake(aa,bb) {
-                    return new Promise(function(resolve, reject) {
-                        resolve();
-                    });
-                }
-            );
-
-            rewireGetAlAuth(function(err) { if (err === null) done(); });
-        });
-
-        it('aims returns error', function(done) {
-            stub = sinon.stub(m_aimsc.prototype, 'authenticate').
-            callsFake(
-                function fake(aa,bb) {
-                    return new Promise(function(resolve, reject) {
-                        reject('reject');
-                    });
-                }
-            );
-
-            rewireGetAlAuth(function(err) { if (err === 'reject') done(); });
-        });
-
-        it('aims throws exception', function(done) {
-            stub = sinon.stub(m_aimsc.prototype, 'authenticate').
-            callsFake(
-                function fake(aa,bb) {
-                    return new Promise(function(resolve, reject) {
-                        throw 'exception';
-                    });
-                }
-            );
-
-            rewireGetAlAuth(function(err) { if (err === 'exception') done(); });
+        it('fails when an unknown event is passed', function(done) {
+            const stub = sinon.stub(cweMock.DEFAULT_LAMBDA_CONTEXT, "fail");
+            rewireProcessScheduleEvent({"RequestType": "InvalidType"}, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, null);
+            assert(stub.called);
+            done();
         });
     });
-    
+
+    describe('getStatisticsFunctions()', () => {
+        var rewireGetStatisticsFunctions;
+        beforeEach(function() {
+            rewireGetStatisticsFunctions = cweRewire.__get__('getStatisticsFunctions');
+        });
+
+        it('generates an empty list when passed a GD event', () => {
+            const result = rewireGetStatisticsFunctions(cweMock.GD_OTHER_KINESIS_TEST_EVENT);
+            assert(result.length === 0);
+        });
+
+        it('generates a list of functions when passed a Checkin Event', () => {
+            const result = rewireGetStatisticsFunctions(cweMock.CHECKIN_TEST_EVENT);
+            assert(result.length !== 0);
+        });
+
+        it('generates an empty array when an update event is passed', () => {
+            const result = rewireGetStatisticsFunctions(cweMock.UPDATE_TEST_EVENT);
+            assert(result.length === 0);
+        });
+    });
+
     describe('formatMessages()', function() {
+        var rewireFormatMessages;
 
         beforeEach(function() {
             rewireFormatMessages = cweRewire.__get__('formatMessages');
@@ -548,7 +155,6 @@ describe('CWE Unit Tests', function() {
 
     describe('getDecryptedCredentials()', function() {
         var rewireGetDecryptedCredentials;
-        var stub;
 
         const ACCESS_KEY_ID = 'access_key_id';
         const ENCRYPTED_SECRET_KEY = 'encrypted_secret_key';

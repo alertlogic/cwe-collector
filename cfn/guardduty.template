@@ -686,6 +686,7 @@
                       { "Ref" : "AWS::Region" }
                   ]]},
                   "aws_lambda_zipfile_name": "packages/lambda/al-cwe-collector.zip",
+                  "aws_lambda_update_config_name": "configs/lambda/al-cwe-collector.json",
                   "al_api":{
                       "Ref":"AlApiEndpoint"
                   },

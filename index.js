@@ -158,20 +158,20 @@ function envVarMigration(event){
 
 
 exports.handler = function(event, context) {
-envVarMigration(event);
-async.waterfall([
-    getDecryptedCredentials,
-    function(asyncCallback){
-        const collector = new AlAwsCollector(
-            context,
-            "cwe",
-                AlAwsCollector.IngestTypes.SECMSGS,
-                m_packageJson.version,
-                AIMS_CREDS,
-                formatMessages,
-                [m_checkin.checkHealth(event, context)],
-                getStatisticsFunctions(event)
-            );
+    envVarMigration(event);
+    async.waterfall([
+        getDecryptedCredentials,
+        function(asyncCallback){
+            const collector = new AlAwsCollector(
+                context,
+                "cwe",
+                    AlAwsCollector.IngestTypes.SECMSGS,
+                    m_packageJson.version,
+                    AIMS_CREDS,
+                    formatMessages,
+                    [m_checkin.checkHealth(event, context)],
+                    getStatisticsFunctions(event)
+                );
 
             debug("DEBUG0001: Received event: ", JSON.stringify(event));
             switch (event.RequestType) {

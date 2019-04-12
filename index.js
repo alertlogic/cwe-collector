@@ -165,13 +165,13 @@ exports.handler = function(event, context) {
             const collector = new AlAwsCollector(
                 context,
                 "cwe",
-                    AlAwsCollector.IngestTypes.SECMSGS,
-                    m_packageJson.version,
-                    AIMS_CREDS,
-                    formatMessages,
-                    [m_checkin.checkHealth(event, context)],
-                    getStatisticsFunctions(event)
-                );
+                AlAwsCollector.IngestTypes.SECMSGS,
+                m_packageJson.version,
+                AIMS_CREDS,
+                formatMessages,
+                [m_checkin.checkHealth(event, context)],
+                getStatisticsFunctions(event)
+            );
 
             debug("DEBUG0001: Received event: ", JSON.stringify(event));
             switch (event.RequestType) {

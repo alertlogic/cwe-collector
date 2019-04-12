@@ -144,20 +144,27 @@ function getStatisticsFunctions(event) {
     ];
 }
 
+// Migration code for old collectors.
+// This needs to be done because the collector lambda does not have premissions to set its own env vars.
+function envVarMigration(event){
+    if(!process.env.aws_lambda_update_config_name){
+        process.env.aws_lambda_update_config_name = 'configs/lambda/al-cwe-collector.json';
+    }
+    //add in the env var for the framework
+    if(!process.env.stack_name && event.StackName){
+        process.env.stack_name = event.StackName;
+    }
+}
+
 
 exports.handler = function(event, context) {
-    async.waterfall([
-        getDecryptedCredentials,
-        function(asyncCallback){
-            // Migration code for old collectors.
-            // This needs to be done because the collector lambda does not have premissions to set its own env vars.
-            if(!process.env.aws_lambda_update_config_name){
-                process.env.aws_lambda_update_config_name = 'configs/lambda/config.json';
-            }
-
-            const collector = new AlAwsCollector(
-                context,
-                "cwe",
+envVarMigration(event);
+async.waterfall([
+    getDecryptedCredentials,
+    function(asyncCallback){
+        const collector = new AlAwsCollector(
+            context,
+            "cwe",
                 AlAwsCollector.IngestTypes.SECMSGS,
                 m_packageJson.version,
                 AIMS_CREDS,

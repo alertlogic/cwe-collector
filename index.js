@@ -43,16 +43,19 @@ function getDecryptedCredentials(callback) {
 }
 
 function getKinesisData(event, callback) {
-    async.map(event.Records, function(record, mapCallback) {
-        var cwEvent = new Buffer(record.kinesis.data, 'base64').toString('utf-8');
-        try {
-            return mapCallback(null, JSON.parse(cwEvent));
-        } catch (ex) {
-            console.warn('Event parse failed.', ex);
-            console.warn('Skipping: ', record.kinesis.data);
-            return mapCallback(null, {});
-        }
-    }, callback);
+    async.map(event.Records,
+        function(record, mapCallback) {
+            var cwEvent = new Buffer(record.kinesis.data, 'base64').toString('utf-8');
+            try {
+                return mapCallback(null, JSON.parse(cwEvent));
+            } catch (ex) {
+                console.warn('Event parse failed.', ex);
+                console.warn('Skipping: ', record.kinesis.data);
+                return mapCallback(null, {});
+            }
+        },
+        callback
+    );
 }
 
 function filterGDEvents(cwEvents, callback) {

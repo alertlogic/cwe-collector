@@ -98,7 +98,24 @@ describe('CWE Unit Tests', function() {
                 done();
             });
         });
-        
+
+        it('Guard Duty events format filter garbage and empty', function(done) {
+            var context = {
+                invokedFunctionArn : 'test:arn'
+            };
+            rewireFormatMessages(cweMock.GD_ONLY_KINESIS_TEST_EVENT_WITH_BAD_RECORDS, context, function(formatError, collectedData) {
+                var expected = {
+                    collected_batch : {
+                        source_id : context.invokedFunctionArn,
+                        collected_messages : [cweMock.GD_EVENT]
+                    }
+                };
+                assert.equal(null, formatError);
+                assert.equal(JSON.stringify(expected), collectedData);
+                done();
+            });
+        });
+
         it('Guard Duty events filtering', function(done) {
             var context = {
                 invokedFunctionArn : 'test:arn'

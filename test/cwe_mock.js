@@ -61,6 +61,59 @@ const REGISTRATION_TEST_EVENT = {
     }
 };
 
+const GD_ONLY_KINESIS_TEST_EVENT_WITH_BAD_RECORDS = {
+  'Records': [
+    {
+      'kinesis': {
+        'kinesisSchemaVersion': '1.0',
+        'partitionKey': '52badd7d-edd6-ac34-b543-393e309cb977_dee8b923-1314-47b0-b820-68030eaf93e3',
+        'sequenceNumber': '49577651119794799532435452775356657619317529872846290946',
+        'data': 'eyJ2ZXJzaW9uIjoiMCIsImlkIjoiNTJiYWRkN2QtZWRkNi1hYzM0LWI1NDMtMzkzZTMwOWNiOTc3IiwiZGV0YWlsLXR5cGUiOiJHdWFyZER1dHkgRmluZGluZyIsInNvdXJjZSI6ImF3cy5ndWFyZGR1dHkiLCJhY2NvdW50IjoiMzUyMjgzODk0MDA4IiwidGltZSI6IjE5NzAtMDEtMDFUMDA6MDA6MDBaIiwicmVnaW9uIjoidXMtZWFzdC0xIiwicmVzb3VyY2VzIjpbXSwiZGV0YWlsIjp7InNjaGVtYVZlcnNpb24iOiIyLjAiLCJhY2NvdW50SWQiOiIzNTIyODM4OTQwMDgiLCJyZWdpb24iOiJ1cy1lYXN0LTEiLCJwYXJ0aXRpb24iOiJhd3MiLCJpZCI6IjNhYWY4M2RkZDljMzE0MDUyNDZmYTFjNjJlM2UwMzRkIiwiYXJuIjoiYXJuOmF3czpndWFyZGR1dHk6dXMtZWFzdC0xOjM1MjI4Mzg5NDAwODpkZXRlY3Rvci8wNGFmNTFkMTAxYzhjNWJjYWUzYTkyNTYwYzcwMTBjZS9maW5kaW5nLzNhYWY4M2RkZDljMzE0MDUyNDZmYTFjNjJlM2UwMzRkIiwidHlwZSI6IlVuYXV0aG9yaXplZEFjY2VzczpFQzIvTWFsaWNpb3VzSVBDYWxsZXIuQ3VzdG9tIiwicmVzb3VyY2UiOnsicmVzb3VyY2VUeXBlIjoiSW5zdGFuY2UiLCJpbnN0YW5jZURldGFpbHMiOnsiaW1hZ2VJZCI6ImFtaS04YTFhZTJlNyIsImluc3RhbmNlSWQiOiJpLTA5NjFlMGIzYWY4YjNlYzM5IiwiaW5zdGFuY2VUeXBlIjoiYzQubGFyZ2UiLCJsYXVuY2hUaW1lIjoxLjUwNzY1NjA2M0UxMiwicHJvZHVjdENvZGVzIjpbXSwibmV0d29ya0ludGVyZmFjZXMiOlt7ImlwdjZBZGRyZXNzZXMiOltdLCJwcml2YXRlSXBBZGRyZXNzIjoiMTAuNjYuNjYuMzkiLCJwcml2YXRlSXBBZGRyZXNzZXMiOlt7InByaXZhdGVJcEFkZHJlc3MiOiIxMC42Ni42Ni4zOSJ9XSwic3VibmV0SWQiOiJzdWJuZXQtYzM5NmI4Y2YiLCJ2cGNJZCI6InZwYy1iNWE5NmZjZCIsInNlY3VyaXR5R3JvdXBzIjpbeyJncm91cE5hbWUiOiJBbGVydCBMb2dpYyBTZWN1cml0eSBHcm91cCAxMzQyMzI4MjhfMjhENTlCMjctQjU0Ni00QTQ4LUFBMEEtODhGRjEzM0M4MTI2IiwiZ3JvdXBJZCI6InNnLTIxNzE4ZjUzIn1dLCJwdWJsaWNEbnNOYW1lIjoiIiwicHVibGljSXAiOiIzNC4yMDQuMTcyLjE2NiJ9XSwidGFncyI6W3sia2V5IjoiQWxlcnRMb2dpYy1FbnZpcm9ubWVudElEIiwidmFsdWUiOiIyOEQ1OUIyNy1CNTQ2LTRBNDgtQUEwQS04OEZGMTMzQzgxMjYifSx7ImtleSI6Ik5hbWUiLCJ2YWx1ZSI6IkFsZXJ0TG9naWMgU2VjdXJpdHkgQXBwbGlhbmNlIn0seyJrZXkiOiJBbGVydExvZ2ljIiwidmFsdWUiOiJTZWN1cml0eSJ9LHsia2V5IjoiYXdzOmF1dG9zY2FsaW5nOmdyb3VwTmFtZSIsInZhbHVlIjoiQWxlcnQgTG9naWMgU2VjdXJpdHkgQXV0byBTY2FsaW5nIEdyb3VwXzEzNDIzMjgyOF8yOEQ1OUIyNy1CNTQ2LTRBNDgtQUEwQS04OEZGMTMzQzgxMjZfdnBjLWI1YTk2ZmNkIn0seyJrZXkiOiJBbGVydExvZ2ljLUFjY291bnRJRCIsInZhbHVlIjoiMTM0MjMyODI4In1dLCJpbnN0YW5jZVN0YXRlIjoicnVubmluZyIsImF2YWlsYWJpbGl0eVpvbmUiOiJ1cy1lYXN0LTFmIn19LCJzZXJ2aWNlIjp7InNlcnZpY2VOYW1lIjoiZ3VhcmRkdXR5IiwiZGV0ZWN0b3JJZCI6IjA0YWY1MWQxMDFjOGM1YmNhZTNhOTI1NjBjNzAxMGNlIiwiYWN0aW9uIjp7ImFjdGlvblR5cGUiOiJORVRXT1JLX0NPTk5FQ1RJT04iLCJuZXR3b3JrQ29ubmVjdGlvbkFjdGlvbiI6eyJjb25uZWN0aW9uRGlyZWN0aW9uIjoiVU5LTk9XTiIsInJlbW90ZUlwRGV0YWlscyI6eyJpcEFkZHJlc3NWNCI6Ijc3LjcyLjgyLjgwIiwib3JnYW5pemF0aW9uIjp7ImFzbiI6NDMzNTAuMCwiYXNuT3JnIjoiTkZvcmNlIEVudGVydGFpbm1lbnQgQi5WLiIsImlzcCI6Ik5ldFVQIEx0ZC4iLCJvcmciOiJOZXRVUCBMdGQuIn0sImNvdW50cnkiOnsiY291bnRyeUNvZGUiOiJHQiIsImNvdW50cnlOYW1lIjoiVW5pdGVkIEtpbmdkb20ifSwiY2l0eSI6eyJjaXR5TmFtZSI6IlN0b2tlLW9uLVRyZW50In0sImdlb0xvY2F0aW9uIjp7ImxhdCI6NTMuMCwibG9uIjotMi4xODMzfX0sInJlbW90ZVBvcnREZXRhaWxzIjp7InBvcnQiOjQ0NzA1LjAsInBvcnROYW1lIjoiVW5rbm93biJ9LCJsb2NhbFBvcnREZXRhaWxzIjp7InBvcnQiOjQ0ODcuMCwicG9ydE5hbWUiOiJVbmtub3duIn0sInByb3RvY29sIjoiVENQIiwiYmxvY2tlZCI6dHJ1ZX19LCJyZXNvdXJjZVJvbGUiOiJUQVJHRVQiLCJhZGRpdGlvbmFsSW5mbyI6eyJ0aHJlYXROYW1lIjoiQ3VzdG9tZXIgVGhyZWF0IEludGVsIiwidGhyZWF0TGlzdE5hbWUiOiJ0ZG9zb3VkaWwtc2V6bmFtLWN6In0sImV2ZW50Rmlyc3RTZWVuIjoiMjAxNy0xMC0xMFQxOToxODoyMFoiLCJldmVudExhc3RTZWVuIjoiMjAxNy0xMC0xMVQyMzo0OTowOVoiLCJhcmNoaXZlZCI6ZmFsc2UsImNvdW50IjoyMC4wfSwic2V2ZXJpdHkiOjUuMCwiY3JlYXRlZEF0IjoiMjAxNy0xMC0xMFQxOToyMTowMi41OThaIiwidXBkYXRlZEF0IjoiMjAxNy0xMC0xMVQyMzo1MjoxNi45MzVaIiwidGl0bGUiOiJFQzIgSW5zdGFuY2UgaS0wOTYxZTBiM2FmOGIzZWMzOSBjb21tdW5pY2F0aW5nIG91dGJvdW5kIHdpdGggZGlzYWxsb3dlZCBJUCBhZGRyZXNzLiIsImRlc2NyaXB0aW9uIjoiRUMyIEluc3RhbmNlIGktMDk2MWUwYjNhZjhiM2VjMzkgaGFzIGJlZW4gZm91bmQgY29tbXVuaWNhdGluZyBvdXRib3VuZCB3aXRoIGRpc2FsbG93ZWQgSVAgYWRkcmVzcyA3Ny43Mi44Mi44MCBwcmVzZW50IGluIHRoZSBsaXN0IHRkb3NvdWRpbC1zZXpuYW0tY3ouIn19',
+        'approximateArrivalTimestamp': 1507769764.013
+      },
+      'eventSource': 'aws:kinesis',
+      'eventVersion': '1.0',
+      'eventID': 'shardId-000000000000:49577651119794799532435452775356657619317529872846290946',
+      'eventName': 'aws:kinesis:record',
+      'invokeIdentityArn': 'arn:aws:iam::352283894008:role/kkuzmin-vpc-flow-role',
+      'awsRegion': 'us-east-1',
+      'eventSourceARN': 'arn:aws:kinesis:us-east-1:352283894008:stream/kkuzmin-gd-test'
+    },
+    {
+      'kinesis': {
+        'kinesisSchemaVersion': '1.0',
+        'partitionKey': '52badd7d-edd6-ac34-b543-393e309cb977_dee8b923-1314-47b0-b820-68030eaf93e3',
+        'sequenceNumber': '49577651119794799532435452775356657619317529872846290946',
+        'data': 'eyJcIiJ9',
+        'approximateArrivalTimestamp': 1507769764.013
+      },
+      'eventSource': 'aws:kinesis',
+      'eventVersion': '1.0',
+      'eventID': 'shardId-000000000000:49577651119794799532435452775356657619317529872846290946',
+      'eventName': 'aws:kinesis:record',
+      'invokeIdentityArn': 'arn:aws:iam::352283894008:role/kkuzmin-vpc-flow-role',
+      'awsRegion': 'us-east-1',
+      'eventSourceARN': 'arn:aws:kinesis:us-east-1:352283894008:stream/kkuzmin-gd-test'
+    },
+    {
+      'kinesis': {
+        'kinesisSchemaVersion': '1.0',
+        'partitionKey': '52badd7d-edd6-ac34-b543-393e309cb977_dee8b923-1314-47b0-b820-68030eaf93e3',
+        'sequenceNumber': '49577651119794799532435452775356657619317529872846290946',
+        'data': 'e30=',
+        'approximateArrivalTimestamp': 1507769764.013
+      },
+      'eventSource': 'aws:kinesis',
+      'eventVersion': '1.0',
+      'eventID': 'shardId-000000000000:49577651119794799532435452775356657619317529872846290946',
+      'eventName': 'aws:kinesis:record',
+      'invokeIdentityArn': 'arn:aws:iam::352283894008:role/kkuzmin-vpc-flow-role',
+      'awsRegion': 'us-east-1',
+      'eventSourceARN': 'arn:aws:kinesis:us-east-1:352283894008:stream/kkuzmin-gd-test'
+    }
+  ]
+};
+
 const GD_ONLY_KINESIS_TEST_EVENT = {
   'Records': [
     {
@@ -459,6 +512,7 @@ module.exports = {
     REGISTRATION_TEST_URL : REGISTRATION_TEST_URL,
     REGISTRATION_TEST_EVENT : REGISTRATION_TEST_EVENT,
     GD_ONLY_KINESIS_TEST_EVENT : GD_ONLY_KINESIS_TEST_EVENT,
+    GD_ONLY_KINESIS_TEST_EVENT_WITH_BAD_RECORDS : GD_ONLY_KINESIS_TEST_EVENT_WITH_BAD_RECORDS,
     GD_OTHER_KINESIS_TEST_EVENT : GD_OTHER_KINESIS_TEST_EVENT,
     NON_GD_OTHER_KINESIS_TEST_EVENT : NON_GD_OTHER_KINESIS_TEST_EVENT,
     NO_GD_KINESIS_TEST_EVENT : NO_GD_KINESIS_TEST_EVENT,

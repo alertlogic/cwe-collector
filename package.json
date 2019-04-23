@@ -40,7 +40,7 @@
     "request": "^2.88.0",
     "request-promise-native": "*",
     "@alertlogic/al-collector-js": "^1.1.2",
-    "@alertlogic/al-aws-collector-js": "^1.1.0"
+    "@alertlogic/al-aws-collector-js": "https://github.com/JDragovichAlertLogic/al-aws-collector-js.git#npm"
   },
   "author": "Alert Logic Inc."
 }

@@ -6,7 +6,7 @@ const AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 const cweMockErrors = require('./cwe_mock_errors');
 const clone = require('clone');
-var m_servicec = require('al-collector-js/al_servicec');
+var {AlServiceC: m_servicec} = require('@alertlogic/al-collector-js');
 var azcollectStub;
 
 function setAzcollectStub() {

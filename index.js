@@ -91,7 +91,7 @@ function formatMessages(event, context, callback) {
                     }
                 }));
             } else {
-                return asyncCallback(null, '');
+                return asyncCallback(null);
             }
         }],
         callback);

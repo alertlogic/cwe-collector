@@ -1,19 +1,30 @@
 {
   "name": "al-cwe-collector",
   "version": "1.1.0",
+  "license": "MIT",
   "description": "Alert Logic CloudWatch Events Collector",
-  "repository": {},
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alertlogic/al-cwe-collector#master"
+  },
+  "private": false,
   "scripts": {
     "start": "node index.js",
     "lint": "jshint --exclude \"./node_modules/*\" **/*.js",
     "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura mocha --colors --reporter mocha-jenkins-reporter"
   },
+  "main": "index.js",
+  "maintainers": [
+    {
+      "name": "Alert Logic NPM Team",
+      "email": "npm@alertlogic.com"
+    }
+  ],
   "devDependencies": {
-    "aws-sdk": "*",
-    "aws-sdk-mock": "*",
-    "dotenv": "*",
-    "clone": "*",
+    "aws-sdk": "^2.441.0",
+    "aws-sdk-mock": "^4.4.0",
+    "dotenv": "^7.0.0",
+    "clone": "^2.1.2",
     "jshint": "^2.9.5",
     "mocha": "^3.5.3",
     "mocha-jenkins-reporter": "^0.3.10",
@@ -22,14 +33,14 @@
     "sinon": "^3.3.0"
   },
   "dependencies": {
-    "debug": "*",
-    "async": "*",
-    "cfn-response": "*",
+    "debug": "^4.1.1",
+    "cfn-response": "^1.0.1",
+    "async": "^2.6.1",
     "moment": "^2.19.2",
-    "request": "*",
+    "request": "^2.88.0",
     "request-promise-native": "*",
-    "al-collector-js": "git://github.com/alertlogic/al-collector-js#master",
-    "al-aws-collector-js": "git://github.com/alertlogic/al-aws-collector-js#master"
+    "@alertlogic/al-collector-js": "^1.1.2",
+    "@alertlogic/al-aws-collector-js": "^1.1.0"
   },
   "author": "Alert Logic Inc."
 }

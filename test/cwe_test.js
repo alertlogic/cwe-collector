@@ -121,9 +121,8 @@ describe('CWE Unit Tests', function() {
                 invokedFunctionArn : 'test:arn'
             };
             rewireFormatMessages(cweMock.NON_GD_OTHER_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
-                var expected = '';
                 assert.equal(formatError, null);
-                assert.equal(collectedData, expected);
+                assert.equal(collectedData, undefined);
                 done();
             });
         });
@@ -135,7 +134,7 @@ describe('CWE Unit Tests', function() {
             };
             rewireFormatMessages(cweMock.NO_GD_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
                 assert.equal(null, formatError);
-                assert.equal('', collectedData);
+                assert.equal(undefined, collectedData);
                 done();
             });
         });
@@ -146,7 +145,7 @@ describe('CWE Unit Tests', function() {
             };
             rewireFormatMessages(cweMock.GD_MALFORMED_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
                 assert.equal(null, formatError);
-                assert.equal('', collectedData);
+                assert.equal(undefined, collectedData);
                 done();
             });
         });

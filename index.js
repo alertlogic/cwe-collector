@@ -13,9 +13,9 @@ const debug = require('debug') ('index');
 const AWS = require('aws-sdk');
 const async = require('async');
 
-const m_alAws = require('al-aws-collector-js/al_aws');
-const m_statsTemplate = require('al-aws-collector-js/statistics_templates');
-const AlAwsCollector = require('al-aws-collector-js/al_aws_collector');
+const { Util: m_alAws } = require('@alertlogic/al-aws-collector-js');
+const { Stats: m_statsTemplate } = require('@alertlogic/al-aws-collector-js');
+const { AlAwsCollector } = require('@alertlogic/al-aws-collector-js');
 const m_checkin = require('./checkin');
 const m_packageJson = require('./package.json');
 
@@ -91,7 +91,7 @@ function formatMessages(event, context, callback) {
                     }
                 }));
             } else {
-                return asyncCallback(null, '');
+                return asyncCallback(null);
             }
         }],
         callback);

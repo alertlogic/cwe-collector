@@ -1,6 +1,6 @@
 {
   "name": "al-cwe-collector",
-  "version": "1.1.0",
+  "version": "1.2.2",
   "license": "MIT",
   "description": "Alert Logic CloudWatch Events Collector",
   "repository": {
@@ -40,7 +40,7 @@
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "@alertlogic/al-collector-js": "1.2.4",
-    "@alertlogic/al-aws-collector-js": "1.1.1"
+    "@alertlogic/al-aws-collector-js": "1.1.2"
   },
   "author": "Alert Logic Inc."
 }

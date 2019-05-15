@@ -112,7 +112,8 @@
                               }
                             },
                             "Action": [
-                              "kms:Decrypt"
+                              "kms:Decrypt",
+                              "kms:Encrypt"
                             ],
                             "Resource": "*"
                        },

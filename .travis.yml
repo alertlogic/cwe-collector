@@ -3,6 +3,6 @@ language: node_js
 node_js:
   - "8"
 install:
-  - make deps
+  - npm install
 script:
-  - make test
+  - npm test

@@ -114,10 +114,6 @@ function errorMsg(code, message) {
 
 module.exports = {
     checkHealth : function(event, context){
-        //add in the env var for the framework
-        if(!process.env.stack_name){
-            process.env.stack_name = event.StackName;
-        }
 
         //close over the event and context to creat a function compatible with the framework.
         return function(callback){

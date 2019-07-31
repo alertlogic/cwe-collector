@@ -13,9 +13,9 @@ const debug = require('debug') ('index');
 const AWS = require('aws-sdk');
 const async = require('async');
 
-const m_alAws = require('al-aws-collector-js/al_aws');
-const m_statsTemplate = require('al-aws-collector-js/statistics_templates');
-const AlAwsCollector = require('al-aws-collector-js/al_aws_collector');
+const { Util: m_alAws } = require('@alertlogic/al-aws-collector-js');
+const { Stats: m_statsTemplate } = require('@alertlogic/al-aws-collector-js');
+const { AlAwsCollector } = require('@alertlogic/al-aws-collector-js');
 const m_checkin = require('./checkin');
 const m_packageJson = require('./package.json');
 
@@ -91,7 +91,7 @@ function formatMessages(event, context, callback) {
                     }
                 }));
             } else {
-                return asyncCallback(null, '');
+                return asyncCallback(null);
             }
         }],
         callback);
@@ -144,17 +144,24 @@ function getStatisticsFunctions(event) {
     ];
 }
 
+// Migration code for old collectors.
+// This needs to be done because the collector lambda does not have premissions to set its own env vars.
+function envVarMigration(event){
+    if(!process.env.aws_lambda_update_config_name){
+        process.env.aws_lambda_update_config_name = 'configs/lambda/al-cwe-collector.json';
+    }
+    //add in the env var for the framework
+    if(!process.env.stack_name && event.StackName){
+        process.env.stack_name = event.StackName;
+    }
+}
+
 
 exports.handler = function(event, context) {
+    envVarMigration(event);
     async.waterfall([
         getDecryptedCredentials,
         function(asyncCallback){
-            // Migration code for old collectors.
-            // This needs to be done because the collector lambda does not have premissions to set its own env vars.
-            if(!process.env.aws_lambda_update_config_name){
-                process.env.aws_lambda_update_config_name = 'configs/lambda/config.json';
-            }
-
             const collector = new AlAwsCollector(
                 context,
                 "cwe",

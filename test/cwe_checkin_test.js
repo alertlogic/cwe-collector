@@ -6,11 +6,11 @@ const AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 const cweMockErrors = require('./cwe_mock_errors');
 const clone = require('clone');
-var m_servicec = require('al-collector-js/al_servicec');
+var {AlServiceC} = require('@alertlogic/al-collector-js');
 var azcollectStub;
 
 function setAzcollectStub() {
-    azcollectStub = sinon.stub(m_servicec.AlServiceC.prototype, 'post').callsFake(
+    azcollectStub = sinon.stub(AlServiceC.prototype, 'post').callsFake(
         function fakeFn(path, extraOptions) {
             assert.equal(cweMock.CHECKIN_TEST_URL, path);
             assert.equal('ok', extraOptions.body.status);

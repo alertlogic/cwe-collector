@@ -285,7 +285,7 @@
                            "",
                            [
                                 "const AWS = require('aws-sdk');\n",
-                                "const response = require('cfn-response');\n",
+                                "const response = require('./cfn-response');\n",
                                 "\n",
                                 "\n",
                                 "function encrypt(event, context) {\n",

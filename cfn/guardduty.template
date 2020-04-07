@@ -299,7 +299,7 @@
                                 "            console.log(err, err.stack); // an error occurred\n",
                                 "            return response.send(event, context, response.FAILED);\n",
                                 "        }\n",
-                                "        var base64 = new Buffer(data.CiphertextBlob).toString('base64');\n",
+                                "        var base64 = Buffer.from(data.CiphertextBlob).toString('base64');\n",
                                 "        var responseData = {\n",
                                 "            EncryptedText : base64\n",
                                 "        };\n",

@@ -157,7 +157,7 @@ describe('CWE Unit Tests', function() {
 
         const ACCESS_KEY_ID = 'access_key_id';
         const ENCRYPTED_SECRET_KEY = 'encrypted_secret_key';
-        const ENCRYPTED_SECRET_KEY_BASE64 = new Buffer(ENCRYPTED_SECRET_KEY).toString('base64');
+        const ENCRYPTED_SECRET_KEY_BASE64 = Buffer.from(ENCRYPTED_SECRET_KEY).toString('base64');
         const DECRYPTED_SECRET_KEY = 'secret_key';
 
         before(function() {
@@ -207,7 +207,7 @@ describe('CWE Unit Tests', function() {
             cweRewire.__set__('process', {
                     env : {
                         aims_access_key_id : ACCESS_KEY_ID,
-                        aims_secret_key: new Buffer('wrong_key').toString('base64')
+                        aims_secret_key: Buffer.from('wrong_key').toString('base64')
                     }
             });
             AWS.mock('KMS', 'decrypt', function (data, callback) {

@@ -27,7 +27,7 @@ function getDecryptedCredentials(callback) {
     } else {
         const kms = new AWS.KMS();
         kms.decrypt(
-            {CiphertextBlob: new Buffer(process.env.aims_secret_key, 'base64')},
+            {CiphertextBlob: Buffer.from(process.env.aims_secret_key, 'base64')},
             (err, data) => {
                 if (err) {
                     return callback(err);
@@ -44,7 +44,7 @@ function getDecryptedCredentials(callback) {
 
 function getKinesisData(event, callback) {
     async.map(event.Records, function(record, mapCallback) {
-        var cwEvent = new Buffer(record.kinesis.data, 'base64').toString('utf-8');
+        var cwEvent = Buffer.from(record.kinesis.data, 'base64').toString('utf-8');
         try {
             return mapCallback(null, JSON.parse(cwEvent));
         } catch (ex) {

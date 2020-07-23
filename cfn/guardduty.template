@@ -97,8 +97,13 @@
                              ]
                             }
                             },
-                            "Action": "kms:*",
-                            "Resource": "*"
+                            "Action": [
+                                "kms:Decrypt",
+                                "kms:Encrypt"
+                            ],
+                            "Resource": {
+                                "Ref":"SecretKey"
+                            }
                        },
                        {
                             "Sid": "Allow use of the key for lambda",
@@ -115,7 +120,9 @@
                               "kms:Decrypt",
                               "kms:Encrypt"
                             ],
-                            "Resource": "*"
+                            "Resource": {
+                                "Ref":"SecretKey"
+                            }
                        },
                        {
                           "Sid": "Allow use of the key for lambda encryption",
@@ -131,7 +138,9 @@
                           "Action": [
                              "kms:Encrypt"
                           ],
-                          "Resource": "*"
+                          "Resource": {
+                              "Ref":"SecretKey"
+                          }
                        }
                     ]
                 },

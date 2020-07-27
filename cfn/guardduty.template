@@ -102,7 +102,7 @@
                                 "kms:Encrypt"
                             ],
                             "Resource": {
-                                "Ref":"SecretKey"
+                                "*"
                             }
                        },
                        {
@@ -121,7 +121,7 @@
                               "kms:Encrypt"
                             ],
                             "Resource": {
-                                "Ref":"SecretKey"
+                                "*"
                             }
                        },
                        {
@@ -139,7 +139,7 @@
                              "kms:Encrypt"
                           ],
                           "Resource": {
-                              "Ref":"SecretKey"
+                              "*"
                           }
                        }
                     ]

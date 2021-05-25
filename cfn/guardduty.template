@@ -16,7 +16,8 @@
           "Type": "String",
           "Default": "api.global-services.global.alertlogic.com",
           "AllowedValues" : [
-               "api.global-services.global.alertlogic.com"
+               "api.global-services.global.alertlogic.com",
+               "api.global-integration.product.dev.alertlogic.com"
           ]
       },
       "AlDataResidency":{
@@ -24,7 +25,17 @@
           "Type":"String",
           "Default" : "default",
           "AllowedValues" : ["default"]
-      }
+      },
+      "CollectorId": {
+        "Description": "Optional. A collector UUID if known.",
+        "Type": "String",
+        "Default": "none"
+    },
+    "AlApplicationId": {
+        "Description": "Alert Logic Application Id for collector logs",
+        "Type": "String",
+        "Default": "guardduty"
+    }
    },
    "Resources":{
       "KinesisStream":{
@@ -412,7 +423,16 @@
                   },
                   "al_data_residency":{
                       "Ref":"AlDataResidency"
-                  }
+                  },
+                  "collector_id": {
+                    "Ref":"CollectorId"
+                  },
+                  "stack_name": {
+                    "Ref":"AWS::StackName"
+                  },
+                  "al_application_id":{
+                    "Ref":"AlApplicationId"
+                }
                }
             },
             "Tags": [

@@ -5,7 +5,7 @@ const parse = require('@alertlogic/al-collector-js').Parse
 const async = require('async');
 
 const typeIdPaths = [
-    { path: ['detail','type'] }
+    { path: ['detail', 'type'] }
 ];
 
 const tsPaths = [
@@ -27,19 +27,17 @@ class CweCollector extends AlAwsCollector {
 
     getProperties(event) {
         const baseProps = super.getProperties();
-        const stack_name =  event && event.ResourceProperties.StackName ? event.ResourceProperties.StackName : this.stack_name ;
+        const stack_name = event && event.ResourceProperties.StackName ? event.ResourceProperties.StackName : this.stack_name;
         const collectRule = event && event.ResourceProperties.CollectRule ? event.ResourceProperties.CollectRule : `aws.guardduty`;
 
         let cweProps = {
             cf_stack_name: stack_name,
             collect_rule: collectRule
-            
         };
         return Object.assign(cweProps, baseProps);
     };
 
     register(event, custom, callback) {
-       
         let collector = this;
         let cweRegisterProps = this.getProperties(event);
         AlAwsCollector.prototype.register.call(collector, event, cweRegisterProps, callback);
@@ -49,24 +47,24 @@ class CweCollector extends AlAwsCollector {
         const context = this._invokeContext;
         var collector = this;
         async.waterfall([
-            function(asyncCallback) {
+            function (asyncCallback) {
                 collector._formatFun(event, context, asyncCallback);
             },
-            function(formattedData, compress, asyncCallback) {
-                if(arguments.length === 2 && typeof compress === 'function'){
+            function (formattedData, compress, asyncCallback) {
+                if (arguments.length === 2 && typeof compress === 'function') {
                     asyncCallback = compress;
                     compress = true;
-                } 
-                collector.send(formattedData, compress, collector._ingestType, (err,res)=>{
-                    return asyncCallback (err ,formattedData);
+                }
+                collector.send(formattedData, compress, collector._ingestType, (err, res) => {
+                    return asyncCallback(err, formattedData);
                 });
             },
-            function(formattedData, asyncCallback) {
+            function (formattedData, asyncCallback) {
                 let formatedJsonData = JSON.parse(formattedData);
                 collector.processLog(formatedJsonData.collected_batch.collected_messages, collector.formatLog.bind(collector), null, asyncCallback);
             }
         ],
-        callback);
+            callback);
     }
 
     handleEvent(event, asyncCallback) {
@@ -83,7 +81,7 @@ class CweCollector extends AlAwsCollector {
      * Format the message to process logmessages
      * @param {*} msg 
      */
-     formatLog(msg) {
+    formatLog(msg) {
         const ts = parse.getMsgTs(msg, tsPaths);
         const typeId = parse.getMsgTypeId(msg, typeIdPaths);
         let formattedMsg = {
@@ -92,9 +90,9 @@ class CweCollector extends AlAwsCollector {
             progName: 'CWECollector',
             message: JSON.stringify(msg),
             messageType: 'json/cwe',
-            applicationId : this.application_id
+            applicationId: this.application_id
         };
-    
+
         if (typeId !== null && typeId !== undefined) {
             formattedMsg.messageTypeId = `${typeId}`;
         }

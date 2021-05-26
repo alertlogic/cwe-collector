@@ -1,54 +1,11 @@
 
 const assert = require('assert');
 const rewire = require('rewire');
-const sinon = require('sinon');
 var AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 var cweRewire = rewire('../index');
 
 describe('CWE Unit Tests', function() {
-
-    // FIXME - check lambda update call
-    describe('processScheduledEvent()', function() {
-        var rewireProcessScheduleEvent;
-        var mockCollector = {
-            update: (callback) => {
-                return callback("update");
-            },
-            checkin: (callback) => {
-                return callback("checkin");
-            }
-        };
-
-        before(function() {
-            rewireProcessScheduleEvent = cweRewire.__get__('processScheduledEvent');
-        });
-
-        after(function() {
-
-        });
-
-        it('call function update', function(done) {
-            rewireProcessScheduleEvent(cweMock.UPDATE_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
-                assert(result === "update");
-                done();
-            });
-        });
-
-        it('call function checkin', function(done) {
-            rewireProcessScheduleEvent(cweMock.CHECKIN_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
-                assert(result === "checkin");
-                done();
-            });
-        });
-
-        it('fails when an unknown event is passed', function(done) {
-            const stub = sinon.stub(cweMock.DEFAULT_LAMBDA_CONTEXT, "fail");
-            rewireProcessScheduleEvent({"RequestType": "InvalidType"}, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, null);
-            assert(stub.called);
-            done();
-        });
-    });
 
     describe('getStatisticsFunctions()', () => {
         var rewireGetStatisticsFunctions;

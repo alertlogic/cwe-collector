@@ -50,8 +50,8 @@ describe('CWE Unit Tests', function() {
                         collected_messages : [cweMock.GD_EVENT]
                     }
                 };
-                assert.equal(null, formatError);
-                assert.equal(JSON.stringify(expected), collectedData);
+                 assert.equal(null, formatError);
+                 assert.deepEqual(expected,collectedData);
                 done();
             });
         });
@@ -68,7 +68,7 @@ describe('CWE Unit Tests', function() {
                     }
                 };
                 assert.equal(null, formatError);
-                assert.equal(JSON.stringify(expected), collectedData);
+                assert.deepEqual(expected, collectedData);
                 done();
             });
         });

@@ -20,14 +20,14 @@ function restoreAlAwsCollectorStub() {
    alAwsCollectorStub.send.restore();
 }
 
-function formatFunction(event, context, callback){
- let  collectedData = JSON.stringify({ 
-        collected_batch : {
-            source_id : context.invokedFunctionArn,
-            collected_messages : cweMock.GD_EVENT
+function formatFunction(event, context, callback) {
+    let collectedData = {
+        collected_batch: {
+            source_id: context.invokedFunctionArn,
+            collected_messages: [cweMock.GD_EVENT]
         }
-    });
-    return callback(null,collectedData );
+    };
+    return callback(null, collectedData);
 }
 
 describe('CWE collector Tests', function() {

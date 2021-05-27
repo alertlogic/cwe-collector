@@ -55,13 +55,12 @@ class CweCollector extends AlAwsCollector {
                     asyncCallback = compress;
                     compress = true;
                 }
-                collector.send(formattedData, compress, collector._ingestType, (err, res) => {
+                collector.send(JSON.stringify(formattedData), compress, collector._ingestType, (err, res) => {
                     return asyncCallback(err, formattedData);
                 });
             },
             function (formattedData, asyncCallback) {
-                let formatedJsonData = JSON.parse(formattedData);
-                collector.processLog(formatedJsonData.collected_batch.collected_messages, collector.formatLog.bind(collector), null, asyncCallback);
+                collector.processLog(formattedData.collected_batch.collected_messages, collector.formatLog.bind(collector), null, asyncCallback);
             }
         ],
             callback);

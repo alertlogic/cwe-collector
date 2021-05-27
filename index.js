@@ -82,12 +82,12 @@ function formatMessages(event, context, callback) {
         },
         function(collectedData, asyncCallback) {
             if (collectedData.length > 0) {
-                return asyncCallback(null, JSON.stringify({ 
+                return asyncCallback(null, { 
                     collected_batch : {
                         source_id : context.invokedFunctionArn,
                         collected_messages : collectedData
                     }
-                }));
+                });
             } else {
                 return asyncCallback(null);
             }

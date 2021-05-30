@@ -138,17 +138,10 @@ function envVarMigration(event) {
         });
     }
     //add in the env var for the framework
-    if (!process.env.stack_name && event.StackName) {
-        m_alAws.setEnv({ stack_name: event.StackName }, (err) => {
+    if ((!process.env.stack_name && event.StackName) || !process.env.al_application_id) {
+        m_alAws.setEnv({ stack_name: event.StackName, al_application_id: 'guardduty' }, (err) => {
             if (err) {
                 console.error('CWE error while adding stack_name in environment variable')
-            }
-        });
-    }
-    if (!process.env.al_application_id) {
-        m_alAws.setEnv({ al_application_id: 'guardduty' }, (err) => {
-            if (err) {
-                console.error('CWE error while adding al_application_id in environment variable')
             }
         });
     }

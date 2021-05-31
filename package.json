@@ -26,8 +26,8 @@
     "dotenv": "^7.0.0",
     "clone": "^2.1.2",
     "jshint": "^2.9.5",
-    "mocha": "^3.5.3",
-    "mocha-jenkins-reporter": "^0.3.10",
+    "mocha": "^6.2.2",
+    "mocha-jenkins-reporter": "^0.4.2",
     "nyc": "^11.3.0",
     "rewire": "^2.5.2",
     "sinon": "^3.3.0"

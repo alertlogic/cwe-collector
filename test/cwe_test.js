@@ -139,12 +139,9 @@ describe('CWE Unit Tests', function() {
 
         it('if AIMS_CREDS are not declared KMS decryption is called', function(done) {
             cweRewire.__set__('AIMS_CREDS', undefined);
-            cweRewire.__set__('process', {
-                    env : {
-                        aims_access_key_id : ACCESS_KEY_ID,
-                        aims_secret_key: ENCRYPTED_SECRET_KEY_BASE64
-                    }
-            });
+            process.env.aims_access_key_id = ACCESS_KEY_ID;
+            process.env.aims_secret_key = ENCRYPTED_SECRET_KEY_BASE64;
+    
             AWS.mock('KMS', 'decrypt', function (data, callback) {
                 assert.equal(data.CiphertextBlob, ENCRYPTED_SECRET_KEY);
                 return callback(null, {Plaintext : DECRYPTED_SECRET_KEY});
@@ -161,12 +158,8 @@ describe('CWE Unit Tests', function() {
 
         it('if some error during decryption, function fails', function(done) {
             cweRewire.__set__('AIMS_CREDS', undefined);
-            cweRewire.__set__('process', {
-                    env : {
-                        aims_access_key_id : ACCESS_KEY_ID,
-                        aims_secret_key: Buffer.from('wrong_key').toString('base64')
-                    }
-            });
+            process.env.aims_access_key_id = ACCESS_KEY_ID;
+            process.env.aims_secret_key = Buffer.from('wrong_key').toString('base64');
             AWS.mock('KMS', 'decrypt', function (data, callback) {
                 assert.equal(data.CiphertextBlob, 'wrong_key');
                 return callback('error', 'stack');

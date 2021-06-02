@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node index.js",
     "lint": "jshint --exclude \"./node_modules/*\" **/*.js",
-    "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura mocha --colors"
+    "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura mocha --colors --reporter mocha-jenkins-reporter"
   },
   "main": "index.js",
   "maintainers": [
@@ -23,13 +23,14 @@
   "devDependencies": {
     "aws-sdk": "^2.441.0",
     "aws-sdk-mock": "^4.4.0",
-    "dotenv": "^8.2.0",
+    "dotenv": "^7.0.0",
     "clone": "^2.1.2",
     "jshint": "^2.9.5",
-    "mocha": "^7.2.0",
-    "nyc": "^15.1.0",
+    "mocha": "^3.5.3",
+    "mocha-jenkins-reporter": "^0.3.10",
+    "nyc": "^11.3.0",
     "rewire": "^2.5.2",
-    "sinon": "^9.0.2"
+    "sinon": "^3.3.0"
   },
   "dependencies": {
     "debug": "^4.1.1",

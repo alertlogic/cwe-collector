@@ -1,4 +1,10 @@
 process.env.AWS_REGION = 'us-east-1';
+process.env.AWS_LAMBDA_FUNCTION_NAME = 'test-function-name';
+process.env.al_api = 'api.global-services.global.alertlogic.com';
+process.env.ingest_api = 'ingest.global-services.global.alertlogic.com';
+process.env.azollect_api = 'azcollect.global-services.global.alertlogic.com';
+process.env.collector_id = 'collector-id';
+process.env.al_application_id = 'guardduty';
 
 const AIMS_TEST_CREDS = {
     access_key_id: 'test-access-key-id',
@@ -6,7 +12,7 @@ const AIMS_TEST_CREDS = {
 };
 
 const TEST_AL_API = 'api.test.product.dev.alertlogic.com';
-const INGEST_TEST_URL = '/data/secmsgs';
+const INGEST_TEST_URL = 'ingest.global-services.global.alertlogic.com';
 const CHECKIN_TEST_FUNCTION_NAME = 'test-CollectLambdaFunction-1JNNKQIPOTEST';
 const CHECKIN_TEST_URL = '/aws/cwe/checkin/353333894008/us-east-1/' + encodeURIComponent(CHECKIN_TEST_FUNCTION_NAME);
 const FUNCTION_ARN = 'arn:aws:lambda:us-east-1:352283894008:function:test-guardduty-01-CollectLambdaFunction-2CWNLPPW5XO8';

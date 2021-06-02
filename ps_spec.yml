@@ -11,39 +11,5 @@ stages:
         image: node:12
         compute_size: small
         commands:
-            - make test
-
-    -
-        name: Master Push - Publish
-        when:
-            - push: ['master']
-        image: node:12
-        compute_size: small
-        commands:
-            - |
-              set -ex
-              #git config --global --add url."git@github.com:".insteadOf "https://github.com/"
-  
-              echo //registry.npmjs.org/:_authToken=$NPM_TOKEN > .npmrc
-              npm whoami
-              
-              PKGNAME=$(node -e 'console.log(require("./package.json").name)')
-              PKGVERSION=$(node -e 'console.log(require("./package.json").version)')
-              WORDCOUNT=$(npm view "${PKGNAME}@${PKGVERSION}" | wc -c)
-              
-              git config --global credential.helper \'store\' || true
-              echo "https://$ALPS_GH_USER:$ALPS_GH_TOKEN@github.com" > ~/.git-credentials
-              git tag -a $PKGVERSION -m "$PKGNAME release $PKGVERSION" HEAD
- 
-              npm install
-              
-              if [ "$WORDCOUNT" -eq 0 ]; then
-                 echo "PUBLISHING $PKGNAME $PKGVERSION"
-                 npm run lint
-                 git push origin $PKGVERSION
-                 npm publish --access public
-              else
-                 echo "NOT PUBLISHING $PKGNAME $PKGVERSION"
-              fi
-            - echo done
-            
+            - npm install 
+            - npm test

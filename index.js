@@ -15,10 +15,8 @@ const async = require('async');
 
 const { Util: m_alAws } = require('@alertlogic/al-aws-collector-js');
 const { Stats: m_statsTemplate } = require('@alertlogic/al-aws-collector-js');
-const { AlAwsCollector } = require('@alertlogic/al-aws-collector-js');
 const m_checkin = require('./checkin');
-const m_packageJson = require('./package.json');
-
+const cweCollector = require('./al-cwe-collector').cweCollector
 let AIMS_CREDS;
 
 function getDecryptedCredentials(callback) {
@@ -84,12 +82,12 @@ function formatMessages(event, context, callback) {
         },
         function(collectedData, asyncCallback) {
             if (collectedData.length > 0) {
-                return asyncCallback(null, JSON.stringify({ 
+                return asyncCallback(null, { 
                     collected_batch : {
                         source_id : context.invokedFunctionArn,
                         collected_messages : collectedData
                     }
-                }));
+                });
             } else {
                 return asyncCallback(null);
             }
@@ -98,21 +96,6 @@ function formatMessages(event, context, callback) {
 }
 
 
-function processScheduledEvent(event, collector, context, callback) {
-    console.info("Processing scheduled event: ", event);
-    switch (event.Type) {
-        case 'SelfUpdate':
-            console.info("Starting framework self update");
-            collector.update(callback);
-            break;
-        case 'Checkin':
-            console.info("Starting framework checkin");
-            collector.checkin(callback);
-            break;
-        default:
-            return context.fail("Unknown scheduled event detail type: " + event.type);
-    }
-}
 
 
 function getStatisticsFunctions(event) {
@@ -146,13 +129,21 @@ function getStatisticsFunctions(event) {
 
 // Migration code for old collectors.
 // This needs to be done because the collector lambda does not have premissions to set its own env vars.
-function envVarMigration(event){
-    if(!process.env.aws_lambda_update_config_name){
-        process.env.aws_lambda_update_config_name = 'configs/lambda/al-cwe-collector.json';
+function envVarMigration(event) {
+    if (!process.env.aws_lambda_update_config_name) {
+        m_alAws.setEnv({ aws_lambda_update_config_name: 'configs/lambda/al-cwe-collector.json' }, (err) => {
+            if (err) {
+                console.error('CWE error while adding aws_lambda_update_config_name in environment variable')
+            }
+        });
     }
     //add in the env var for the framework
-    if(!process.env.stack_name && event.StackName){
-        process.env.stack_name = event.StackName;
+    if ((!process.env.stack_name && event.StackName) || !process.env.al_application_id) {
+        m_alAws.setEnv({ stack_name: event.StackName, al_application_id: 'guardduty' }, (err) => {
+            if (err) {
+                console.error('CWE error while adding stack_name in environment variable')
+            }
+        });
     }
 }
 
@@ -161,12 +152,9 @@ exports.handler = function(event, context) {
     envVarMigration(event);
     async.waterfall([
         getDecryptedCredentials,
-        function(asyncCallback){
-            const collector = new AlAwsCollector(
+        function (asyncCallback) {
+            const collector = new cweCollector(
                 context,
-                "cwe",
-                AlAwsCollector.IngestTypes.SECMSGS,
-                m_packageJson.version,
                 AIMS_CREDS,
                 formatMessages,
                 [m_checkin.checkHealth(event, context)],
@@ -174,30 +162,7 @@ exports.handler = function(event, context) {
             );
 
             debug("DEBUG0001: Received event: ", JSON.stringify(event));
-            switch (event.RequestType) {
-                case 'ScheduledEvent':
-                    processScheduledEvent(event, collector, context, asyncCallback);
-                    break;
-                case 'Create':
-                    var registrationValues = {
-                        stackName : event.ResourceProperties.StackName,
-                        custom_fields: {
-                            collect_rule : event.ResourceProperties.CollectRule
-                        }
-                    };
-
-                    collector.register(event, registrationValues);
-                    break;
-                case 'Delete':
-                    collector.deregister(event);
-                    break;
-                default:
-                    if (event.Records) {
-                        return collector.process(event, asyncCallback);
-                    } else {
-                        return context.fail('Unknown event source: ' + event.source);
-                    }
-            }
+            collector.handleEvent(event, asyncCallback);
         }
     ],
     function(err, result){

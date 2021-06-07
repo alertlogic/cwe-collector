@@ -1,6 +1,6 @@
 {
     "Runtime": {
         "path": "Runtime",
-        "value": "nodejs10.x"
+        "value": "nodejs12.x"
     }
 }

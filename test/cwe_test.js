@@ -1,54 +1,11 @@
 
 const assert = require('assert');
 const rewire = require('rewire');
-const sinon = require('sinon');
 var AWS = require('aws-sdk-mock');
 const cweMock = require('./cwe_mock');
 var cweRewire = rewire('../index');
 
 describe('CWE Unit Tests', function() {
-
-    // FIXME - check lambda update call
-    describe('processScheduledEvent()', function() {
-        var rewireProcessScheduleEvent;
-        var mockCollector = {
-            update: (callback) => {
-                return callback("update");
-            },
-            checkin: (callback) => {
-                return callback("checkin");
-            }
-        };
-
-        before(function() {
-            rewireProcessScheduleEvent = cweRewire.__get__('processScheduledEvent');
-        });
-
-        after(function() {
-
-        });
-
-        it('call function update', function(done) {
-            rewireProcessScheduleEvent(cweMock.UPDATE_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
-                assert(result === "update");
-                done();
-            });
-        });
-
-        it('call function checkin', function(done) {
-            rewireProcessScheduleEvent(cweMock.CHECKIN_TEST_EVENT, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, (result) => {
-                assert(result === "checkin");
-                done();
-            });
-        });
-
-        it('fails when an unknown event is passed', function(done) {
-            const stub = sinon.stub(cweMock.DEFAULT_LAMBDA_CONTEXT, "fail");
-            rewireProcessScheduleEvent({"RequestType": "InvalidType"}, mockCollector, cweMock.DEFAULT_LAMBDA_CONTEXT, null);
-            assert(stub.called);
-            done();
-        });
-    });
 
     describe('getStatisticsFunctions()', () => {
         var rewireGetStatisticsFunctions;
@@ -93,8 +50,8 @@ describe('CWE Unit Tests', function() {
                         collected_messages : [cweMock.GD_EVENT]
                     }
                 };
-                assert.equal(null, formatError);
-                assert.equal(JSON.stringify(expected), collectedData);
+                 assert.equal(null, formatError);
+                 assert.deepEqual(expected,collectedData);
                 done();
             });
         });
@@ -111,7 +68,7 @@ describe('CWE Unit Tests', function() {
                     }
                 };
                 assert.equal(null, formatError);
-                assert.equal(JSON.stringify(expected), collectedData);
+                assert.deepEqual(expected, collectedData);
                 done();
             });
         });
@@ -182,12 +139,9 @@ describe('CWE Unit Tests', function() {
 
         it('if AIMS_CREDS are not declared KMS decryption is called', function(done) {
             cweRewire.__set__('AIMS_CREDS', undefined);
-            cweRewire.__set__('process', {
-                    env : {
-                        aims_access_key_id : ACCESS_KEY_ID,
-                        aims_secret_key: ENCRYPTED_SECRET_KEY_BASE64
-                    }
-            });
+            process.env.aims_access_key_id = ACCESS_KEY_ID;
+            process.env.aims_secret_key = ENCRYPTED_SECRET_KEY_BASE64;
+    
             AWS.mock('KMS', 'decrypt', function (data, callback) {
                 assert.equal(data.CiphertextBlob, ENCRYPTED_SECRET_KEY);
                 return callback(null, {Plaintext : DECRYPTED_SECRET_KEY});
@@ -204,12 +158,8 @@ describe('CWE Unit Tests', function() {
 
         it('if some error during decryption, function fails', function(done) {
             cweRewire.__set__('AIMS_CREDS', undefined);
-            cweRewire.__set__('process', {
-                    env : {
-                        aims_access_key_id : ACCESS_KEY_ID,
-                        aims_secret_key: Buffer.from('wrong_key').toString('base64')
-                    }
-            });
+            process.env.aims_access_key_id = ACCESS_KEY_ID;
+            process.env.aims_secret_key = Buffer.from('wrong_key').toString('base64');
             AWS.mock('KMS', 'decrypt', function (data, callback) {
                 assert.equal(data.CiphertextBlob, 'wrong_key');
                 return callback('error', 'stack');

@@ -1,0 +1,15 @@
+version: 1.0
+service_name: cwe-collector
+
+stages:
+    -
+        name: PR Test
+        when:
+            - pull_request
+            - pull_request:
+                trigger_phrase: test it
+        image: node:12
+        compute_size: small
+        commands:
+            - npm install 
+            - npm test

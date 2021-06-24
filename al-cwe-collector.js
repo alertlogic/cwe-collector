@@ -72,6 +72,9 @@ class CweCollector extends AlAwsCollector {
             return collector.process(event, asyncCallback);
 
         } else {
+            if (!this.stack_name && event.StackName) {
+                this.stack_name = event.StackName;
+            }
             return super.handleEvent(event);
         }
     };

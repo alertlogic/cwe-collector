@@ -131,6 +131,7 @@ function getStatisticsFunctions(event) {
 // This needs to be done because the collector lambda does not have premissions to set its own env vars.
 function envVarMigration(event) {
     if (!process.env.aws_lambda_update_config_name) {
+        process.env.aws_lambda_update_config_name = 'configs/lambda/al-cwe-collector.json';
         m_alAws.setEnv({ aws_lambda_update_config_name: 'configs/lambda/al-cwe-collector.json' }, (err) => {
             if (err) {
                 console.error('CWE error while adding aws_lambda_update_config_name in environment variable')
@@ -153,6 +154,15 @@ exports.handler = function(event, context) {
     async.waterfall([
         getDecryptedCredentials,
         function (asyncCallback) {
+            /**  Some old collector has KMS permission issue and so we can't add the vairable in environment variable
+             *  The process.env.azollect_api has missing c and so connection with azcollect is break, so start connection with azcollect, assinge the value to process.env.azcollect_api. 
+             *  Set the collector_id to NA to not call the register api call in every check in event. 
+             *  */
+            if (process.env.azollect_api && !process.env.azcollect_api) {
+                process.env.collector_id = 'NA';
+                process.env.azcollect_api = process.env.azollect_api;
+            }
+           
             const collector = new cweCollector(
                 context,
                 AIMS_CREDS,

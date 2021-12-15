@@ -12,7 +12,7 @@
           "NoEcho": true
       },
       "AlApiEndpoint": {
-          "Description":"Top-level url hostname of the Alert Logic AIMs service API",
+          "Description":"Alert Logic API endpoint",
           "Type": "String",
           "Default": "api.global-services.global.alertlogic.com",
           "AllowedValues" : [
@@ -32,10 +32,45 @@
         "Default": "none"
     },
     "AlApplicationId": {
-        "Description": "Alert Logic Application Id for collector logs",
+        "Description": "Alert Logic Application Id for collected logs",
         "Type": "String",
         "Default": "guardduty"
+    },
+    "EnableKMSKeyRotation": {
+        "Description": "Enable automatic KMS key rotation. Incur additional AWS charges.",
+        "Type": "String",
+        "AllowedValues" : ["True", "False"],
+        "Default": "False"
+    },
+    "KinesisShardCount": {
+        "Description": "Collector kinesis stream shard count.",
+        "Type": "Number",
+        "Default": "1"
     }
+   },
+   "Metadata" : {
+     "AWS::CloudFormation::Interface" : {
+       "ParameterGroups" : [
+         {
+           "Label" : { "default" : "Alert Logic credentials" },
+           "Parameters" : [
+             "AlApiEndpoint",
+             "AccessKeyId",
+             "SecretKey"
+           ]
+         },
+         {
+           "Label" : { "default":"Guard Duty collector configuration" },
+           "Parameters" : [
+             "CollectorId",
+             "AlDataResidency",
+             "AlApplicationId",
+             "EnableKMSKeyRotation",
+             "KinesisShardCount"
+           ]
+         }
+       ]
+     }
    },
    "Resources":{
       "KinesisStream":{
@@ -43,7 +78,7 @@
          "DependsOn" : [
          ],
          "Properties":{
-            "ShardCount" : 1,
+            "ShardCount" : { "Ref": "KinesisShardCount"},
             "Tags": [
                 {
                     "Key": "Name",
@@ -86,6 +121,7 @@
             ],
             "Properties": {
                "Description": "kms key used to encrypt credentials for lambda",
+               "EnableKeyRotation": { "Ref": "EnableKMSKeyRotation"},
                "KeyPolicy": {
                     "Version": "2012-10-17",
                     "Id": "al-kms-policy",

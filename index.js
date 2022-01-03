@@ -15,6 +15,7 @@ const async = require('async');
 
 const { Util: m_alAws } = require('@alertlogic/al-aws-collector-js');
 const { Stats: m_statsTemplate } = require('@alertlogic/al-aws-collector-js');
+const AlLogger = require('@alertlogic/al-aws-collector-js').Logger;
 const m_checkin = require('./checkin');
 const cweCollector = require('./al-cwe-collector').cweCollector
 let AIMS_CREDS;
@@ -46,8 +47,8 @@ function getKinesisData(event, callback) {
         try {
             return mapCallback(null, JSON.parse(cwEvent));
         } catch (ex) {
-            console.warn('Event parse failed.', ex);
-            console.warn('Skipping: ', record.kinesis.data);
+            AlLogger.warn(`Event parse failed. ${JSON.stringify(ex)}`);
+            AlLogger.warn(`Skipping: ${JSON.stringify(record.kinesis.data)}`);
             return mapCallback(null, {});
         }
     }, callback);
@@ -134,7 +135,7 @@ function envVarMigration(event) {
         process.env.aws_lambda_update_config_name = 'configs/lambda/al-cwe-collector.json';
         m_alAws.setEnv({ aws_lambda_update_config_name: 'configs/lambda/al-cwe-collector.json' }, (err) => {
             if (err) {
-                console.error('CWE error while adding aws_lambda_update_config_name in environment variable')
+                AlLogger.error('CWE error while adding aws_lambda_update_config_name in environment variable')
             }
         });
     }
@@ -142,7 +143,7 @@ function envVarMigration(event) {
     if ((!process.env.stack_name && event.StackName) || !process.env.al_application_id) {
         m_alAws.setEnv({ stack_name: event.StackName, al_application_id: 'guardduty' }, (err) => {
             if (err) {
-                console.error('CWE error while adding stack_name in environment variable')
+                AlLogger.error('CWE error while adding stack_name in environment variable')
             }
         });
     }

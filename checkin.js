@@ -10,6 +10,7 @@
  
 const AWS = require('aws-sdk');
 const async = require('async');
+const AlLogger = require('@alertlogic/al-aws-collector-js').Logger;
 
 function checkCloudWatchEventsRule(event, finalCallback) {
     var cwe = new AWS.CloudWatchEvents();
@@ -92,7 +93,7 @@ function checkHealth(event, context, finalCallback) {
     ],
     function(errMsg) {
         if (errMsg) {
-            console.warn('Health check failed with',  errMsg);
+            AlLogger.warn('Health check failed with',  errMsg);
             return finalCallback(errMsg);
         } else {
             return finalCallback(null);

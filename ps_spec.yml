@@ -8,7 +8,7 @@ stages:
             - pull_request
             - pull_request:
                 trigger_phrase: test it
-        image: node:12
+        image: node:14
         compute_size: small
         commands:
             - npm install 

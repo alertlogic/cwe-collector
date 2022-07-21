@@ -18,6 +18,8 @@ const { Stats: m_statsTemplate } = require('@alertlogic/al-aws-collector-js');
 const AlLogger = require('@alertlogic/al-aws-collector-js').Logger;
 const m_checkin = require('./checkin');
 const cweCollector = require('./al-cwe-collector').cweCollector
+const { Health: m_healthChecks } = require('@alertlogic/al-aws-collector-js');
+
 let AIMS_CREDS;
 
 function getDecryptedCredentials(callback) {
@@ -168,7 +170,11 @@ exports.handler = function(event, context) {
                 context,
                 AIMS_CREDS,
                 formatMessages,
-                [m_checkin.checkHealth(event, context)],
+                [m_checkin.checkHealth(event, context),
+                    function (asyncCallback) {
+                        m_healthChecks.checkCloudFormationStatus(event.stack_name, asyncCallback);
+                    }
+                ],
                 getStatisticsFunctions(event)
             );
 

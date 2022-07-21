@@ -40,7 +40,7 @@
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "@alertlogic/al-collector-js": "2.0.4",
-    "@alertlogic/al-aws-collector-js": "4.1.16"
+    "@alertlogic/al-aws-collector-js": "4.1.6"
   },
   "author": "Alert Logic Inc."
 }

@@ -172,7 +172,7 @@ exports.handler = function(event, context) {
                 formatMessages,
                 [m_checkin.checkHealth(event, context),
                     function (asyncCallback) {
-                        m_healthChecks.checkCloudFormationStatus(event.stack_name, asyncCallback);
+                        m_healthChecks.checkCloudFormationStatus(event.StackName, asyncCallback);
                     }
                 ],
                 getStatisticsFunctions(event)

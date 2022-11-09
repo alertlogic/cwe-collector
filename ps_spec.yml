@@ -14,7 +14,7 @@ stages:
             - npm install 
             - npm test
     -
-        name: Integration Push - Publish
+        name: Integration Push - Coverage
         when:
             - push: ['integration']
         image: node:14

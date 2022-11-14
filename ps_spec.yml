@@ -16,7 +16,7 @@ stages:
     -
         name: Integration Push - Coverage
         when:
-            - push: ['integration']
+            - tag: ['v?\d+.\d+.\d+']
         image: node:14
         compute_size: small
         commands:

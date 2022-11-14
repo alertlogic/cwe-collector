@@ -14,7 +14,7 @@ stages:
             - npm install 
             - npm test
     -
-        name: Integration Push - Coverage
+        name: When Tag Created Run Coverage
         when:
             - tag: ['v?\d+.\d+.\d+']
         image: node:14

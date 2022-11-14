@@ -13,3 +13,18 @@ stages:
         commands:
             - npm install 
             - npm test
+    -
+        name: When Tag Created Run Coverage
+        when:
+            - tag: ['v?\d+.\d+.\d+']
+        image: node:14
+        compute_size: small
+        commands:
+            - make test
+            - git clone git@algithub.pd.alertlogic.net:alertlogic/al-ps-tools.git
+            - cp coverage/cobertura-coverage.xml cwe-collector.coverage.xml
+            - bash ./al-ps-tools/helpers/collect.sh -c 'cwe-collector.coverage.xml'
+            - rm -rf ./al-ps-tools/
+            - echo done
+        outputs:
+            file: ./.ps_outputs/*     

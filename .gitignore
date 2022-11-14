@@ -4,9 +4,15 @@ test/report.xml
 #idea
 .idea/
 nbproject/
-.nyc_output/
 al-cwe-collector.zip
-coverage/
 test/ide_test.js
 .env
 *.swp
+
+# Test coverage
+.nyc_output/
+coverage/
+*.coverage.xml
+
+# alps directories
+.ps_outputs

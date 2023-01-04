@@ -162,6 +162,7 @@ describe('CWE collector Tests', function() {
     describe('Format Log Tests', function(){
         it('Format success', function(done) {
             const formattedMsg = {
+                hostname: 'collector-id',
                 messageTs: 0,
                 priority: 11,
                 progName: 'CWECollector',

@@ -84,15 +84,17 @@ class CweCollector extends AlAwsCollector {
      * @param {*} msg 
      */
     formatLog(msg) {
+        let collector = this;
         const ts = parse.getMsgTs(msg, tsPaths);
         const typeId = parse.getMsgTypeId(msg, typeIdPaths);
         let formattedMsg = {
+            hostname: collector.collector_id,
             messageTs: ts.sec,
             priority: 11,
             progName: 'CWECollector',
             message: JSON.stringify(msg),
             messageType: 'json/cwe',
-            applicationId: this.application_id
+            applicationId: collector.application_id
         };
 
         if (typeId !== null && typeId !== undefined) {

@@ -164,6 +164,7 @@ exports.handler = function(event, context) {
             if (process.env.azollect_api && !process.env.azcollect_api) {
                 process.env.collector_id = 'NA';
                 process.env.azcollect_api = process.env.azollect_api;
+                process.env.collector_status_api = process.env.azcollect_api;
             }
            
             const collector = new cweCollector(

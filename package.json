@@ -21,26 +21,24 @@
     }
   ],
   "devDependencies": {
-    "aws-sdk": "^2.929.0",
+    "aws-sdk": "^2.1434.0",
     "aws-sdk-mock": "^5.8.0",
     "clone": "^2.1.2",
-    "dotenv": "^16.0.3",
-    "jshint": "^2.9.5",
+    "dotenv": "^16.3.1",
+    "jshint": "^2.13.6",
     "mocha": "^10.2.0",
     "mocha-jenkins-reporter": "^0.4.8",
     "nyc": "^15.1.0",
     "rewire": "^6.0.0",
-    "sinon": "^15.0.1"
+    "sinon": "^15.2.0"
   },
   "dependencies": {
-    "@alertlogic/al-aws-collector-js": "^4.1.14",
-    "@alertlogic/al-collector-js": "^3.0.5",
+    "@alertlogic/al-aws-collector-js": "4.1.20",
+    "@alertlogic/al-collector-js": "3.0.9",
     "async": "^3.2.4",
     "cfn-response": "^1.0.1",
-    "debug": "^4.1.1",
-    "moment": "^2.19.2",
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.7"
+    "debug": "^4.3.4",
+    "moment": "^2.29.4"
   },
   "author": "Alert Logic Inc."
 }

@@ -30,6 +30,11 @@ function setAlServiceStub() {
                             azcollect: 'new-azcollect-endpoint'
                         };
                         break;
+                    case '/residency/default/services/collector_status/endpoint':
+                        ret = {
+                            collector_status: 'new-collectors-status-endpoint'
+                        };
+                        break;
                     default:
                         break;
                 }
@@ -69,10 +74,12 @@ function mockSetEnvStub() {
     setEnvStub = sinon.stub(m_al_aws, 'setEnv').callsFake((vars, callback) => {
         const {
             ingest_api,
-            azcollect_api
+            azcollect_api,
+            collector_status_api
         } = vars;
         process.env.ingest_api = ingest_api ? ingest_api : process.env.ingest_api;
         process.env.azollect_api = azcollect_api ? azcollect_api : process.env.azollect_api;
+        process.env.collector_status_api = collector_status_api ? collector_status_api : process.env.collector_status_api;
         const returnBody = {
             Environment: {
                 Varaibles: vars

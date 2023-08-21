@@ -3,6 +3,7 @@ process.env.AWS_LAMBDA_FUNCTION_NAME = 'test-function-name';
 process.env.al_api = 'api.global-services.global.alertlogic.com';
 process.env.ingest_api = 'ingest.global-services.global.alertlogic.com';
 process.env.azollect_api = 'azcollect.global-services.global.alertlogic.com';
+process.env.collector_status_api = 'azcollect.global-services.global.alertlogic.com';
 process.env.collector_id = 'collector-id';
 process.env.al_application_id = 'guardduty';
 

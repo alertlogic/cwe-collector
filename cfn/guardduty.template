@@ -406,7 +406,8 @@
                 },
                 "Plaintext": {
                     "Ref": "SecretKey"
-                }
+                },
+                "Timeout": 300
             }
         },
       "CollectLambdaFunction":{
@@ -942,7 +943,8 @@
             "ServiceToken": { "Fn::GetAtt" : ["CollectLambdaFunction", "Arn"] },
             "StackName": { "Ref" : "AWS::StackName" },
             "AwsAccountId": { "Ref": "AWS::AccountId"},
-            "CollectRule": "aws.guardduty"
+            "CollectRule": "aws.guardduty",
+            "Timeout": 300
          }
       }
    }

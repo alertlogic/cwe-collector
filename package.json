@@ -1,6 +1,6 @@
 {
   "name": "al-cwe-collector",
-  "version": "1.3.22",
+  "version": "1.3.23",
   "license": "MIT",
   "description": "Alert Logic CloudWatch Events Collector",
   "repository": {
@@ -21,7 +21,6 @@
     }
   ],
   "devDependencies": {
-    "aws-sdk-mock": "^5.8.0",
     "clone": "^2.1.2",
     "dotenv": "^16.3.1",
     "jshint": "^2.13.6",
@@ -29,13 +28,19 @@
     "mocha-jenkins-reporter": "^0.4.8",
     "nyc": "^15.1.0",
     "rewire": "^7.0.0",
-    "sinon": "^15.2.0"
+    "sinon": "^15.2.0",
+    "@aws-sdk/client-cloudformation": "^3.427.0",
+    "@aws-sdk/client-cloudwatch": "^3.427.0",
+    "@aws-sdk/client-cloudwatch-events": "^3.427.0",
+    "@aws-sdk/client-kms": "^3.427.0",
+    "@aws-sdk/client-lambda": "^3.427.0",
+    "@aws-sdk/client-ssm": "^3.427.0",
+    "@aws-sdk/client-s3": "^3.427.0"
   },
   "dependencies": {
-    "@alertlogic/al-aws-collector-js": "4.1.22",
+    "@alertlogic/al-aws-collector-js": "4.1.24",
     "@alertlogic/al-collector-js": "3.0.10",
     "async": "^3.2.4",
-    "aws-sdk": "^2.1454.0",
     "cfn-response": "^1.0.1",
     "debug": "^4.3.4",
     "moment": "^2.29.4"

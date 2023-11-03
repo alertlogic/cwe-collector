@@ -7,13 +7,17 @@
  * @end
  * -----------------------------------------------------------------------------
  */
- 
-const AWS = require('aws-sdk');
+
+
+
+const { CloudWatchEvents } = require("@aws-sdk/client-cloudwatch-events");
+const { Lambda } = require("@aws-sdk/client-lambda");
+
 const async = require('async');
 const AlLogger = require('@alertlogic/al-aws-collector-js').Logger;
 
 function checkCloudWatchEventsRule(event, finalCallback) {
-    var cwe = new AWS.CloudWatchEvents();
+    var cwe = new CloudWatchEvents();
     async.waterfall([
        function(callback) {
             cwe.describeRule({Name: event.CloudWatchEventsRule}, function(err, data) {
@@ -47,7 +51,7 @@ function checkCloudWatchEventsRule(event, finalCallback) {
 }
 
 function checkEventSourceMapping(checkinEvent, context, callback) {
-    var lambda = new AWS.Lambda();
+    var lambda = new Lambda();
     lambda.listEventSourceMappings({FunctionName: context.functionName},
         function(err, data) {
             if (err) {

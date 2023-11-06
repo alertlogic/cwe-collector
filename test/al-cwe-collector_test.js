@@ -1,12 +1,13 @@
 var CweCollector = require('../al-cwe-collector').cweCollector;
-var AWS = require('aws-sdk-mock');
 var m_alCollector = require('@alertlogic/al-collector-js');
 const m_al_aws = require('@alertlogic/al-aws-collector-js').Util;
 const m_response = require('cfn-response');
 const cweMock = require('./cwe_mock');
 const sinon = require('sinon');
 const assert = require('assert');
-
+var cweStub = require('./cwe_stub');
+const { KMS } = require("@aws-sdk/client-kms"),
+    { SSM } = require("@aws-sdk/client-ssm");
 let alserviceStub = {};
 let ingestCStub = {};
 let setEnvStub = {};
@@ -105,16 +106,16 @@ describe('CWE collector Tests', function() {
         beforeEach(function () {
             decryptStub = sinon.stub().callsFake(function (params, callback) {
                 const data = {
-                    Plaintext: 'decrypted-sercret-key'
+                    Plaintext: Buffer.from('decrypted-sercret-key')
                 };
                 return callback(null, data);
             });
 
-            AWS.mock('KMS', 'decrypt', decryptStub);
+            cweStub.mock(KMS, 'decrypt', decryptStub);
 
-            AWS.mock('KMS', 'encrypt', function (params, callback) {
+            cweStub.mock(KMS, 'encrypt', function (params, callback) {
                 const data = {
-                    CiphertextBlob: Buffer.from('creds-from-file')
+                    CiphertextBlob: Buffer.from('creds-from-file').toString('base64')
                 };
                 return callback(null, data);
             });
@@ -124,7 +125,7 @@ describe('CWE collector Tests', function() {
                 return callback(null, { Parameter: { Value: data.toString('base64') } });
             });
 
-            AWS.mock('SSM', 'getParameter', ssmStub);
+            cweStub.mock(SSM, 'getParameter', ssmStub);
 
             responseStub = sinon.stub(m_response, 'send').callsFake(
                 function fakeFn(event, mockContext, responseStatus, responseData, physicalResourceId) {
@@ -139,8 +140,9 @@ describe('CWE collector Tests', function() {
            restoreAlServiceStub();
            setEnvStub.restore();
            responseStub.restore();
-           AWS.restore('KMS');
-           AWS.restore('SSM');
+           cweStub.restore(SSM,'getParameter');
+           cweStub.restore(KMS, 'decrypt');
+           cweStub.restore(KMS, 'encrypt');
         });
     
         it('Check process method  get called form handleEvent method if we have records', function (done) {

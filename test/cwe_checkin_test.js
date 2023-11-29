@@ -6,10 +6,7 @@ const cweMock = require('./cwe_mock');
 const cweMockErrors = require('./cwe_mock_errors');
 const clone = require('clone');
 var {AlServiceC} = require('@alertlogic/al-collector-js');
-var cweStub = require('./cwe_stub');
-const { CloudWatchEvents } = require("@aws-sdk/client-cloudwatch-events"),
-      { CloudFormation } = require("@aws-sdk/client-cloudformation"),
-      { Lambda } = require("@aws-sdk/client-lambda");
+const AWS = require('aws-sdk-mock');
 var azcollectStub;
 
 function setAzcollectStub() {
@@ -323,19 +320,19 @@ describe('CWE Checkin Tests', function() {
 });
 
 function mock() {
-    cweStub.mock(CloudFormation, 'describeStacks', function (data, callback) {
+    AWS.mock('CloudFormation', 'describeStacks', function (data, callback) {
         assert.equal(data.StackName, cweMock.STACK_NAME);
         return callback(null, cweMock.CF_DESCRIBE_STACKS_RESPONSE);
     });
-    cweStub.mock(CloudWatchEvents, 'describeRule', function (data, callback) {
+    AWS.mock('CloudWatchEvents', 'describeRule', function (data, callback) {
         assert.equal(data.Name, cweMock.CWE_RULE_NAME);
         return callback(null, cweMock.CWE_DESCRIBE_RULE);
     });
-    cweStub.mock(CloudWatchEvents, 'listTargetsByRule', function (data, callback) {
+    AWS.mock('CloudWatchEvents', 'listTargetsByRule', function (data, callback) {
         assert.equal(data.Rule, cweMock.CWE_RULE_NAME);
         return callback(null, cweMock.CWE_LIST_TARGETS_BY_RULE);
     });
-    cweStub.mock(Lambda, 'listEventSourceMappings', function (data, callback) {
+    AWS.mock('Lambda', 'listEventSourceMappings', function (data, callback) {
         assert.equal(data.FunctionName, cweMock.CHECKIN_TEST_FUNCTION_NAME);
         return callback(null, cweMock.LAMBDA_LIST_EVENTSOURCE_MAPPINGS_OK);
     });
@@ -343,16 +340,15 @@ function mock() {
 
 
 function unmock() {
-    cweStub.restore(CloudFormation, 'describeStacks');
-    cweStub.restore(CloudWatchEvents, 'describeRule');
-    cweStub.restore(CloudWatchEvents, 'listTargetsByRule');
-    cweStub.restore(Lambda, 'listEventSourceMappings');
+    AWS.restore('CloudFormation');
+    AWS.restore('CloudWatchEvents');
+    AWS.restore('Lambda');
 }
 
 
 function mockCWEDescribeRule(fun) {
-    cweStub.restore(CloudWatchEvents, 'describeRule');
-    cweStub.mock(CloudWatchEvents, 'describeRule', function (data, callback) {
+    AWS.restore('CloudWatchEvents', 'describeRule');
+    AWS.mock('CloudWatchEvents', 'describeRule', function (data, callback) {
         assert.equal(data.Name, cweMock.CWE_RULE_NAME);
         return fun(data, callback);
     });
@@ -360,16 +356,16 @@ function mockCWEDescribeRule(fun) {
 
 
 function mockCWEListTargetsByRule(fun) {
-    cweStub.restore(CloudWatchEvents, 'listTargetsByRule');
-    cweStub.mock(CloudWatchEvents, 'listTargetsByRule', function (data, callback) {
+    AWS.restore('CloudWatchEvents', 'listTargetsByRule');
+    AWS.mock('CloudWatchEvents', 'listTargetsByRule', function (data, callback) {
         assert.equal(data.Rule, cweMock.CWE_RULE_NAME);
         return fun(data, callback);
     });
 }
 
 function mockLambdaListEventSourceMappings(fun) {
-    cweStub.restore(Lambda, 'listEventSourceMappings');
-    cweStub.mock(Lambda, 'listEventSourceMappings', function (data, callback) {
+    AWS.restore('Lambda', 'listEventSourceMappings');
+    AWS.mock('Lambda', 'listEventSourceMappings', function (data, callback) {
         assert.equal(data.FunctionName, cweMock.CHECKIN_TEST_FUNCTION_NAME);
         return fun(data, callback);
     });

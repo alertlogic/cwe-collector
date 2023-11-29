@@ -3,8 +3,7 @@ const assert = require('assert');
 const rewire = require('rewire');
 const cweMock = require('./cwe_mock');
 var cweRewire = rewire('../index');
-var cweStub = require('./cwe_stub');
-const { KMS } = require("@aws-sdk/client-kms");
+var AWS = require('aws-sdk-mock');
     
 describe('CWE Unit Tests', function() {
 
@@ -124,7 +123,7 @@ describe('CWE Unit Tests', function() {
         });
 
         afterEach(function() {
-            cweStub.restore(KMS, 'decrypt');
+            AWS.restore('KMS', 'decrypt');
         });
 
         it('if AIMS_CREDS are declared already it returns ok', function(done) {
@@ -132,7 +131,7 @@ describe('CWE Unit Tests', function() {
                 access_key_id : ACCESS_KEY_ID,
                 secret_key: DECRYPTED_SECRET_KEY
             });
-            cweStub.mock(KMS, 'decrypt', function (data, callback) {
+            AWS.mock('KMS', 'decrypt', function (data, callback) {
                 throw Error('don\'t call me');
             });
             rewireGetDecryptedCredentials(function(err) { if (err === null) done(); });
@@ -143,9 +142,9 @@ describe('CWE Unit Tests', function() {
             process.env.aims_access_key_id = ACCESS_KEY_ID;
             process.env.aims_secret_key = ENCRYPTED_SECRET_KEY_BASE64;
     
-            cweStub.mock(KMS, 'decrypt', function (data, callback) {
+            AWS.mock('KMS', 'decrypt', function (data, callback) {
                 assert.equal(data.CiphertextBlob, ENCRYPTED_SECRET_KEY);
-                return callback(null, { Plaintext: Buffer.from(DECRYPTED_SECRET_KEY) });
+                return callback(null, { Plaintext: DECRYPTED_SECRET_KEY});
             });
             rewireGetDecryptedCredentials(function(err) {
                 assert.equal(err, null);
@@ -161,7 +160,7 @@ describe('CWE Unit Tests', function() {
             cweRewire.__set__('AIMS_CREDS', undefined);
             process.env.aims_access_key_id = ACCESS_KEY_ID;
             process.env.aims_secret_key = Buffer.from('wrong_key').toString('base64');
-            cweStub.mock(KMS, 'decrypt', function (data, callback) {
+            AWS.mock('KMS', 'decrypt', function (data, callback) {
                 assert.equal(data.CiphertextBlob, 'wrong_key');
                 return callback('error', 'stack');
             });

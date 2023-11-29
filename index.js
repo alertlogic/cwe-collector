@@ -10,7 +10,7 @@
  */
  
 const debug = require('debug') ('index'); 
-const { KMS } = require("@aws-sdk/client-kms");
+const AWS = require('aws-sdk');
 const async = require('async');
 
 const { Util: m_alAws } = require('@alertlogic/al-aws-collector-js');
@@ -26,7 +26,7 @@ function getDecryptedCredentials(callback) {
     if (AIMS_CREDS) {
         return callback(null);
     } else {
-        const kms = new KMS();
+        const kms = new AWS.KMS();
         kms.decrypt(
             {CiphertextBlob: Buffer.from(process.env.aims_secret_key, 'base64')},
             (err, data) => {
@@ -35,7 +35,7 @@ function getDecryptedCredentials(callback) {
                 } else {
                     AIMS_CREDS = {
                         access_key_id: process.env.aims_access_key_id,
-                        secret_key: new TextDecoder("utf-8").decode(data.Plaintext)
+                        secret_key: data.Plaintext.toString('ascii')
                     };
                     return callback(null);
                 }

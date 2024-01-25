@@ -28,3 +28,20 @@ stages:
             - echo done
         outputs:
             file: ./.ps_outputs/*     
+    -
+        name: When Tag Created Run Build And Create Aritifacts
+        when:
+            - tag: ['v?\d+.\d+.\d+']
+        image: 422372788747.dkr.ecr.us-east-1.amazonaws.com/al-paws-collector-pipeline:latest
+        compute_size: small_arm
+        commands:
+           - source $NVM_DIR/nvm.sh && nvm use 18
+           - npm install
+           - make compile test package
+           - mkdir cwe-collector
+           - cp -r cfn al-cwe-collector.zip al-cwe-collector.json cwe-collector
+           - zip -r cwe-collector.zip cwe-collector
+        outputs:
+           file: ./cwe-collector*
+        packagers:
+           - basic 

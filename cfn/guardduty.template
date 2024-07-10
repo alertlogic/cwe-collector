@@ -369,7 +369,7 @@
                   }
                 },
                 "Handler":"index.handler",
-                "Runtime":"nodejs18.x",
+                "Runtime":"nodejs20.x",
                 "MemorySize":128,
                 "Timeout": 5,
                 "Tags": [
@@ -439,7 +439,7 @@
                "S3Key": "packages/lambda/al-cwe-collector.zip"
             },
             "Handler":"index.handler",
-            "Runtime":"nodejs18.x",
+            "Runtime":"nodejs20.x",
             "MemorySize":128,
             "Timeout":300,
             "Environment":{

@@ -8,7 +8,7 @@ stages:
             - pull_request
             - pull_request:
                 trigger_phrase: test it
-        image: node:18
+        image: node:20
         compute_size: small
         commands:
             - npm install 
@@ -17,7 +17,7 @@ stages:
         name: When Tag Created Run Coverage
         when:
             - tag: ['v?\d+.\d+.\d+']
-        image: node:18
+        image: node:20
         compute_size: small
         commands:
             - make test
@@ -35,7 +35,7 @@ stages:
         image: 422372788747.dkr.ecr.us-east-1.amazonaws.com/al-paws-collector-pipeline:latest
         compute_size: small_arm
         commands:
-           - source $NVM_DIR/nvm.sh && nvm use 18
+           - source $NVM_DIR/nvm.sh && nvm use 20
            - npm install
            - make compile test package
            - mkdir cwe-collector

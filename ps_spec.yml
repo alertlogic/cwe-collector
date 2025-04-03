@@ -20,6 +20,7 @@ stages:
         image: node:20
         compute_size: small
         commands:
+            - npm install
             - make test
             - git clone git@algithub.pd.alertlogic.net:alertlogic/al-ps-tools.git
             - cp coverage/cobertura-coverage.xml cwe-collector.coverage.xml

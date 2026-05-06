@@ -36,7 +36,7 @@ stages:
         image: 422372788747.dkr.ecr.us-east-1.amazonaws.com/al-paws-collector-pipeline:latest
         compute_size: small_arm
         commands:
-           - source $NVM_DIR/nvm.sh && nvm use 20
+           - source $NVM_DIR/nvm.sh && nvm use 22
            - npm install
            - make compile test package
            - mkdir cwe-collector

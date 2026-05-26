@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Run it locally
+Resources:
+  LocalLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      KmsKeyArn: 
+      Environment:
+        Variables:
+          AWS_LAMBDA_FUNCTION_NAME:
+          aims_access_key_id: 
+          aims_secret_key: 
+          aws_lambda_zipfile_name: 
+          al_api: 
+          azcollect_api: 
+          collector_id:
+          LOG_LEVEL: 
+          DEBUG: 
+          al_data_residency: 
+          al_application_id: 
+          ingest_api: 
+          aws_lambda_update_config_name: 
+          stack_name: 
+          aws_lambda_s3_bucket:
+          collector_status_api:
+      CodeUri: ../
+      Runtime: nodejs24.x
+      Handler: index.handler
+      Timeout: 900
+      MemorySize: 1024

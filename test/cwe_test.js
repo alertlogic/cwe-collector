@@ -40,72 +40,57 @@ describe('CWE Unit Tests', function() {
         afterEach(function() {
         });
 
-        it('Guard Duty events format success', function(done) {
+        it('Guard Duty events format success', async function() {
             var context = {
                 invokedFunctionArn : 'test:arn'
             };
-            rewireFormatMessages(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
-                var expected = {
-                    collected_batch : {
-                        source_id : context.invokedFunctionArn,
-                        collected_messages : [cweMock.GD_EVENT]
-                    }
-                };
-                 assert.equal(null, formatError);
-                 assert.deepEqual(expected,collectedData);
-                done();
-            });
+            const collectedData = await rewireFormatMessages(cweMock.GD_ONLY_KINESIS_TEST_EVENT, context);
+            var expected = {
+                collected_batch : {
+                    source_id : context.invokedFunctionArn,
+                    collected_messages : [cweMock.GD_EVENT]
+                }
+            };
+            assert.deepEqual(expected,collectedData);
         });
         
-        it('Guard Duty events filtering', function(done) {
+        it('Guard Duty events filtering', async function() {
             var context = {
                 invokedFunctionArn : 'test:arn'
             };
-            rewireFormatMessages(cweMock.GD_OTHER_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
-                var expected = {
-                    collected_batch : {
-                        source_id : context.invokedFunctionArn,
-                        collected_messages : [cweMock.GD_EVENT]
-                    }
-                };
-                assert.equal(null, formatError);
-                assert.deepEqual(expected, collectedData);
-                done();
-            });
+            const collectedData = await rewireFormatMessages(cweMock.GD_OTHER_KINESIS_TEST_EVENT, context);
+            var expected = {
+                collected_batch : {
+                    source_id : context.invokedFunctionArn,
+                    collected_messages : [cweMock.GD_EVENT]
+                }
+            };
+            assert.deepEqual(expected, collectedData);
         });
 
-        it('Non-Guard Duty events filtering', function(done) {
+        it('Non-Guard Duty events filtering', async function() {
             var context = {
                 invokedFunctionArn : 'test:arn'
             };
-            rewireFormatMessages(cweMock.NON_GD_OTHER_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
-                assert.equal(formatError, null);
-                assert.equal(collectedData, undefined);
-                done();
-            });
+            const collectedData = await rewireFormatMessages(cweMock.NON_GD_OTHER_KINESIS_TEST_EVENT, context);
+            assert.equal(collectedData, undefined);
         });
         
         
-        it('Zero Guard Duty events filtering', function(done) {
+        it('Zero Guard Duty events filtering', async function() {
             var context = {
                 invokedFunctionArn : 'test:arn'
             };
-            rewireFormatMessages(cweMock.NO_GD_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
-                assert.equal(null, formatError);
-                assert.equal(undefined, collectedData);
-                done();
-            });
+            const collectedData = await rewireFormatMessages(cweMock.NO_GD_KINESIS_TEST_EVENT, context);
+            assert.equal(undefined, collectedData);
         });
         
-        it('Filter out malformed GD jsons', function(done) {
+        it('Filter out malformed GD jsons', async function() {
             var context = {
                 invokedFunctionArn : 'test:arn'
             };
-            rewireFormatMessages(cweMock.GD_MALFORMED_KINESIS_TEST_EVENT, context, function(formatError, collectedData) {
-                assert.equal(null, formatError);
-                assert.equal(undefined, collectedData);
-                done();
-            });
+            const collectedData = await rewireFormatMessages(cweMock.GD_MALFORMED_KINESIS_TEST_EVENT, context);
+            assert.equal(undefined, collectedData);
         });
     });
 
@@ -127,48 +112,46 @@ describe('CWE Unit Tests', function() {
             cweStub.restore(KMS, 'decrypt');
         });
 
-        it('if AIMS_CREDS are declared already it returns ok', function(done) {
+        it('if AIMS_CREDS are declared already it returns ok', async function() {
             cweRewire.__set__('AIMS_CREDS', {
                 access_key_id : ACCESS_KEY_ID,
                 secret_key: DECRYPTED_SECRET_KEY
             });
-            cweStub.mock(KMS, 'decrypt', function (data, callback) {
+            cweStub.mock(KMS, 'decrypt', function () {
                 throw Error('don\'t call me');
             });
-            rewireGetDecryptedCredentials(function(err) { if (err === null) done(); });
+            const result = await rewireGetDecryptedCredentials();
+            assert.equal(result, null);
         });
 
-        it('if AIMS_CREDS are not declared KMS decryption is called', function(done) {
+        it('if AIMS_CREDS are not declared KMS decryption is called', async function() {
             cweRewire.__set__('AIMS_CREDS', undefined);
             process.env.aims_access_key_id = ACCESS_KEY_ID;
             process.env.aims_secret_key = ENCRYPTED_SECRET_KEY_BASE64;
     
-            cweStub.mock(KMS, 'decrypt', function (data, callback) {
-                assert.equal(data.CiphertextBlob, ENCRYPTED_SECRET_KEY);
-                return callback(null, { Plaintext: Buffer.from(DECRYPTED_SECRET_KEY) });
+            cweStub.mock(KMS, 'decrypt', async function (data) {
+                assert.deepEqual(data.CiphertextBlob, Buffer.from(ENCRYPTED_SECRET_KEY_BASE64, 'base64'));
+                return { Plaintext: Buffer.from(DECRYPTED_SECRET_KEY) };
             });
-            rewireGetDecryptedCredentials(function(err) {
-                assert.equal(err, null);
-                assert.deepEqual(cweRewire.__get__('AIMS_CREDS'), {
-                    access_key_id: ACCESS_KEY_ID,
-                    secret_key: DECRYPTED_SECRET_KEY
-                });
-                done();
+            await rewireGetDecryptedCredentials();
+            assert.deepEqual(cweRewire.__get__('AIMS_CREDS'), {
+                access_key_id: ACCESS_KEY_ID,
+                secret_key: DECRYPTED_SECRET_KEY
             });
         });
 
-        it('if some error during decryption, function fails', function(done) {
+        it('if some error during decryption, function fails', async function() {
             cweRewire.__set__('AIMS_CREDS', undefined);
             process.env.aims_access_key_id = ACCESS_KEY_ID;
             process.env.aims_secret_key = Buffer.from('wrong_key').toString('base64');
-            cweStub.mock(KMS, 'decrypt', function (data, callback) {
-                assert.equal(data.CiphertextBlob, 'wrong_key');
-                return callback('error', 'stack');
+            cweStub.mock(KMS, 'decrypt', async function (data) {
+                assert.deepEqual(data.CiphertextBlob, Buffer.from('wrong_key'));
+                throw 'error';
             });
-            rewireGetDecryptedCredentials(function(err) {
-                assert.equal(err, 'error');
-                done();
-            });
+            await assert.rejects(
+                rewireGetDecryptedCredentials(),
+                (err) => err === 'error'
+            );
         });
     });
 });

@@ -12,65 +12,64 @@
 
 const { CloudWatchEvents } = require("@aws-sdk/client-cloudwatch-events");
 const { Lambda } = require("@aws-sdk/client-lambda");
-
-const async = require('async');
 const AlLogger = require('@alertlogic/al-aws-collector-js').Logger;
 
-function checkCloudWatchEventsRule(event, finalCallback) {
+
+async function checkCloudWatchEventsRule(event) {
     var cwe = new CloudWatchEvents();
-    async.waterfall([
-       function(callback) {
-            cwe.describeRule({Name: event.CloudWatchEventsRule}, function(err, data) {
-                if (err) {
-                    return callback(errorMsg('CWE00003', stringify(err)));
-                } else {
-                    if (data.State === 'ENABLED' &&
-                        data.EventPattern === event.CweRulePattern) {
-                        return callback(null);
-                    } else {
-                        return callback(errorMsg('CWE00004', 'CWE Rule is incorrectly configured: ' + stringify(data)));
-                    }
-                }
-            });
-        },
-        function(callback) {
-            cwe.listTargetsByRule({Rule: event.CloudWatchEventsRule}, function(err, data) {
-                if (err) {
-                    return callback(errorMsg('CWE00005', stringify(err)));
-                } else {
-                    if (data.Targets.length === 1 &&
-                        data.Targets[0].Arn === event.KinesisArn) {
-                        return callback(null);
-                    } else {
-                        return callback(errorMsg('CWE00006', 'CWE rule ' + event.CloudWatchEventsRule + ' has incorrect target set'));
-                    }
-                }
-            });
+    try {
+        const describeRuleData = await cwe.describeRule({ Name: event.CloudWatchEventsRule });
+        if (describeRuleData.State !== 'ENABLED' ||
+            describeRuleData.EventPattern !== event.CweRulePattern) {
+            throw errorMsg('CWE00004', 'CWE Rule is incorrectly configured: ' + stringify(describeRuleData));
         }
-    ], finalCallback);
+    } catch (err) {
+        if (err && err.code === 'CWE00004') {
+            throw err;
+        }
+        throw errorMsg('CWE00003', stringify(err));
+    }
+
+    try {
+        const targetData = await cwe.listTargetsByRule({ Rule: event.CloudWatchEventsRule });
+        if (targetData.Targets.length === 1 &&
+            targetData.Targets[0].Arn === event.KinesisArn) {
+            return null;
+        }
+
+        throw errorMsg('CWE00006', 'CWE rule ' + event.CloudWatchEventsRule + ' has incorrect target set');
+    } catch (err) {
+        if (err && (err.code === 'CWE00006')) {
+            throw err;
+        }
+        throw errorMsg('CWE00005', stringify(err));
+    }
 }
 
-function checkEventSourceMapping(checkinEvent, context, callback) {
+async function checkEventSourceMapping(checkinEvent, context) {
     var lambda = new Lambda();
-    lambda.listEventSourceMappings({FunctionName: context.functionName},
-        function(err, data) {
-            if (err) {
-                return callback(errorMsg('CWE00010', stringify(err)));
-            } else {
-                var eventSource = data.EventSourceMappings.find(
-                            obj => obj.EventSourceArn === checkinEvent.KinesisArn);
-                if (eventSource) {
-                    return checkEventSourceStatus(checkinEvent, eventSource, callback);
-                } else {
-                    return callback(errorMsg(
-                        'CWE00015',
-                        'Event source mapping doesn\'t exist: ' + stringify(data)));
-                }
-            }
-    });
+    try {
+        const data = await lambda.listEventSourceMappings({ FunctionName: context.functionName });
+        var eventSource = data.EventSourceMappings.find(
+            obj => obj.EventSourceArn === checkinEvent.KinesisArn
+        );
+        if (eventSource) {
+            return checkEventSourceStatus(checkinEvent, eventSource);
+        }
+
+        throw errorMsg(
+            'CWE00015',
+            'Event source mapping doesn\'t exist: ' + stringify(data)
+        );
+    } catch (err) {
+        if (err && err.code === 'CWE00015') {
+            throw err;
+        }
+        throw errorMsg('CWE00010', stringify(err));
+    }
 }
 
-function checkEventSourceStatus(checkinEvent, eventSource, callback) {
+function checkEventSourceStatus(checkinEvent, eventSource) {
     var lastProcessingResult = eventSource.LastProcessingResult;
     var state = eventSource.State;
 
@@ -80,29 +79,21 @@ function checkEventSourceStatus(checkinEvent, eventSource, callback) {
          // around collect lambda is correct and 'No records processed'
          // means just no events being generated.
          lastProcessingResult === 'No records processed')) {
-        return callback(null);
+        return null;
     } else {
-        return callback(errorMsg('CWE00020', 'Incorrect event source mapping status: ' + stringify(eventSource)));
+        throw errorMsg('CWE00020', 'Incorrect event source mapping status: ' + stringify(eventSource));
     }
 }
 
-function checkHealth(event, context, finalCallback) {
-    async.waterfall([
-        function(callback) {
-            checkCloudWatchEventsRule(event, callback);
-        },
-        function(callback) {
-            checkEventSourceMapping(event, context, callback);
-        }
-    ],
-    function(errMsg) {
-        if (errMsg) {
-            AlLogger.warn('Health check failed with',  errMsg);
-            return finalCallback(errMsg);
-        } else {
-            return finalCallback(null);
-        }
-    });
+async function checkHealth(event, context) {
+    try {
+        await checkCloudWatchEventsRule(event);
+        await checkEventSourceMapping(event, context);
+        return null;
+    } catch (errMsg) {
+        AlLogger.warn(`CWE00008: Health check failed with \`${JSON.stringify(errMsg)}\``, errMsg);
+        throw errMsg;
+    }
 }
 
 function stringify(jsonObj) {
@@ -118,11 +109,5 @@ function errorMsg(code, message) {
 }
 
 module.exports = {
-    checkHealth : function(event, context){
-
-        //close over the event and context to creat a function compatible with the framework.
-        return function(callback){
-            checkHealth(event, context, callback);
-        };
-    }
+    checkHealth
 };

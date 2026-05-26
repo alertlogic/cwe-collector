@@ -1,0 +1,21 @@
+{
+  "Records": [
+    {
+      "kinesis": {
+        "kinesisSchemaVersion": "1.0",
+        "partitionKey": "local-sam-partition-key",
+        "sequenceNumber": "49577651119794799532435452775356657619317529872846290946",
+        "data": "eyJ2ZXJzaW9uIjoiMCIsImlkIjoibG9jYWwtc2FtLWV2ZW50IiwiZGV0YWlsLXR5cGUiOiJHdWFyZER1dHkgRmluZGluZyIsInNvdXJjZSI6ImF3cy5ndWFyZGR1dHkiLCJhY2NvdW50IjoiMTIzNDU2Nzg5MDEyIiwidGltZSI6IjIwMjYtMDUtMjFUMDA6MDA6MDBaIiwicmVnaW9uIjoidXMtZWFzdC0xIiwicmVzb3VyY2VzIjpbXSwiZGV0YWlsIjp7InR5cGUiOiJVbmF1dGhvcml6ZWRBY2Nlc3M6RUMyL01hbGljaW91c0lQQ2FsbGVyLkN1c3RvbSJ9fQ==",
+        "approximateArrivalTimestamp": 1716249600
+      },
+      "eventSource": "aws:kinesis",
+      "eventVersion": "1.0",
+      "eventID": "shardId-000000000000:49577651119794799532435452775356657619317529872846290946",
+      "eventName": "aws:kinesis:record",
+      "invokeIdentityArn": "arn:aws:iam::123456789012:role/local-sam-role",
+      "awsRegion": "us-east-1",
+      "eventSourceARN": "arn:aws:kinesis:us-east-1:123456789012:stream/local-sam-stream",
+      "messageId": "444b76a8-fb4c-4588-a232-c2f5f8911d29"
+    }
+  ]
+}

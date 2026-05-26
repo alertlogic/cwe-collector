@@ -1,0 +1,10 @@
+{
+    "RequestType": "ScheduledEvent",
+    "Type": "Checkin",
+    "AwsAccountId": "123456789012",
+    "Region": "us-east-1",
+    "StackName": "im-cwe-collector-test2",
+    "KinesisArn": "arn:aws:kinesis:us-east-1:123456789012:stream/im-cwe-collector-test2-KinesisStream-123456789012",
+    "CloudWatchEventsRule": "im-cwe-collector-test2-CloudWatchEventsRule-123456789012",
+    "CweRulePattern": "{\"detail-type\":[\"GuardDuty Finding\"],\"source\":[\"aws.guardduty\"]}"
+}

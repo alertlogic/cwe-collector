@@ -31,6 +31,10 @@ upload:
 deploy:
 	aws lambda update-function-code --function-name $(AWS_LAMBDA_CWE_FUNCTION_NAME) --zip-file fileb://$(AWS_LAMBDA_CWE_PACKAGE_NAME)
 
+sam-local:
+	@echo "Running local lambda Press Ctrl+C to stop."
+	./local/run-sam.sh; 
+		
 clean:
 	rm -rf node_modules
 	rm -f $(AWS_LAMBDA_CWE_PACKAGE_NAME)

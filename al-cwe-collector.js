@@ -1,8 +1,8 @@
 'use strict';
-const AlAwsCollector = require('@alertlogic/al-aws-collector-js').AlAwsCollector;
+const AlAwsCollectorV2 = require('@alertlogic/al-aws-collector-js').AlAwsCollectorV2;
+const AlLogger = require('@alertlogic/al-aws-collector-js').Logger;
 const m_packageJson = require('./package.json');
 const parse = require('@alertlogic/al-collector-js').Parse
-const async = require('async');
 
 const typeIdPaths = [
     { path: ['detail', 'type'] }
@@ -12,11 +12,11 @@ const tsPaths = [
     { path: ['time'] }
 ];
 
-class CweCollector extends AlAwsCollector {
+class CweCollector extends AlAwsCollectorV2 {
     constructor(context, aimsCreds, formatMessages, healthChecks = [], statsChecks = []) {
         super(context,
             "cwe",
-            AlAwsCollector.IngestTypes.SECMSGS,
+            AlAwsCollectorV2.IngestTypes.SECMSGS,
             m_packageJson.version,
             aimsCreds,
             formatMessages,
@@ -37,45 +37,88 @@ class CweCollector extends AlAwsCollector {
         return Object.assign(cweProps, baseProps);
     };
 
-    register(event, custom, callback) {
-        let collector = this;
-        let cweRegisterProps = this.getProperties(event);
-        AlAwsCollector.prototype.register.call(collector, event, cweRegisterProps, callback);
-    }
-
-    process(event, callback) {
-        const context = this._invokeContext;
-        var collector = this;
-        async.waterfall([
-            function (asyncCallback) {
-                collector._formatFun(event, context, asyncCallback);
-            },
-            function (formattedData, compress, asyncCallback) {
-                if (arguments.length === 2 && typeof compress === 'function') {
-                    asyncCallback = compress;
-                    compress = true;
-                }
-                collector.send(JSON.stringify(formattedData), compress, collector._ingestType, (err, res) => {
-                    return asyncCallback(err, formattedData);
-                });
-            },
-            function (formattedData, asyncCallback) {
-                collector.processLog(formattedData.collected_batch.collected_messages, collector.formatLog.bind(collector), null, asyncCallback);
+    async register(event, custom) {
+        try {
+            const cweRegisterProps = this.getProperties(event);
+            if (custom && typeof custom === 'object') {
+                Object.assign(cweRegisterProps, custom);
             }
-        ],
-            callback);
+            return await super.register(event, cweRegisterProps);
+        } catch (err) {
+            AlLogger.error(`CWE00021: CWE registration failed: \`${err.message}\``, err);
+            throw err;
+        }
     }
 
-    handleEvent(event, asyncCallback) {
-        let collector = this;
-        if (event.Records) {
-            return collector.process(event, asyncCallback);
+    async _formatMessagesAsync(event, context) {
+        try {
+            return await this._formatFun(event, context);
+        } catch (err) {
+            AlLogger.error(`CWE00022: Failed to format messages: \`${err.message}\``, err);
+            throw err;
+        }
+    }
 
-        } else {
+    async _sendAsync(formattedData, compress = true) {
+        try {
+            if (arguments.length === 2 && typeof compress === 'function') {
+                compress = true;
+            }
+            await this.send(JSON.stringify(formattedData), compress, this._ingestType);
+            return formattedData;
+        } catch (err) {
+            AlLogger.error(`CWE00023: Failed to send formatted data: \`${err.message}\``, err);
+            throw err;
+        }
+    }
+
+    async _processLogAsync(formattedData) {
+        try {
+            if (!formattedData || !formattedData.collected_batch) {
+                AlLogger.warn('Invalid formattedData structure, skipping log processing');
+                return null;
+            }
+            return await this.processLog(
+                formattedData.collected_batch.collected_messages,
+                this.formatLog.bind(this),
+                null
+            );
+        } catch (err) {
+            AlLogger.error(`CWE00024: Failed to process logs: \`${err.message}\``, err);
+            throw err;
+        }
+    }
+
+    async process(event) {
+        try {
+            const context = this._invokeContext;
+            const formattedData = await this._formatMessagesAsync(event, context);
+            
+            if (!formattedData) {
+                AlLogger.warn('No formatted data to process, returning empty batch');
+                return { collected_messages: [] };
+            }
+            
+            await this._sendAsync(formattedData, true);
+            return await this._processLogAsync(formattedData);
+        } catch (err) {
+            AlLogger.error(`CWE00025: CWE process execution failed: \`${err.message}\``, err);
+            throw err;
+        }
+    }
+
+    async handleEvent(event) {
+        try {
+            if (event.Records) {
+                return await this.process(event);
+            }
             if (!this.stack_name && event.StackName) {
                 this.stack_name = event.StackName;
             }
-            return super.handleEvent(event);
+            return await super.handleEvent(event);
+        } catch (err) {
+            AlLogger.error(`CWE00026: CWE handleEvent failed: \`${err.message}\``, err);
+            throw err;
         }
     };
 

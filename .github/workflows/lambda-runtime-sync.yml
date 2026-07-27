@@ -1,0 +1,127 @@
+name: Lambda Runtime Sync
+
+on:
+  # Weekly check for newly supported Lambda Node.js runtimes.
+  schedule:
+    - cron: '0 2 * * 1'
+  # Manual trigger for ad-hoc validation and testing.
+  workflow_dispatch:
+
+permissions:
+  # Required for committing workflow-generated file updates.
+  contents: write
+  # Required for opening or updating the automation PR.
+  pull-requests: write
+
+jobs:
+  sync-runtime:
+    name: Sync Node.js runtime with AWS Lambda
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Detect Lambda Node.js runtime updates
+        id: runtime
+        run: node scripts/check-lambda-node-runtime.js
+
+      # Keep ps_spec runtime image aligned with detected Lambda runtime major.
+      - name: Update ps_spec.yml runtime image
+        if: steps.runtime.outputs.changed == 'true'
+        run: |
+          major='${{ steps.runtime.outputs.target_major }}'
+          sed -i.bak -E "s/node:[0-9]+/node:${major}/g" ps_spec.yml
+          rm -f ps_spec.yml.bak
+
+      # Fail fast if any stage image in ps_spec still points to a different major.
+      - name: Verify ps_spec.yml runtime image
+        if: steps.runtime.outputs.changed == 'true'
+        run: |
+          expected='node:${{ steps.runtime.outputs.target_major }}'
+          runtime_lines="$(grep -E '^[[:space:]]*image:[[:space:]]*node:[0-9]+' ps_spec.yml || true)"
+
+          if [[ -z "$runtime_lines" ]]; then
+            echo "::error::No node image entries found in ps_spec.yml"
+            exit 1
+          fi
+
+          if echo "$runtime_lines" | grep -Ev "image:[[:space:]]*${expected}$" > /dev/null; then
+            echo "::error::Found unexpected node image tag(s) in ps_spec.yml"
+            echo "$runtime_lines"
+            exit 1
+          fi
+      - name: Update node runtime references
+        if: steps.runtime.outputs.changed == 'true'
+        run: |
+          set -euo pipefall
+
+          major='node:${{ steps.runtime.outputs.target_major }}'
+          runtime='node:${{ steps.runtime.outputs.target_runtime }}'
+
+          echo "Updating runtime to ${runtime}"
+          echo "Updating Node major to ${major}"
+
+          #
+          # Update Cloud formation template
+          #
+
+          if [ -f cfn/guardduty.template ]; then
+            sed -i.bak -E \
+              "s/nodejs[0-9]+\.x/${runtime}/g" \
+              cfn/guardduty.template 
+            rm -f cfn/guardduty.template.bak
+          fi
+
+          #
+          # Update al-cwe-collector.json
+          #
+
+          if [ -f al-cwe-collector.json ]; then
+            sed -i.bak -E "s/['\"]nodejs[0-9]+\.x['\"]/\"${runtime}\"/g" al-cwe-collector.json
+            rm -f al-cwe-collector.json.bak
+          fi
+
+      - name: Install dependencies
+        if: steps.runtime.outputs.changed == 'true'
+        run: npm ci
+
+      - name: Run lint
+        if: steps.runtime.outputs.changed == 'true'
+        run: npm run lint
+
+      - name: Run tests
+        if: steps.runtime.outputs.changed == 'true'
+        run: npm test
+
+      - name: Create Pull Request
+        if: steps.runtime.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          # Fixed branch name allows updating an existing open PR instead of spamming new ones.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/lambda-runtime-sync
+          commit-message: "chore: sync Node runtime to ${{ steps.runtime.outputs.target_runtime }}"
+          title: "chore: sync Node runtime to ${{ steps.runtime.outputs.target_runtime }}"
+          body: |
+            ## Runtime Sync
+
+            This PR updates Node.js runtime pins to match AWS Lambda supported runtime.
+
+            ### Target runtime
+            - `${{ steps.runtime.outputs.target_runtime }}`
+
+            ### Updated files
+            - `${{ steps.runtime.outputs.changed_files }}`
+            - `ps_spec.yml`
+
+            Source: https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html
+          labels: dependencies,automated
+          delete-branch: false

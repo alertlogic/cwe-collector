@@ -1,0 +1,37 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    target-branch: integration
+    schedule:
+      interval: daily
+    versioning-strategy: increase
+    groups:
+      npm-version-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      npm-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    target-branch: integration
+    schedule:
+      interval: weekly
+    groups:
+      github-actions-version-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      github-actions-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    labels:
+      - dependencies

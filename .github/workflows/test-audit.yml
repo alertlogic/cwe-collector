@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [integration]
+  pull_request:
+    branches: [integration]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/**'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint & Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+  audit:
+    name: Security Audit (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run update:overrides
+      - run: npm install --package-lock-only
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --audit-level=high || true

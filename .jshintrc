@@ -1,5 +1,5 @@
 {
-  "esversion": 9,
+  "esversion": 10,
   "shadow": "outer",
   "undef": true,
   "unused": "vars",

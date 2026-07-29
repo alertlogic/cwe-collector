@@ -40,6 +40,7 @@ jobs:
           major='${{ steps.runtime.outputs.target_major }}'
           sed -i.bak -E "s/node:[0-9]+/node:${major}/g" ps_spec.yml
           rm -f ps_spec.yml.bak
+          echo "Updated ps_spec.yml"
 
       # Fail fast if any stage image in ps_spec still points to a different major.
       - name: Verify ps_spec.yml runtime image
@@ -62,7 +63,7 @@ jobs:
         shell: bash
         if: steps.runtime.outputs.changed == 'true'
         run: |
-          set -euo pipefall
+          set -euo pipefail
 
           major='node:${{ steps.runtime.outputs.target_major }}'
           runtime='node:${{ steps.runtime.outputs.target_runtime }}'
@@ -79,6 +80,7 @@ jobs:
               "s/nodejs[0-9]+\.x/${runtime}/g" \
               cfn/guardduty.template 
             rm -f cfn/guardduty.template.bak
+            echo "Updated guardduty.template"
           fi
 
           #
@@ -88,6 +90,7 @@ jobs:
           if [ -f al-cwe-collector.json ]; then
             sed -i.bak -E "s/['\"]nodejs[0-9]+\.x['\"]/\"${runtime}\"/g" al-cwe-collector.json
             rm -f al-cwe-collector.json.bak
+            echo "Updated al-cwe-collector.json"
           fi
 
       - name: Install dependencies

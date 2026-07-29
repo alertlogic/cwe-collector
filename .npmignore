@@ -1,13 +1,11 @@
-node_modules/
+.github/
+
 test/report.xml
 #idea
 .idea/
 nbproject/
-al-cwe-collector.zip
 test/ide_test.js
 .env
-local/env.json
-*.swp
 
 # Test coverage
 .nyc_output/

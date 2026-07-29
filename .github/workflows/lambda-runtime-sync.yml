@@ -59,6 +59,7 @@ jobs:
             exit 1
           fi
       - name: Update node runtime references
+        shell: bash
         if: steps.runtime.outputs.changed == 'true'
         run: |
           set -euo pipefall

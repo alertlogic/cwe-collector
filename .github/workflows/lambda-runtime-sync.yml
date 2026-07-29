@@ -66,7 +66,7 @@ jobs:
           set -euo pipefail
 
           major='node:${{ steps.runtime.outputs.target_major }}'
-          runtime='node:${{ steps.runtime.outputs.target_runtime }}'
+          runtime='${{ steps.runtime.outputs.target_runtime }}'
 
           echo "Updating runtime to ${runtime}"
           echo "Updating Node major to ${major}"

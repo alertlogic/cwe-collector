@@ -11,6 +11,7 @@
   "scripts": {
     "start": "node index.js",
     "lint": "jshint --exclude \"./node_modules/*\" **/*.js",
+    "update:overrides": "node scripts/update-overrides.js",
     "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura --reporter=text mocha --colors"
   },
   "main": "index.js",

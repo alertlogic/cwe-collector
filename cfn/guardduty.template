@@ -356,7 +356,7 @@
                               "        return response.send(event, context, response.FAILED);\n",
                               "   }\n",
                               "}\n",
-                              "exports.handler = async(event, context, callback) => {\n",
+                              "exports.handler = async(event, context) => {\n",
                               "    if (event.ResourceType == 'AWS::CloudFormation::CustomResource' &&\n",
                               "        (event.RequestType == 'Create' || event.RequestType == 'Update')) {\n",
                               "        await encrypt(event, context);\n",

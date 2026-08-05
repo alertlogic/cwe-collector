@@ -65,6 +65,16 @@ function isUpdatableSpec(spec) {
   return !/^(file:|link:|workspace:|git\+|github:|https?:|npm:)/i.test(normalized);
 }
 
+function isExactSemverSpec(spec) {
+  if (typeof spec !== 'string') {
+    return false;
+  }
+
+  const normalized = spec.trim();
+  // Treat plain semver pins as exact versions that should follow latest.
+  return /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(normalized);
+}
+
 function updateDependencyMap(sectionName, dependencies) {
   if (!dependencies || typeof dependencies !== 'object') {
     return;
@@ -79,12 +89,16 @@ function updateDependencyMap(sectionName, dependencies) {
       const prefixMatch = current.match(/^[^0-9]*/);
       const prefix = prefixMatch ? prefixMatch[0] : '';
 
-      let resolvedVersion;
-      try {
-        resolvedVersion = resolveLatestVersionForRange(name, current);
-      } catch {
-        resolvedVersion = resolveLatestVersion(name);
+        let resolvedVersion;
+        if (isExactSemverSpec(current)) {
+          resolvedVersion = resolveLatestVersion(name);
+        } else {
+          try {
+            resolvedVersion = resolveLatestVersionForRange(name, current);
+          } catch {
+            resolvedVersion = resolveLatestVersion(name);
       }
+        }
 
       const next = `${prefix}${resolvedVersion}`;
 

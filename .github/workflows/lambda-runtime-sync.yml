@@ -33,30 +33,44 @@ jobs:
         id: runtime
         run: node scripts/check-lambda-node-runtime.js
 
-      # Keep ps_spec runtime image aligned with detected Lambda runtime major.
-      - name: Update ps_spec.yml runtime image
+      # Keep ps_spec Node pins aligned with detected Lambda runtime major.
+      - name: Update ps_spec.yml Node pins
         if: steps.runtime.outputs.changed == 'true'
         run: |
           major='${{ steps.runtime.outputs.target_major }}'
           sed -i.bak -E "s/node:[0-9]+/node:${major}/g" ps_spec.yml
+          sed -i.bak -E "s/(nvm[[:space:]]+use[[:space:]]+)[0-9]+/\1${major}/g" ps_spec.yml
           rm -f ps_spec.yml.bak
           echo "Updated ps_spec.yml"
 
-      # Fail fast if any stage image in ps_spec still points to a different major.
-      - name: Verify ps_spec.yml runtime image
+      # Fail fast if ps_spec Node pins still point to a different major.
+      - name: Verify ps_spec.yml Node pins
         if: steps.runtime.outputs.changed == 'true'
         run: |
           expected='node:${{ steps.runtime.outputs.target_major }}'
+          expected_major='${{ steps.runtime.outputs.target_major }}'
           runtime_lines="$(grep -E '^[[:space:]]*image:[[:space:]]*node:[0-9]+' ps_spec.yml || true)"
+          nvm_lines="$(grep -E 'nvm[[:space:]]+use[[:space:]]+[0-9]+' ps_spec.yml || true)"
 
           if [[ -z "$runtime_lines" ]]; then
             echo "::error::No node image entries found in ps_spec.yml"
             exit 1
           fi
 
+          if [[ -z "$nvm_lines" ]]; then
+            echo "::error::No nvm use entries found in ps_spec.yml"
+            exit 1
+          fi
+
           if echo "$runtime_lines" | grep -Ev "image:[[:space:]]*${expected}$" > /dev/null; then
             echo "::error::Found unexpected node image tag(s) in ps_spec.yml"
             echo "$runtime_lines"
+            exit 1
+          fi
+
+          if echo "$nvm_lines" | grep -Ev "nvm[[:space:]]+use[[:space:]]+${expected_major}$" > /dev/null; then
+            echo "::error::Found unexpected nvm use major(s) in ps_spec.yml"
+            echo "$nvm_lines"
             exit 1
           fi
       - name: Update node runtime references

@@ -37,6 +37,68 @@ function resolveLatestVersion(name) {
   return normalized;
 }
 
+function resolveLatestVersionForRange(name, range) {
+  const raw = execFileSync('npm', ['view', `${name}@${range}`, 'version', '--json'], {
+    encoding: 'utf8'
+  }).trim();
+  const parsed = parseJson(raw);
+  const latest = Array.isArray(parsed) ? parsed[parsed.length - 1] : parsed || raw.replace(/"/g, '');
+  const normalized = String(latest).trim();
+
+  if (!normalized || normalized === 'undefined') {
+    throw new Error(`could not resolve latest version for ${name}@${range}`);
+  }
+
+  return normalized;
+}
+
+function isUpdatableSpec(spec) {
+  if (typeof spec !== 'string') {
+    return false;
+  }
+
+  const normalized = spec.trim();
+  if (!normalized) {
+    return false;
+  }
+
+  return !/^(file:|link:|workspace:|git\+|github:|https?:|npm:)/i.test(normalized);
+}
+
+function updateDependencyMap(sectionName, dependencies) {
+  if (!dependencies || typeof dependencies !== 'object') {
+    return;
+  }
+
+  for (const [name, current] of Object.entries(dependencies)) {
+    if (!isUpdatableSpec(current)) {
+      continue;
+    }
+
+    try {
+      const prefixMatch = current.match(/^[^0-9]*/);
+      const prefix = prefixMatch ? prefixMatch[0] : '';
+
+      let resolvedVersion;
+      try {
+        resolvedVersion = resolveLatestVersionForRange(name, current);
+      } catch {
+        resolvedVersion = resolveLatestVersion(name);
+      }
+
+      const next = `${prefix}${resolvedVersion}`;
+
+      if (next !== current) {
+        dependencies[name] = next;
+        changed = true;
+        console.log(`Updated ${sectionName} ${name}: ${current} -> ${next}`);
+      }
+    } catch (error) {
+      console.warn(`Skipping ${sectionName} ${name}: ${error.message}`);
+    }
+  }
+}
+
 function getAuditReport() {
   try {
     const raw = execFileSync('npm', ['audit', '--json'], { encoding: 'utf8' }).trim();
@@ -79,6 +141,9 @@ function getParentPackages(nodes, dependencyName) {
 }
 
 let changed = false;
+
+updateDependencyMap('dependency', packageJson.dependencies);
+updateDependencyMap('devDependency', packageJson.devDependencies);
 
 for (const name of Object.keys(overrides)) {
   const current = overrides[name];

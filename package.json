@@ -1,6 +1,6 @@
 {
   "name": "al-cwe-collector",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "license": "MIT",
   "description": "Alert Logic CloudWatch Events Collector",
   "repository": {
@@ -22,13 +22,13 @@
     }
   ],
   "devDependencies": {
-    "@aws-sdk/client-cloudformation": "^3.1103.0",
-    "@aws-sdk/client-cloudwatch": "^3.1103.0",
-    "@aws-sdk/client-cloudwatch-events": "^3.1103.0",
-    "@aws-sdk/client-kms": "^3.1103.0",
-    "@aws-sdk/client-lambda": "^3.1103.0",
-    "@aws-sdk/client-s3": "^3.1103.0",
-    "@aws-sdk/client-ssm": "^3.1103.0",
+    "@aws-sdk/client-cloudformation": "^3.1104.0",
+    "@aws-sdk/client-cloudwatch": "^3.1104.0",
+    "@aws-sdk/client-cloudwatch-events": "^3.1104.0",
+    "@aws-sdk/client-kms": "^3.1104.0",
+    "@aws-sdk/client-lambda": "^3.1104.0",
+    "@aws-sdk/client-s3": "^3.1104.0",
+    "@aws-sdk/client-ssm": "^3.1104.0",
     "clone": "^2.1.2",
     "dotenv": "^17.4.2",
     "jshint": "^2.13.6",

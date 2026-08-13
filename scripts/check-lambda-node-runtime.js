@@ -8,27 +8,6 @@ const RUNTIME_DOCS_URL = "https://docs.aws.amazon.com/lambda/latest/dg/lambda-ru
 const REPO_ROOT = path.resolve(__dirname, "..");
 const STATE_FILE = path.join(REPO_ROOT, ".github", "lambda-runtime.json");
 
-const TARGET_FILES = [
-  {
-    file: path.join(REPO_ROOT, ".github", "workflows", "test-audit.yml"),
-    replacers: [
-      {
-        pattern: /\b24\.x\b/g,
-        replacement: (major) => `${major}.x`
-      }
-    ]
-  },
-  {
-    file: path.join(REPO_ROOT, ".github", "workflows", "auto-deps-update.yml"),
-    replacers: [
-      {
-        pattern: /\b24\.x\b/g,
-        replacement: (major) => `${major}.x`
-      }
-    ]
-  }
-];
-
 function writeGitHubOutput(key, value) {
   if (!process.env.GITHUB_OUTPUT) {
     return;
@@ -99,7 +78,16 @@ function parseHighestNodeRuntimeMajor(html) {
   while (match !== null) {
     const major = Number(match[1]);
     if (Number.isInteger(major) && major >= 10) {
-      majors.add(major);
+      // Check context around the runtime to see if it's marked as "Not scheduled"
+      const matchIndex = match.index;
+      const contextStart = Math.max(0, matchIndex - 200);
+      const contextEnd = Math.min(html.length, matchIndex + 200);
+      const context = html.substring(contextStart, contextEnd);
+
+      // Skip if "Not scheduled" appears in the context
+      if (!context.toLowerCase().includes("not scheduled")) {
+        majors.add(major);
+      }
     }
     match = regex.exec(html);
   }
@@ -130,26 +118,6 @@ function writeStateMajor(major) {
   fs.writeFileSync(STATE_FILE, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
-function updateTargetFiles(targetMajor) {
-  const changed = [];
-
-  for (const item of TARGET_FILES) {
-    const original = fs.readFileSync(item.file, "utf8");
-    let next = original;
-
-    for (const replacer of item.replacers) {
-      next = next.replace(replacer.pattern, replacer.replacement(targetMajor));
-    }
-
-    if (next !== original) {
-      fs.writeFileSync(item.file, next, "utf8");
-      changed.push(path.relative(REPO_ROOT, item.file));
-    }
-  }
-
-  return changed;
-}
-
 async function main() {
   try {
     const html = await fetchHtmlWithRetry(RUNTIME_DOCS_URL);
@@ -161,7 +129,6 @@ async function main() {
     let changedFiles = [];
 
     if (shouldUpdate) {
-      changedFiles = updateTargetFiles(targetMajor);
       writeStateMajor(targetMajor);
       changedFiles.push(path.relative(REPO_ROOT, STATE_FILE));
     }

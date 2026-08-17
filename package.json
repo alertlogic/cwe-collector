@@ -22,13 +22,13 @@
     }
   ],
   "devDependencies": {
-    "@aws-sdk/client-cloudformation": "^3.1103.0",
-    "@aws-sdk/client-cloudwatch": "^3.1103.0",
-    "@aws-sdk/client-cloudwatch-events": "^3.1103.0",
-    "@aws-sdk/client-kms": "^3.1103.0",
-    "@aws-sdk/client-lambda": "^3.1103.0",
-    "@aws-sdk/client-s3": "^3.1103.0",
-    "@aws-sdk/client-ssm": "^3.1103.0",
+    "@aws-sdk/client-cloudformation": "^3.1110.0",
+    "@aws-sdk/client-cloudwatch": "^3.1110.0",
+    "@aws-sdk/client-cloudwatch-events": "^3.1110.0",
+    "@aws-sdk/client-kms": "^3.1110.0",
+    "@aws-sdk/client-lambda": "^3.1110.0",
+    "@aws-sdk/client-s3": "^3.1110.0",
+    "@aws-sdk/client-ssm": "^3.1110.0",
     "clone": "^2.1.2",
     "dotenv": "^17.4.2",
     "jshint": "^2.13.6",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@alertlogic/al-aws-collector-js": "^4.2.10",
-    "@alertlogic/al-collector-js": "3.0.30",
+    "@alertlogic/al-collector-js": "3.0.31",
     "cfn-response": "^1.0.1",
     "debug": "^4.4.3",
     "moment": "^2.30.1"

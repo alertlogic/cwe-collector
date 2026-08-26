@@ -5,6 +5,8 @@ updates:
     target-branch: integration
     schedule:
       interval: daily
+    cooldown:
+      default-days: 7
     versioning-strategy: increase
     groups:
       npm-version-updates:
@@ -24,6 +26,8 @@ updates:
     target-branch: integration
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       github-actions-version-updates:
         applies-to: version-updates

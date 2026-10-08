@@ -1,6 +1,6 @@
 {
   "name": "al-cwe-collector",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "license": "MIT",
   "description": "Alert Logic CloudWatch Events Collector",
   "repository": {
@@ -38,8 +38,8 @@
     "sinon": "^22.1.0"
   },
   "dependencies": {
-    "@alertlogic/al-aws-collector-js": "^4.2.12",
-    "@alertlogic/al-collector-js": "3.0.31",
+    "@alertlogic/al-aws-collector-js": "^4.2.13",
+    "@alertlogic/al-collector-js": "^3.0.32",
     "cfn-response": "^1.0.1",
     "debug": "^4.4.3",
     "moment": "^2.31.0"
@@ -52,9 +52,6 @@
     "serialize-javascript": "^7.1.2",
     "jshint": {
       "minimatch": "^3.1.4"
-    },
-    "@alertlogic/al-aws-collector-js": {
-      "@alertlogic/al-collector-js": "^3.0.7"
     },
     "@istanbuljs/load-nyc-config": "^1.1.0",
     "argparse": "^3.0.2",

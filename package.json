@@ -1,6 +1,6 @@
 {
   "name": "al-cwe-collector",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "license": "MIT",
   "description": "Alert Logic CloudWatch Events Collector",
   "repository": {
@@ -22,41 +22,44 @@
     }
   ],
   "devDependencies": {
-    "@aws-sdk/client-cloudformation": "^3.1147.0",
-    "@aws-sdk/client-cloudwatch": "^3.1147.0",
-    "@aws-sdk/client-cloudwatch-events": "^3.1147.0",
-    "@aws-sdk/client-kms": "^3.1147.0",
-    "@aws-sdk/client-lambda": "^3.1147.0",
-    "@aws-sdk/client-s3": "^3.1147.0",
-    "@aws-sdk/client-ssm": "^3.1147.0",
+    "@aws-sdk/client-cloudformation": "^3.1171.0",
+    "@aws-sdk/client-cloudwatch": "^3.1171.0",
+    "@aws-sdk/client-cloudwatch-events": "^3.1171.0",
+    "@aws-sdk/client-kms": "^3.1171.0",
+    "@aws-sdk/client-lambda": "^3.1171.0",
+    "@aws-sdk/client-s3": "^3.1171.0",
+    "@aws-sdk/client-ssm": "^3.1171.0",
     "clone": "^2.1.2",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.10",
     "jshint": "^2.13.6",
-    "mocha": "^11.8.0",
+    "mocha": "^12.0.3",
     "nyc": "^18.0.0",
     "rewire": "^9.0.1",
     "sinon": "^22.1.0"
   },
   "dependencies": {
-    "@alertlogic/al-aws-collector-js": "^4.2.13",
-    "@alertlogic/al-collector-js": "^3.0.32",
+    "@alertlogic/al-aws-collector-js": "^4.2.14",
+    "@alertlogic/al-collector-js": "^3.0.35",
     "cfn-response": "^1.0.1",
     "debug": "^4.4.3",
     "moment": "^2.31.0"
   },
   "overrides": {
     "diff": "^8.0.4",
-    "fast-xml-parser": "^5.11.2",
+    "fast-xml-parser": "^5.12.1",
     "lodash": "^4.18.1",
     "uuid": "^11.1.1",
-    "serialize-javascript": "^7.1.2",
+    "serialize-javascript": "^7.1.4",
     "jshint": {
       "minimatch": "^3.1.4"
     },
     "@istanbuljs/load-nyc-config": "^1.1.0",
-    "argparse": "^3.0.2",
-    "js-yaml": "^5.4.3",
-    "sprintf-js": "^1.1.3"
+    "argparse": "^3.0.4",
+    "js-yaml": "^5.5.0",
+    "sprintf-js": "^1.1.3",
+    "glob": "^14.0.6",
+    "minimatch": "^11.0.9",
+    "test-exclude": "^8.0.0"
   },
   "author": "Alert Logic Inc."
 }

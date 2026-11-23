@@ -273,8 +273,7 @@
                                             ":log-group:/aws/lambda/",
                                             {
                                                 "Ref":"EncryptLambdaFunction"
-                                            },
-                                            ":*"
+                                            }
                                         ]
                                     ]
                                 }
@@ -521,8 +520,7 @@
                                  ":log-group:/aws/lambda/",
                                  {
                                     "Ref":"CollectLambdaFunction"
-                                 },
-                                 ":*"
+                                 }
                               ]
                            ]
                         }
